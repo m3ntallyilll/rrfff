@@ -28,21 +28,28 @@ export function CharacterSelector({ onCharacterSelect, selectedCharacter }: Char
             <CardContent className="p-4 text-center">
               {/* Character Avatar */}
               <div className="mb-3">
-                {character.avatar ? (
-                  <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-accent-gold">
+                <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-accent-gold bg-gradient-to-br from-accent-gold to-accent-red flex items-center justify-center">
+                  {character.avatar ? (
                     <img
                       src={`/attached_assets/generated_images/${character.avatar}`}
+                      onLoad={() => console.log(`Successfully loaded: ${character.avatar}`)}
                       alt={character.displayName}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.warn(`Failed to load image: ${character.avatar}`);
+                        // Fallback to character initial
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).nextElementSibling!.style.display = 'block';
+                      }}
                     />
+                  ) : null}
+                  <div 
+                    className="text-2xl font-bold text-black"
+                    style={{ display: character.avatar ? 'none' : 'block' }}
+                  >
+                    {character.displayName.charAt(0)}
                   </div>
-                ) : (
-                  <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-accent-gold to-accent-red flex items-center justify-center">
-                    <div className="text-2xl font-bold text-black">
-                      {character.name.charAt(3)}
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
 
               {/* Character Info */}
