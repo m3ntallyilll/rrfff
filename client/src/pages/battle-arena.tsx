@@ -360,6 +360,7 @@ export default function BattleArena() {
                 isAISpeaking={battleState?.isPlayingAudio || false}
                 battleState={battleState?.isAIResponding ? "battle" : "idle"}
                 audioUrl={currentAiAudio}
+                character={selectedCharacter || undefined}
               />
 
               {/* Battle Text Display */}

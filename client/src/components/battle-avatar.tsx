@@ -2,19 +2,22 @@ import { useState, useEffect, useRef } from "react";
 import { Settings, Smile, Flame, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { BattleCharacter } from "@shared/characters";
 
 interface BattleAvatarProps {
   isAISpeaking: boolean;
   battleState?: "idle" | "battle" | "mad" | "victory" | "defeat";
   audioUrl?: string;
   className?: string;
+  character?: BattleCharacter;
 }
 
 export function BattleAvatar({ 
   isAISpeaking, 
   battleState = "idle",
   audioUrl,
-  className = "" 
+  className = "",
+  character
 }: BattleAvatarProps) {
   const [currentEmotion, setCurrentEmotion] = useState<"neutral" | "angry" | "happy">("neutral");
   const [lipSyncLevel, setLipSyncLevel] = useState(0);
@@ -73,7 +76,7 @@ export function BattleAvatar({
               
               setLipSyncLevel(normalizedLevel);
               
-              // Set mouth shape based on audio levels
+              // Update mouth shape based on audio intensity
               if (normalizedLevel > 0.7) {
                 setMouthShape("large");
               } else if (normalizedLevel > 0.4) {
@@ -158,10 +161,10 @@ export function BattleAvatar({
     <div className={`bg-battle-gray rounded-xl p-6 border border-gray-700 text-center ${className}`}>
       <div className="mb-4">
         <div className="text-lg font-orbitron font-bold text-accent-red" data-testid="text-ai-title">
-          AI CHALLENGER
+          {character?.displayName || "AI CHALLENGER"}
         </div>
         <div className="text-sm text-gray-400" data-testid="text-ai-level">
-          Level 47 • Hardcore Mode
+          {character?.difficulty ? `${character.difficulty.toUpperCase()} MODE` : "HARDCORE MODE"} • {character?.style || "AI Voice"}
         </div>
       </div>
 
@@ -169,7 +172,7 @@ export function BattleAvatar({
       <div className="relative mx-auto w-48 h-48 mb-6">
         {/* Avatar Image/Representation */}
         <motion.div
-          className="w-full h-full bg-gradient-to-br from-accent-blue to-accent-red rounded-full border-4 border-accent-gold flex items-center justify-center text-6xl"
+          className="w-full h-full rounded-full border-4 border-accent-gold overflow-hidden relative bg-gradient-to-br from-accent-blue to-accent-red"
           animate={isAISpeaking ? {
             scale: [1, 1.05, 1],
             borderColor: ["var(--accent-gold)", "var(--accent-red)", "var(--accent-gold)"]
@@ -181,55 +184,95 @@ export function BattleAvatar({
           }}
           data-testid="avatar-ai-character"
         >
-          {/* AI Character Face with Lip Sync */}
-          <div className="text-white relative">
-            {/* Eyes */}
-            <div className="text-2xl mb-4 flex justify-center space-x-3">
-              <div className={`w-4 h-4 rounded-full ${
-                currentEmotion === "angry" ? "bg-red-500" : 
-                currentEmotion === "happy" ? "bg-green-500" : "bg-blue-400"
-              }`} />
-              <div className={`w-4 h-4 rounded-full ${
-                currentEmotion === "angry" ? "bg-red-500" : 
-                currentEmotion === "happy" ? "bg-green-500" : "bg-blue-400"
-              }`} />
+          {/* Character Avatar Image */}
+          {character?.avatar ? (
+            <img
+              src={`/attached_assets/generated_images/${character.avatar}`}
+              alt={character.displayName}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-6xl text-white">
+              🤖
             </div>
-            
-            {/* Animated Mouth for Lip Sync */}
-            <motion.div 
-              className="flex justify-center"
-              animate={{
-                scaleY: mouthShape === "large" ? 1.8 : 
-                        mouthShape === "medium" ? 1.4 : 
-                        mouthShape === "small" ? 1.1 : 1,
-                scaleX: mouthShape === "large" ? 1.3 : 
-                        mouthShape === "medium" ? 1.2 : 
-                        mouthShape === "small" ? 1.1 : 1,
-              }}
-              transition={{ duration: 0.1, ease: "easeOut" }}
-            >
-              <div className={`rounded-full ${
-                mouthShape === "closed" ? "w-3 h-1 bg-gray-700" :
-                mouthShape === "small" ? "w-4 h-2 bg-gray-800" :
-                mouthShape === "medium" ? "w-5 h-3 bg-gray-900" :
-                "w-6 h-4 bg-black"
-              } transition-all duration-100`} />
-            </motion.div>
-            
-            {/* Lip sync intensity indicator */}
-            {isAISpeaking && (
-              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
-                <motion.div 
-                  className="w-1 bg-accent-gold rounded-full"
-                  style={{
-                    height: `${8 + lipSyncLevel * 16}px`,
-                  }}
-                  animate={{ opacity: [0.7, 1, 0.7] }}
-                  transition={{ duration: 0.3, repeat: Infinity }}
-                />
+          )}
+          {/* Lip Sync Overlay for Character Images */}
+          {character?.avatar && (
+            <div className="absolute inset-0 pointer-events-none">
+              {/* Animated Mouth Overlay for Lip Sync */}
+              <motion.div 
+                className="absolute bottom-16 left-1/2 transform -translate-x-1/2 flex justify-center"
+                animate={{
+                  scaleY: mouthShape === "large" ? 1.8 : 
+                          mouthShape === "medium" ? 1.4 : 
+                          mouthShape === "small" ? 1.1 : 1,
+                  scaleX: mouthShape === "large" ? 1.3 : 
+                          mouthShape === "medium" ? 1.2 : 
+                          mouthShape === "small" ? 1.1 : 1,
+                }}
+                transition={{ duration: 0.1, ease: "easeOut" }}
+              >
+                <div className={`rounded-full ${
+                  mouthShape === "closed" ? "w-4 h-2 bg-red-900 opacity-60" :
+                  mouthShape === "small" ? "w-5 h-3 bg-red-800 opacity-70" :
+                  mouthShape === "medium" ? "w-6 h-4 bg-red-700 opacity-80" :
+                  "w-8 h-5 bg-red-600 opacity-90"
+                } transition-all duration-100 shadow-lg`} />
+              </motion.div>
+              
+              {/* Lip sync intensity indicator */}
+              {isAISpeaking && (
+                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2">
+                  <motion.div 
+                    className="w-1 bg-accent-gold rounded-full"
+                    style={{
+                      height: `${8 + lipSyncLevel * 16}px`,
+                    }}
+                    animate={{ opacity: [0.7, 1, 0.7] }}
+                    transition={{ duration: 0.3, repeat: Infinity }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Fallback AI Character Face for non-character avatars */}
+          {!character?.avatar && (
+            <div className="text-white relative flex items-center justify-center h-full">
+              {/* Eyes */}
+              <div className="absolute top-12 left-1/2 transform -translate-x-1/2 flex space-x-3">
+                <div className={`w-4 h-4 rounded-full ${
+                  currentEmotion === "angry" ? "bg-red-500" : 
+                  currentEmotion === "happy" ? "bg-green-500" : "bg-blue-400"
+                }`} />
+                <div className={`w-4 h-4 rounded-full ${
+                  currentEmotion === "angry" ? "bg-red-500" : 
+                  currentEmotion === "happy" ? "bg-green-500" : "bg-blue-400"
+                }`} />
               </div>
-            )}
-          </div>
+              
+              {/* Animated Mouth for Lip Sync */}
+              <motion.div 
+                className="absolute bottom-16 left-1/2 transform -translate-x-1/2"
+                animate={{
+                  scaleY: mouthShape === "large" ? 1.8 : 
+                          mouthShape === "medium" ? 1.4 : 
+                          mouthShape === "small" ? 1.1 : 1,
+                  scaleX: mouthShape === "large" ? 1.3 : 
+                          mouthShape === "medium" ? 1.2 : 
+                          mouthShape === "small" ? 1.1 : 1,
+                }}
+                transition={{ duration: 0.1, ease: "easeOut" }}
+              >
+                <div className={`rounded-full ${
+                  mouthShape === "closed" ? "w-3 h-1 bg-gray-700" :
+                  mouthShape === "small" ? "w-4 h-2 bg-gray-800" :
+                  mouthShape === "medium" ? "w-5 h-3 bg-gray-900" :
+                  "w-6 h-4 bg-black"
+                } transition-all duration-100`} />
+              </motion.div>
+            </div>
+          )}
         </motion.div>
         
         {/* Battle State Indicator */}
