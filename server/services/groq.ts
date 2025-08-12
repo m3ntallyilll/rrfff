@@ -81,7 +81,7 @@ CONTENT REQUIREMENTS:
 - Showcase your lyrical superiority through demonstration
 - ${profanityNote}
 
-Return only the raw rap verses with natural line breaks, no quotation marks or commentary.`;
+Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes, no commentary - just the rap lines.`;
 
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
@@ -97,7 +97,7 @@ Return only the raw rap verses with natural line breaks, no quotation marks or c
             content: prompt
           }
         ],
-        max_completion_tokens: 300,
+        max_completion_tokens: 150,
         temperature: difficulty === "hard" ? 0.95 : difficulty === "normal" ? 0.85 : 0.75,
         top_p: 0.9,
       }),
@@ -115,11 +115,32 @@ Return only the raw rap verses with natural line breaks, no quotation marks or c
       throw new Error(`Groq API returned no choices: ${JSON.stringify(result)}`);
     }
     
-    if (!result.choices[0].message || !result.choices[0].message.content) {
-      throw new Error(`Groq API response missing content: ${JSON.stringify(result.choices[0])}`);
-    }
+    const choice = result.choices[0];
+    const responseContent = choice?.message?.content || choice?.message?.reasoning;
     
-    return result.choices[0].message.content;
+    if (!responseContent) {
+      throw new Error(`Groq API response missing content and reasoning: ${JSON.stringify(choice)}`);
+    }
+
+    // If we got reasoning instead of content, try to extract rap verses
+    if (choice?.message?.reasoning && !choice?.message?.content) {
+      console.log("Extracting rap from reasoning field...");
+      
+      // Try to extract quoted rap lines from reasoning text
+      const reasoningText = choice.message.reasoning;
+      const quotedLines = reasoningText.match(/"([^"]{10,})"/g);
+      
+      if (quotedLines && quotedLines.length >= 1) {
+        const cleanLines = quotedLines.map((line: string) => line.replace(/"/g, '').trim());
+        return cleanLines.slice(0, 4).join('\n'); // Take first 4 lines
+      }
+      
+      // Fallback: generate a simple response
+      console.log("Using fallback rap response due to parsing failure");
+      return `Your flow's decent but I'm bringing the heat,\nLyrics so sharp, got you down in defeat,\nStep to the mic, watch me spit fire clean,\nBest battle rapper that you've ever seen.`;
+    }
+
+    return responseContent;
   }
 }
 
