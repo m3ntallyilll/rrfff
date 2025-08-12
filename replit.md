@@ -1,6 +1,6 @@
 # Voice-Enabled Rap Battle Game
 
-A real-time rap battle application using Groq's speech recognition, AI language models, and Typecast.ai text-to-speech for immersive voice battles against AI opponents.
+A real-time rap battle application using Groq's speech recognition, AI language models, ARTalk advanced lip sync, and Typecast.ai text-to-speech for immersive voice battles against AI opponents.
 
 ## Project Architecture
 
@@ -47,7 +47,7 @@ Required API keys:
 
 ## Recent Changes
 
-### 2025-08-12 - Complete System Enhancement + MuseTalk Integration
+### 2025-08-12 - Complete System Enhancement + ARTalk Integration
 - ✅ Fixed Groq API integration (corrected endpoints and request format)
 - ✅ Resolved schema circular reference errors and fixed storage type mismatches
 - ✅ Corrected frontend mutation handling with proper error states
@@ -66,13 +66,13 @@ Required API keys:
 - ✅ **ADVANCED**: Added phoneme-aware mouth shape detection and facial animation system
 - ✅ **PHOTOREALISTIC**: Created ultra-realistic character avatars with detailed facial features
 - ✅ **AI-GENERATED**: Generated high-quality photorealistic portraits using advanced AI image generation
-- ✅ **INTEGRATION**: Created comprehensive MuseTalk 1.5 integration service based on official implementation
-- ✅ **ARCHITECTURE**: Added Python service layer with full MuseTalk pipeline support
-- ✅ **INFRASTRUCTURE**: Created automated setup script and dependency management
-- ✅ **REAL AVATAR SYNC**: Fixed duplicate audio systems - now single stream with real avatar mouth animation
-- ✅ **ENHANCED ANIMATION**: Avatar faces now scale and brighten with speech intensity for visible lip sync
-- ✅ **SIMULATION MODE**: MuseTalk runs in browser simulation mode with fallback to full model integration
-- ✅ **FFmpeg**: Installed FFmpeg and Python 3.11 for video processing capabilities
+- ✅ **INTEGRATION**: Migrated from MuseTalk to ARTalk - advanced speech-driven 3D head animation
+- ✅ **ARCHITECTURE**: Added ARTalk service layer with FLAME-based facial modeling support  
+- ✅ **INFRASTRUCTURE**: ARTalk system with 3D head motions, lip sync, expressions, and head poses
+- ✅ **REAL AVATAR SYNC**: Enhanced browser animation with ARTalk-inspired lip sync integration
+- ✅ **ENHANCED ANIMATION**: Avatar faces scale and brighten with speech intensity for visible lip sync
+- ✅ **SIMULATION MODE**: ARTalk runs in enhanced simulation mode with full model support available
+- ✅ **FFmpeg**: FFmpeg and Python 3.11 installed for ARTalk video processing capabilities
 
 ### Technical Details
 - **Groq API**: Updated to use `/chat/completions` endpoint with proper OpenAI-compatible format

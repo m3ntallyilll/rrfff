@@ -6,7 +6,7 @@ import { groqService } from "./services/groq";
 import { typecastService } from "./services/typecast";
 import { scoringService } from "./services/scoring";
 import { FineTuningService } from "./services/fine-tuning";
-import { MuseTalkService } from "./services/musetalkService";
+import { ARTalkService } from "./services/artalkService";
 import { insertBattleSchema, insertBattleRoundSchema } from "@shared/schema";
 
 const upload = multer({
@@ -15,10 +15,10 @@ const upload = multer({
 });
 
 const fineTuningService = new FineTuningService();
-const museTalkService = new MuseTalkService();
+const artalkService = new ARTalkService();
 
-// Initialize MuseTalk service
-museTalkService.initialize().catch(console.error);
+// Initialize ARTalk service
+artalkService.initialize().catch(console.error);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create a new battle
@@ -198,15 +198,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get AI character voice ID from battle data
       const aiVoiceId = battle.aiVoiceId || "tc_67d237f1782cabcc6155272f";
       
-      // Generate TTS for AI response using character's voice
-      const ttsResult = await typecastService.generateSpeech(aiVerse, aiVoiceId);
-
       // Calculate scores
       const scores = scoringService.scoreRound(userVerse, aiVerse);
 
       // Get current rounds to determine round number
       const existingRounds = await storage.getBattleRounds(battleId);
       const roundNumber = existingRounds.length + 1;
+      
+      // Generate TTS for AI response using character's voice
+      const ttsResult = await typecastService.generateSpeech(aiVerse, aiVoiceId);
+      
+      // Generate ARTalk lip sync video for AI character
+      let artalkResult = null;
+      try {
+        artalkResult = await artalkService.generateLipSyncVideo(
+          ttsResult.audioUrl, 
+          battle.aiCharacterId || 'MC_Razor',
+          `${battleId}_round_${roundNumber}`
+        );
+        console.log('ARTalk generation result:', artalkResult);
+      } catch (error) {
+        console.error('ARTalk generation failed:', error);
+      }
 
       // Create battle round
       const roundData = {
@@ -241,6 +254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         round: battleRound,
         aiAudioUrl: ttsResult.audioUrl,
+        artalk: artalkResult,
         scores,
         battleState: {
           userScore: newUserScore,
@@ -295,18 +309,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // MuseTalk integration endpoints
-  app.get("/api/musetalk/status", async (req, res) => {
+  // ARTalk integration endpoints
+  app.get("/api/artalk/status", async (req, res) => {
     try {
-      const status = await museTalkService.getStatus();
+      const status = await artalkService.getStatus();
       res.json({
         success: true,
         ...status,
         features: [
-          "Real-time lip sync processing",
-          "Character avatar preparation", 
-          "Video generation with audio sync",
-          "Multi-character support"
+          "Speech-driven 3D head animation",
+          "Advanced lip sync processing",
+          "Realistic expressions and head poses", 
+          "Multi-character avatar support",
+          "FLAME-based facial modeling"
         ]
       });
     } catch (error) {
@@ -314,12 +329,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         available: false,
         error: error instanceof Error ? error.message : 'Unknown error',
-        message: "MuseTalk status check failed",
+        message: "ARTalk status check failed",
         features: [
-          "Real-time lip sync processing",
-          "Character avatar preparation", 
-          "Video generation with audio sync",
-          "Multi-character support"
+          "Speech-driven 3D head animation",
+          "Advanced lip sync processing",
+          "Realistic expressions and head poses", 
+          "Multi-character avatar support",
+          "FLAME-based facial modeling"
         ]
       });
     }
