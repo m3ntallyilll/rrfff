@@ -6,6 +6,7 @@ import { groqService } from "./services/groq";
 import { typecastService } from "./services/typecast";
 import { scoringService } from "./services/scoring";
 import { FineTuningService } from "./services/fine-tuning";
+import { MuseTalkService } from "./services/musetalkService";
 import { insertBattleSchema, insertBattleRoundSchema } from "@shared/schema";
 
 const upload = multer({
@@ -14,6 +15,10 @@ const upload = multer({
 });
 
 const fineTuningService = new FineTuningService();
+const museTalkService = new MuseTalkService();
+
+// Initialize MuseTalk service
+museTalkService.initialize().catch(console.error);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create a new battle
@@ -291,18 +296,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // MuseTalk integration endpoints
-  app.get("/api/musetalk/status", (req, res) => {
-    res.json({
-      success: true,
-      available: false, // Will be true when fully integrated
-      message: "MuseTalk integration in development",
-      features: [
-        "Real-time lip sync processing",
-        "Character avatar preparation", 
-        "Video generation with audio sync",
-        "Multi-character support"
-      ]
-    });
+  app.get("/api/musetalk/status", async (req, res) => {
+    try {
+      const status = await museTalkService.getStatus();
+      res.json({
+        success: true,
+        ...status,
+        features: [
+          "Real-time lip sync processing",
+          "Character avatar preparation", 
+          "Video generation with audio sync",
+          "Multi-character support"
+        ]
+      });
+    } catch (error) {
+      res.json({
+        success: false,
+        available: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        message: "MuseTalk status check failed",
+        features: [
+          "Real-time lip sync processing",
+          "Character avatar preparation", 
+          "Video generation with audio sync",
+          "Multi-character support"
+        ]
+      });
+    }
   });
 
   // Fine-tuning endpoints

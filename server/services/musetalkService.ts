@@ -2,7 +2,12 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
 import fs from 'fs/promises';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { BattleCharacter } from '../../shared/characters';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const execAsync = promisify(exec);
 
@@ -33,7 +38,7 @@ export class MuseTalkService {
 
   constructor() {
     this.pythonPath = 'python3'; // Could be configured based on environment
-    this.servicePath = path.join(__dirname, 'musetalk.py');
+    this.servicePath = path.join(__dirname, 'musetalk_integration.py');
   }
 
   /**
@@ -43,20 +48,23 @@ export class MuseTalkService {
     try {
       console.log('Initializing MuseTalk service...');
       
-      const { stdout } = await execAsync(`${this.pythonPath} ${this.servicePath} init`);
-      const result = JSON.parse(stdout.trim());
+      const { stdout, stderr } = await execAsync(`${this.pythonPath} ${this.servicePath} --initialize`);
       
-      this.initialized = result.success;
-      
-      if (this.initialized) {
+      // Check if initialization was successful
+      if (stdout.includes('SUCCESS')) {
+        this.initialized = true;
         console.log('MuseTalk service initialized successfully');
       } else {
+        this.initialized = false;
         console.warn('MuseTalk service initialization failed - running in fallback mode');
+        if (stderr) console.warn('Initialization error:', stderr);
       }
       
       return this.initialized;
     } catch (error) {
       console.error('MuseTalk initialization error:', error);
+      // Don't fail completely - allow fallback functionality
+      this.initialized = false;
       return false;
     }
   }
@@ -83,10 +91,15 @@ export class MuseTalkService {
       console.log(`Preparing MuseTalk avatar for ${character.displayName} (${avatarId})`);
 
       const { stdout } = await execAsync(
-        `${this.pythonPath} ${this.servicePath} prepare --avatar-id "${avatarId}" --image-path "${imagePath}"`
+        `${this.pythonPath} ${this.servicePath} --prepare-avatar "${avatarId}" "${imagePath}"`
       );
 
-      const result = JSON.parse(stdout.trim()) as AvatarPrepResult;
+      // Check for success message in stdout
+      const result: AvatarPrepResult = {
+        success: stdout.includes('SUCCESS'),
+        avatarId,
+        error: stdout.includes('FAILED') ? 'Avatar preparation failed' : undefined
+      };
       
       if (result.success) {
         this.preparedAvatars.add(avatarId);
@@ -134,10 +147,16 @@ export class MuseTalkService {
       console.log(`Generating MuseTalk lip sync video for ${character.displayName}`);
 
       const { stdout } = await execAsync(
-        `${this.pythonPath} ${this.servicePath} generate --avatar-id "${avatarId}" --audio-path "${audioPath}" --output-path "${outputPath}"`
+        `${this.pythonPath} ${this.servicePath} --generate "${avatarId}" "${audioPath}" "${outputPath}"`
       );
 
-      const result = JSON.parse(stdout.trim()) as MuseTalkResult;
+      // Check for success message in stdout
+      const result: MuseTalkResult = {
+        success: stdout.includes('SUCCESS'),
+        videoPath: stdout.includes('SUCCESS') ? outputPath : undefined,
+        error: stdout.includes('FAILED') ? 'Video generation failed' : undefined,
+        method: 'MuseTalk'
+      };
       
       if (result.success) {
         console.log(`Lip sync video generated: ${outputPath} (${result.duration}s)`);
@@ -163,15 +182,30 @@ export class MuseTalkService {
   }
 
   /**
-   * Get status of MuseTalk service
+   * Get detailed status of MuseTalk service
    */
-  getStatus() {
-    return {
-      initialized: this.initialized,
-      preparedAvatars: Array.from(this.preparedAvatars),
-      pythonPath: this.pythonPath,
-      servicePath: this.servicePath
-    };
+  async getStatus() {
+    try {
+      const { stdout } = await execAsync(`${this.pythonPath} ${this.servicePath} --status`);
+      const status = JSON.parse(stdout);
+      return {
+        ...status,
+        preparedAvatars: Array.from(this.preparedAvatars),
+        pythonPath: this.pythonPath,
+        servicePath: this.servicePath
+      };
+    } catch (error) {
+      return {
+        initialized: this.initialized,
+        modelsAvailable: false,
+        device: 'unknown',
+        avatarsPrepared: 0,
+        preparedAvatars: Array.from(this.preparedAvatars),
+        pythonPath: this.pythonPath,
+        servicePath: this.servicePath,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
   }
 
   /**
