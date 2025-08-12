@@ -1,0 +1,165 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Refined skin gradients -->
+    <radialGradient id="skinGradS" cx="0.4" cy="0.3" r="0.8">
+      <stop offset="0%" stop-color="#F8E8D4"/>
+      <stop offset="30%" stop-color="#F2DCC4"/>
+      <stop offset="70%" stop-color="#E6C8A8"/>
+      <stop offset="100%" stop-color="#D4B898"/>
+    </radialGradient>
+    <radialGradient id="cheekGradS" cx="0.5" cy="0.5" r="0.6">
+      <stop offset="0%" stop-color="#F8E8D4"/>
+      <stop offset="100%" stop-color="#ECD4B8"/>
+    </radialGradient>
+    <!-- Styled wavy hair -->
+    <linearGradient id="hairGradS" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A0653A"/>
+      <stop offset="25%" stop-color="#8B4513"/>
+      <stop offset="50%" stop-color="#B8783D"/>
+      <stop offset="75%" stop-color="#9A5C28"/>
+      <stop offset="100%" stop-color="#6B3410"/>
+    </linearGradient>
+    <radialGradient id="hairHighlightS" cx="0.3" cy="0.2" r="0.5">
+      <stop offset="0%" stop-color="#D49857"/>
+      <stop offset="100%" stop-color="#A0653A"/>
+    </radialGradient>
+    <!-- Charismatic blue eyes -->
+    <radialGradient id="eyeGradS" cx="0.4" cy="0.3" r="0.7">
+      <stop offset="0%" stop-color="#87CEEB"/>
+      <stop offset="30%" stop-color="#4A90E2"/>
+      <stop offset="70%" stop-color="#2E5C8A"/>
+      <stop offset="100%" stop-color="#1E3F5F"/>
+    </radialGradient>
+    <radialGradient id="eyeReflectionS" cx="0.25" cy="0.2" r="0.4">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.95)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+    <!-- Natural lip color -->
+    <linearGradient id="lipGradS" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#D4A574"/>
+      <stop offset="50%" stop-color="#C49964"/>
+      <stop offset="100%" stop-color="#B58854"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="400" fill="#1A1A1A"/>
+  
+  <!-- Refined face structure -->
+  <!-- Base shadow -->
+  <ellipse cx="200" cy="220" rx="98" ry="115" fill="#D4B898" opacity="0.3"/>
+  
+  <!-- Elegant facial structure -->
+  <ellipse cx="200" cy="210" rx="93" ry="110" fill="url(#skinGradS)" stroke="#E6C8A8" stroke-width="1"/>
+  
+  <!-- Forehead highlight -->
+  <ellipse cx="200" cy="165" rx="58" ry="36" fill="url(#cheekGradS)" opacity="0.7"/>
+  
+  <!-- Refined cheekbone structure -->
+  <ellipse cx="158" cy="215" rx="22" ry="35" fill="url(#cheekGradS)" opacity="0.6"/>
+  <ellipse cx="242" cy="215" rx="22" ry="35" fill="url(#cheekGradS)" opacity="0.6"/>
+  
+  <!-- Defined jawline -->
+  <path d="M 135 265 Q 200 305 265 265 Q 240 285 200 290 Q 160 285 135 265" fill="url(#cheekGradS)" opacity="0.7"/>
+  <ellipse cx="200" cy="285" rx="32" ry="18" fill="url(#cheekGradS)" opacity="0.5"/>
+  
+  <!-- Styled wavy hair -->
+  <path d="M 110 160 Q 200 80 290 160 Q 275 100 200 90 Q 125 100 110 160" fill="url(#hairGradS)"/>
+  <!-- Hair waves and texture -->
+  <path d="M 115 155 Q 145 125 175 140 Q 200 120 225 140 Q 255 125 285 155 Q 250 135 200 130 Q 150 135 115 155" 
+        fill="url(#hairGradS)" opacity="0.8"/>
+  <!-- Hair highlights -->
+  <path d="M 140 145 Q 170 120 200 130 Q 230 120 260 145 Q 230 135 200 135 Q 170 135 140 145" 
+        fill="url(#hairHighlightS)" opacity="0.7"/>
+  <!-- Side hair details -->
+  <path d="M 110 150 Q 130 130 150 145 Q 135 155 110 150" fill="url(#hairGradS)"/>
+  <path d="M 250 145 Q 270 130 290 150 Q 265 155 250 145" fill="url(#hairGradS)"/>
+  <!-- Hair texture waves -->
+  <path d="M 125 140 Q 145 135 165 145 Q 185 135 205 145 Q 225 135 245 145 Q 265 135 275 140" 
+        stroke="url(#hairHighlightS)" stroke-width="1.5" fill="none" opacity="0.6"/>
+  
+  <!-- Well-groomed eyebrows -->
+  <path d="M 160 182 Q 178 177 195 182 Q 188 186 178 184 Q 168 186 160 182" fill="#6B3410" opacity="0.9"/>
+  <path d="M 205 182 Q 222 177 240 182 Q 232 186 222 184 Q 212 186 205 182" fill="#6B3410" opacity="0.9"/>
+  <!-- Eyebrow hair texture -->
+  <path d="M 164 181 L 170 183 M 172 180 L 178 182 M 180 180 L 186 182 M 188 181 L 192 183" 
+        stroke="#5A2B0D" stroke-width="0.8" opacity="0.7"/>
+  <path d="M 208 183 L 214 181 M 216 182 L 222 180 M 224 180 L 230 182 M 232 181 L 236 183" 
+        stroke="#5A2B0D" stroke-width="0.8" opacity="0.7"/>
+  
+  <!-- Charismatic eyes -->
+  <!-- Eye sockets -->
+  <ellipse cx="175" cy="198" rx="20" ry="14" fill="#E6C8A8" opacity="0.4"/>
+  <ellipse cx="225" cy="198" rx="20" ry="14" fill="#E6C8A8" opacity="0.4"/>
+  
+  <!-- Left eye -->
+  <ellipse cx="175" cy="198" rx="17" ry="12" fill="white"/>
+  <ellipse cx="175" cy="198" rx="9" ry="12" fill="url(#eyeGradS)"/>
+  <ellipse cx="175" cy="198" rx="4.5" ry="4.5" fill="black"/>
+  <!-- Eye reflections -->
+  <ellipse cx="172" cy="195" rx="2.2" ry="2.2" fill="url(#eyeReflectionS)"/>
+  <ellipse cx="177" cy="197" rx="1.1" ry="1.1" fill="white" opacity="0.95"/>
+  <!-- Upper eyelid -->
+  <path d="M 159 194 Q 175 191 191 194" stroke="#D4B898" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <!-- Lower eyelid -->
+  <path d="M 161 201 Q 175 203 189 201" stroke="#E6C8A8" stroke-width="1" fill="none" opacity="0.5"/>
+  
+  <!-- Right eye -->
+  <ellipse cx="225" cy="198" rx="17" ry="12" fill="white"/>
+  <ellipse cx="225" cy="198" rx="9" ry="12" fill="url(#eyeGradS)"/>
+  <ellipse cx="225" cy="198" rx="4.5" ry="4.5" fill="black"/>
+  <!-- Eye reflections -->
+  <ellipse cx="222" cy="195" rx="2.2" ry="2.2" fill="url(#eyeReflectionS)"/>
+  <ellipse cx="227" cy="197" rx="1.1" ry="1.1" fill="white" opacity="0.95"/>
+  <!-- Upper eyelid -->
+  <path d="M 209 194 Q 225 191 241 194" stroke="#D4B898" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <!-- Lower eyelid -->
+  <path d="M 211 201 Q 225 203 239 201" stroke="#E6C8A8" stroke-width="1" fill="none" opacity="0.5"/>
+  
+  <!-- Refined eyelashes -->
+  <path d="M 164 192 L 162 190 M 169 191 L 167 189 M 175 191 L 173 189 M 181 191 L 179 189 M 186 192 L 184 190" 
+        stroke="#5A2B0D" stroke-width="0.7" opacity="0.8"/>
+  <path d="M 214 192 L 212 190 M 219 191 L 217 189 M 225 191 L 223 189 M 231 191 L 229 189 M 236 192 L 234 190" 
+        stroke="#5A2B0D" stroke-width="0.7" opacity="0.8"/>
+  
+  <!-- Refined nose -->
+  <path d="M 194 210 Q 200 235 206 210 Q 203 230 200 233 Q 197 230 194 210" fill="url(#cheekGradS)"/>
+  <!-- Nose bridge highlight -->
+  <path d="M 197 215 Q 200 225 203 215 Q 200 220 197 215" fill="url(#cheekGradS)" opacity="0.8"/>
+  <!-- Refined nostrils -->
+  <ellipse cx="197" cy="230" rx="2.2" ry="1.8" fill="#D4B898"/>
+  <ellipse cx="203" cy="230" rx="2.2" ry="1.8" fill="#D4B898"/>
+  <!-- Nose tip highlight -->
+  <ellipse cx="200" cy="225" rx="3.5" ry="2.5" fill="url(#cheekGradS)" opacity="0.6"/>
+  
+  <!-- Philtrum -->
+  <path d="M 198 235 Q 200 240 202 235 Q 200 245 198 235" fill="#F2DCC4" opacity="0.6"/>
+  
+  <!-- Charismatic smile -->
+  <ellipse cx="200" cy="252" rx="23" ry="15" fill="url(#cheekGradS)" opacity="0.4"/>
+  <!-- Lips with slight smile -->
+  <path id="lips" d="M 182 252 Q 200 257 218 252 Q 210 256 200 257 Q 190 256 182 252" 
+        fill="url(#lipGradS)" stroke="#B58854" stroke-width="0.8"/>
+  <!-- Lip highlight -->
+  <path d="M 186 251 Q 200 254 214 251 Q 200 253 186 251" fill="#E6C8A8" opacity="0.7"/>
+  
+  <!-- Dimples -->
+  <ellipse cx="173" cy="257" rx="4" ry="6" fill="url(#cheekGradS)" opacity="0.5"/>
+  <ellipse cx="227" cy="257" rx="4" ry="6" fill="url(#cheekGradS)" opacity="0.5"/>
+  
+  <!-- Facial details -->
+  <!-- Subtle nasolabial folds -->
+  <path d="M 178 240 Q 183 250 188 260" stroke="#E6C8A8" stroke-width="1" fill="none" opacity="0.4"/>
+  <path d="M 222 240 Q 217 250 212 260" stroke="#E6C8A8" stroke-width="1" fill="none" opacity="0.4"/>
+  
+  <!-- Confident smile lines -->
+  <path d="M 175 245 Q 185 250 195 250" stroke="#D4B898" stroke-width="0.8" fill="none" opacity="0.5"/>
+  <path d="M 205 250 Q 215 250 225 245" stroke="#D4B898" stroke-width="0.8" fill="none" opacity="0.5"/>
+  
+  <!-- Elegant neck -->
+  <path d="M 175 310 Q 200 320 225 310 L 230 350 Q 200 355 170 350 Z" fill="url(#skinGradS)" opacity="0.9"/>
+  
+  <!-- Character name -->
+  <text x="200" y="350" text-anchor="middle" fill="#4AA0FF" font-family="Arial, sans-serif" font-size="24" font-weight="bold">MC SILK</text>
+  <text x="200" y="375" text-anchor="middle" fill="#CCCCCC" font-family="Arial, sans-serif" font-size="14">SMOOTH BATTLE MC</text>
+</svg>

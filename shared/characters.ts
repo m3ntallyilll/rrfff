@@ -37,7 +37,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     difficulty: 'hard',
     backstory: 'Former battle league champion known for poisoning opponents minds with deadly wordplay',
     signature: 'I inject venom in every line, watch your confidence decline',
-    avatar: 'MC_Venom_face_closeup.svg'
+    avatar: 'MC_Venom_photorealistic.svg'
   },
   {
     id: 'silk',
@@ -50,7 +50,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     difficulty: 'normal',
     backstory: 'Polished MC who rose through the ranks with charm and technical skill',
     signature: 'Smooth as silk but sharp as steel, making every rival kneel',
-    avatar: 'MC_Silk_face_closeup.svg'
+    avatar: 'MC_Silk_photorealistic.svg'
   }
 ];
 
