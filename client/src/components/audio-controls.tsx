@@ -24,7 +24,7 @@ export function AudioControls({
   const [isMuted, setIsMuted] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
   const [audioLoaded, setAudioLoaded] = useState(false);
-  const [voiceType, setVoiceType] = useState("hardcore");
+
   
   const currentTrack = audioUrl && !audioError ? "AI Battle Response" : "No audio available";
   
@@ -270,16 +270,9 @@ export function AudioControls({
 
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-400">Voice Type</span>
-          <Select value={voiceType} onValueChange={setVoiceType}>
-            <SelectTrigger className="w-40 bg-secondary-dark border-gray-600" data-testid="select-voice-type">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-secondary-dark border-gray-600">
-              <SelectItem value="hardcore">Hardcore MC</SelectItem>
-              <SelectItem value="smooth">Smooth Flow</SelectItem>
-              <SelectItem value="aggressive">Aggressive Battle</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="text-sm text-accent-gold font-semibold">
+            Hardcore MC (Fixed)
+          </div>
         </div>
       </div>
     </div>
