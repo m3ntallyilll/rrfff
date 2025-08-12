@@ -90,7 +90,7 @@ Return only the raw rap verses with natural line breaks, no quotation marks or c
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant", // Using base model as fine-tuned model not accessible
+        model: "openai/gpt-oss-120b", // Using powerful GPT-based model for enhanced rap generation
         messages: [
           {
             role: "user",

@@ -58,7 +58,7 @@ Required API keys:
 - ✅ **CRITICAL**: Fixed audio playback infinite loops and React errors
 - ✅ **CRITICAL**: Implemented stable audio controls with proper loading states
 - ✅ **MAJOR**: Created comprehensive battle rap training dataset with 30 advanced examples
-- ✅ **PRODUCTION**: Using custom fine-tuned model `ft-7a9b8c6d5e4f3d2c1b0a-model` for specialized battle rap generation
+- ✅ **PRODUCTION**: Using Groq's `openai/gpt-oss-120b` model for enhanced battle rap generation
 - ✅ **NEW**: Generated 3 unique battle character avatars with distinct personalities
 - ✅ **NEW**: Implemented character selection system with voice ID mapping  
 - ✅ **NEW**: Added character profiles: MC Razor (female, hardcore), MC Venom (male, aggressive), MC Silk (male, smooth)
