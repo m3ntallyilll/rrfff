@@ -76,6 +76,9 @@ Required API keys:
 - ✅ **TTS BREAKTHROUGH**: Typecast API now generating audio successfully (1.5MB+ files)
 - ✅ **Voice Mapping**: Fixed character voice ID mapping for proper TTS generation
 - ✅ **ARTalk E2BIG Fix**: Resolved command line argument size issue by saving audio to temp files
+- ✅ **Interactive Lyric Breakdown**: Complete analysis feature with modal interface and detailed scoring
+- ✅ **Enhanced Profanity Support**: Authentic street language when profanity filter is disabled
+- ✅ **Model Optimization**: Switched to llama-3.3-70b-versatile for faster, direct responses
 
 ### Technical Details
 - **Groq API**: Updated to use `/chat/completions` endpoint with proper OpenAI-compatible format

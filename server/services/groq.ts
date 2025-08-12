@@ -51,7 +51,7 @@ export class GroqService {
 
     const profanityNote = profanityFilter 
       ? "Keep language clean but hard-hitting through clever wordplay rather than explicit content." 
-      : "Use authentic rap battle language including mature themes if contextually appropriate.";
+      : "Use authentic street rap language with profanity (fuck, shit, bitch, damn) and explicit content for maximum impact.";
 
     const prompt = `You are a legendary rap battle MC with mastery of every rap technique. The challenger just delivered:
 
@@ -90,7 +90,7 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-120b", // Using GPT model with proper reasoning_effort parameter
+        model: "llama-3.3-70b-versatile", // Using faster model without reasoning overhead
         messages: [
           {
             role: "user",
@@ -100,7 +100,7 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
         max_completion_tokens: 1024,
         temperature: difficulty === "hard" ? 0.95 : difficulty === "normal" ? 0.85 : 0.75,
         top_p: 0.9,
-        reasoning_effort: "medium",
+        reasoning_effort: "low",
       }),
     });
 
@@ -123,8 +123,13 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
       throw new Error(`Groq API response missing content and reasoning: ${JSON.stringify(choice)}`);
     }
 
-    // If we got reasoning instead of content, try to extract rap verses
-    if (choice?.message?.reasoning && !choice?.message?.content) {
+    // Direct response handling only - no reasoning extraction
+    if (choice?.message?.content) {
+      return choice.message.content.trim();
+    }
+
+    // If we got reasoning instead of content, extract clean rap verses
+    if (choice?.message?.reasoning) {
       console.log("Extracting rap from reasoning field...");
       
       // Try to extract quoted rap lines from reasoning text
