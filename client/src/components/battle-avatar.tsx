@@ -60,107 +60,14 @@ export function BattleAvatar({
     }
   }, [battleState]);
 
-  // Advanced audio analysis for lip sync (legacy system)
+  // Remove duplicate audio system - let AdvancedLipSync handle everything
   useEffect(() => {
-    let audio: HTMLAudioElement | null = null;
-    
-    if (audioUrl && isAISpeaking) {
-      audio = new Audio(audioUrl);
-      
-      const startAdvancedLipSync = () => {
-        try {
-          if (!audioContextRef.current) {
-            audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-          }
-          
-          const source = audioContextRef.current.createMediaElementSource(audio!);
-          analyserRef.current = audioContextRef.current.createAnalyser();
-          analyserRef.current.fftSize = 256;
-          analyserRef.current.smoothingTimeConstant = 0.8;
-          
-          source.connect(analyserRef.current);
-          analyserRef.current.connect(audioContextRef.current.destination);
-          
-          const bufferLength = analyserRef.current.frequencyBinCount;
-          dataArrayRef.current = new Uint8Array(bufferLength);
-          
-          const updateAdvancedLipSync = () => {
-            if (analyserRef.current && dataArrayRef.current) {
-              analyserRef.current.getByteFrequencyData(dataArrayRef.current);
-              
-              const average = Array.from(dataArrayRef.current).reduce((a, b) => a + b) / bufferLength;
-              const normalized = average / 255;
-              
-              setLipSyncLevel(normalized);
-              
-              // Enhanced mouth shape detection based on frequency ranges
-              const lowFreq = dataArrayRef.current.slice(0, bufferLength / 4).reduce((a, b) => a + b) / (bufferLength / 4);
-              const midFreq = dataArrayRef.current.slice(bufferLength / 4, bufferLength / 2).reduce((a, b) => a + b) / (bufferLength / 4);
-              const highFreq = dataArrayRef.current.slice(bufferLength / 2, bufferLength).reduce((a, b) => a + b) / (bufferLength / 2);
-              
-              if (normalized < 0.1) {
-                setMouthShape("closed");
-              } else if (highFreq > 100 && midFreq < 80) {
-                setMouthShape("small");  // 'S', 'F', 'TH' sounds
-              } else if (lowFreq > 120) {
-                setMouthShape("large");  // 'A', 'O', 'AH' sounds
-              } else {
-                setMouthShape("medium"); // Most consonants and mixed sounds
-              }
-            }
-            
-            if (isAISpeaking) {
-              animationFrameRef.current = requestAnimationFrame(updateAdvancedLipSync);
-            }
-          };
-          
-          audio!.play();
-          updateAdvancedLipSync();
-          
-          console.log("MuseTalk-inspired lip sync initialized with advanced frequency analysis");
-          
-        } catch (error) {
-          console.warn("Advanced lip sync not supported, falling back:", error);
-          // Enhanced fallback animation
-          const fallbackAnimation = () => {
-            if (isAISpeaking) {
-              const shapes: Array<"closed" | "small" | "medium" | "large"> = ["small", "medium", "small", "large"];
-              const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
-              setMouthShape(randomShape);
-              setTimeout(fallbackAnimation, 150 + Math.random() * 200);
-            }
-          };
-          fallbackAnimation();
-        }
-      };
-      
-      startAdvancedLipSync();
-      
-      audio.addEventListener('ended', () => {
-        setMouthShape("closed");
-        setLipSyncLevel(0);
-        setCurrentEmotion("neutral");
-        console.log("Advanced lip sync session ended");
-      });
-    } else {
+    if (!isAISpeaking) {
       setMouthShape("closed");
       setLipSyncLevel(0);
       setCurrentEmotion("neutral");
     }
-    
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
-      if (audio) {
-        audio.pause();
-        audio.remove();
-      }
-    };
-  }, [audioUrl, isAISpeaking]);
+  }, [isAISpeaking]);
 
   const getAvatarStateColor = () => {
     switch (battleState) {
@@ -241,17 +148,23 @@ export function BattleAvatar({
             </div>
           )}
 
-          {/* Real Avatar Lip Sync Component - Hidden behind avatar but provides data */}
+          {/* Real Avatar Lip Sync Component - Provides data only, no audio playback */}
           {character?.avatar && audioUrl && (
-            <div className="absolute inset-0 pointer-events-none opacity-0">
-              <AdvancedLipSync
-                audioUrl={audioUrl}
-                isPlaying={isAISpeaking}
-                avatarImageUrl={`/attached_assets/generated_images/${character.avatar}`}
-                onLipSyncData={(data) => setLipSyncData(data)}
-                disableAudioPlayback={true}
-              />
-            </div>
+            <AdvancedLipSync
+              audioUrl={audioUrl}
+              isPlaying={isAISpeaking}
+              avatarImageUrl={`/attached_assets/generated_images/${character.avatar}`}
+              onLipSyncData={(data) => {
+                setLipSyncData(data);
+                // Update legacy mouth shapes for fallback
+                if (data.mouthOpenness > 0.7) setMouthShape("large");
+                else if (data.mouthOpenness > 0.4) setMouthShape("medium");
+                else if (data.mouthOpenness > 0.1) setMouthShape("small");
+                else setMouthShape("closed");
+                setLipSyncLevel(data.intensity / 100);
+              }}
+              disableAudioPlayback={true}
+            />
           )}
           
           {/* Subtle visual feedback when speaking */}
