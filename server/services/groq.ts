@@ -38,27 +38,50 @@ export class GroqService {
     profanityFilter: boolean = true
   ): Promise<string> {
     const difficultyPrompts = {
-      easy: "Create a simple, beginner-friendly rap response with basic rhymes and straightforward metaphors.",
-      normal: "Generate a solid rap response with good rhyme schemes, wordplay, and moderate complexity.",
-      hard: "Craft an advanced rap response with complex rhyme patterns, intricate wordplay, multi-syllabic rhymes, and sophisticated metaphors."
+      easy: "Use simple AABB or ABAB rhyme schemes, basic wordplay, straightforward punchlines, and clear syllable patterns that flow naturally.",
+      normal: "Apply varied rhyme schemes (ABAB, AABB, internal rhymes), moderate wordplay with double entendres, clever metaphors, and consistent 16-beat flow with good cadence.",
+      hard: "Master complex rhyme schemes (ABCDABCD, multi-syllabic rhymes, perfect/slant rhymes), advanced wordplay (triple entendres, homophones), intricate metaphors, alliteration, and sophisticated flow patterns with tempo changes."
+    };
+
+    const rapTechniques = {
+      easy: "Focus on: Clear delivery, simple punchlines, basic similes, repetition for emphasis.",
+      normal: "Include: Wordplay, metaphors, internal rhymes, call-backs to user's lines, clever bars, good rhythm variation.", 
+      hard: "Master: Complex internal rhymes, multi-layered wordplay, extended metaphors, alliterative patterns, sophisticated battle tactics, technical rhyme schemes."
     };
 
     const profanityNote = profanityFilter 
-      ? "Keep the language clean and appropriate for all audiences." 
-      : "You can use mature language if it fits the battle context.";
+      ? "Keep language clean but hard-hitting through clever wordplay rather than explicit content." 
+      : "Use authentic rap battle language including mature themes if contextually appropriate.";
 
-    const prompt = `You are an AI rap battle opponent. The user just delivered this verse:
+    const prompt = `You are a legendary rap battle MC with mastery of every rap technique. The challenger just delivered:
 
 "${userVerse}"
 
-Respond with a powerful 4-line rap battle response that:
-- ${difficultyPrompts[difficulty as keyof typeof difficultyPrompts]}
-- Directly addresses or counters the user's verse
-- Shows creativity and originality
-- Maintains good flow and rhythm
+Create a devastating 4-line counter-attack that demonstrates:
+
+RHYME MASTERY: ${difficultyPrompts[difficulty as keyof typeof difficultyPrompts]}
+
+RAP TECHNIQUES: ${rapTechniques[difficulty as keyof typeof rapTechniques]}
+
+BATTLE STRATEGY:
+- Directly dismantle their specific bars and flip their own words against them
+- Use aggressive confidence and intimidation tactics
+- Show technical superiority through superior wordplay
+- End with a knockout punchline that silences the crowd
+
+FLOW & DELIVERY:
+- Match syllable count and rhythm for natural delivery
+- Use strong consonants and vowel patterns for impact
+- Create natural pause points and emphasis beats
+- Build tension and release with line structure
+
+CONTENT REQUIREMENTS:
+- Counter their specific claims with evidence of your dominance  
+- Reference their weaknesses implied in their verse
+- Showcase your lyrical superiority through demonstration
 - ${profanityNote}
 
-Return only the rap verses, no additional commentary.`;
+Return only the raw rap verses with natural line breaks, no quotation marks or commentary.`;
 
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
@@ -74,8 +97,9 @@ Return only the rap verses, no additional commentary.`;
             content: prompt
           }
         ],
-        max_completion_tokens: 200,
-        temperature: difficulty === "hard" ? 0.9 : difficulty === "normal" ? 0.8 : 0.7,
+        max_completion_tokens: 300,
+        temperature: difficulty === "hard" ? 0.95 : difficulty === "normal" ? 0.85 : 0.75,
+        top_p: 0.9,
       }),
     });
 
