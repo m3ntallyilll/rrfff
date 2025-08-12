@@ -23,15 +23,26 @@ export function AudioControls({
   const [volume, setVolume] = useState([85]);
   const [isMuted, setIsMuted] = useState(false);
   const [voiceType, setVoiceType] = useState("hardcore");
-  const [currentTrack, setCurrentTrack] = useState("AI Battle Response #2");
+  const [currentTrack, setCurrentTrack] = useState("AI Battle Response");
+  const [audioError, setAudioError] = useState<string | null>(null);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    if (audioUrl) {
-      // Create new audio element when URL changes
+    if (audioUrl && audioUrl.trim() !== "" && audioUrl.startsWith('data:audio/')) {
+      console.log('Loading new audio URL, size:', audioUrl.length, 'bytes');
+      
+      // Reset state when changing audio
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setDuration(0);
+      setAudioError(null);
+      
+      // Clean up previous audio
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current.src = '';
       }
       
       audioRef.current = new Audio(audioUrl);
@@ -46,9 +57,25 @@ export function AudioControls({
         onPlaybackChange?.(false);
       };
       
+      const handleError = (e: Event) => {
+        const error = e as ErrorEvent;
+        console.error('Audio loading error:', error);
+        setAudioError('Failed to load audio');
+        setIsPlaying(false);
+        onPlaybackChange?.(false);
+      };
+
+      const handleCanPlay = () => {
+        console.log('Audio ready to play, duration:', audio.duration);
+        setAudioError(null);
+        setCurrentTrack(`AI Rap Response ${Math.floor(Date.now() / 1000) % 100}`);
+      };
+      
       audio.addEventListener('timeupdate', updateTime);
       audio.addEventListener('loadedmetadata', updateDuration);
       audio.addEventListener('ended', handleEnded);
+      audio.addEventListener('error', handleError);
+      audio.addEventListener('canplay', handleCanPlay);
       
       // Set volume
       audio.volume = isMuted ? 0 : volume[0] / 100;
@@ -57,22 +84,39 @@ export function AudioControls({
         audio.removeEventListener('timeupdate', updateTime);
         audio.removeEventListener('loadedmetadata', updateDuration);
         audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('error', handleError);
+        audio.removeEventListener('canplay', handleCanPlay);
         audio.pause();
       };
     }
-  }, [audioUrl, volume, isMuted, onPlaybackChange]);
+  }, [audioUrl]); // Remove onPlaybackChange from dependencies
 
-  const togglePlayback = () => {
+  // Separate effect for volume changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = isMuted ? 0 : volume[0] / 100;
+    }
+  }, [volume, isMuted]);
+
+  const togglePlayback = async () => {
     if (!audioRef.current) return;
     
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
+    try {
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+        onPlaybackChange?.(false);
+      } else {
+        // Ensure we wait for the promise to resolve
+        await audioRef.current.play();
+        setIsPlaying(true);
+        onPlaybackChange?.(true);
+      }
+    } catch (error) {
+      console.error('Audio playback error:', error);
+      setIsPlaying(false);
+      onPlaybackChange?.(false);
     }
-    
-    setIsPlaying(!isPlaying);
-    onPlaybackChange?.(!isPlaying);
   };
 
   const handleVolumeChange = (newVolume: number[]) => {
@@ -114,7 +158,13 @@ export function AudioControls({
       <div className="bg-secondary-dark rounded-lg p-4 mb-4">
         <div className="text-sm text-gray-400 mb-2">Now Playing:</div>
         <div className="font-semibold text-accent-gold mb-3" data-testid="text-current-track">
-          {currentTrack}
+          {audioError ? (
+            <span className="text-red-400">Audio Error: {audioError}</span>
+          ) : audioUrl ? (
+            currentTrack
+          ) : (
+            "No audio available"
+          )}
         </div>
         
         {/* Audio Progress */}
