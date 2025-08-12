@@ -79,6 +79,8 @@ Required API keys:
 - ✅ **ADVANCED**: Enhanced MC Razor with realistic skin tones, layered hair highlights, detailed eyebrows with individual hair strands, and professional eyelashes
 - ✅ **CHARACTER**: Updated MC Venom with photorealistic masculine features, intense green eyes, slicked hair with gel shine, and battle scar details
 - ✅ **REFINED**: Created MC Silk with sophisticated features, charismatic blue eyes, styled wavy hair, and confident smile with natural dimples
+- ✅ **AI-GENERATED**: Generated high-quality photorealistic portraits using advanced AI image generation
+- ✅ **PRECISION**: Fixed lip sync mouth positioning to be perfectly centered for all characters
 
 ### Technical Details
 - **Groq API**: Updated to use `/chat/completions` endpoint with proper OpenAI-compatible format

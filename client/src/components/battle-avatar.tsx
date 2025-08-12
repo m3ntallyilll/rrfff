@@ -246,8 +246,7 @@ export function BattleAvatar({
               <motion.div 
                 className="absolute"
                 style={{
-                  bottom: character.id === 'razor' ? '35%' : 
-                          character.id === 'venom' ? '30%' : '33%',
+                  bottom: '25%', // Centered positioning for all characters
                   left: '50%',
                   transform: 'translateX(-50%)',
                   width: `${16 + lipSyncLevel * 25}px`,
