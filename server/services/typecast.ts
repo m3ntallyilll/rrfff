@@ -16,28 +16,9 @@ export class TypecastService {
     console.log("Attempting Typecast TTS generation for text:", text.substring(0, 50) + "...");
     
     try {
-      // First check if we can access the API at all by getting voices
-      const voicesResponse = await fetch(`${this.baseUrl}/v1/voices`, {
-        headers: {
-          "X-API-KEY": this.apiKey,
-        },
-      });
-
-      if (!voicesResponse.ok) {
-        const errorText = await voicesResponse.text();
-        console.log("Typecast voices endpoint failed:", voicesResponse.status, errorText);
-        throw new Error(`Cannot access Typecast API: ${voicesResponse.status}`);
-      }
-
-      const voices = await voicesResponse.json();
-      console.log("Available Typecast voices:", voices?.length || 0);
-      
-      if (!voices || voices.length === 0) {
-        throw new Error("No voices available in Typecast account");
-      }
-
-      const selectedVoice = voices[0];
-      console.log("Using voice:", selectedVoice.voice_name, selectedVoice.voice_id);
+      // Use the user's specific voice ID
+      const voiceId = "tc_67d237f1782cabcc6155272f";
+      console.log("Using specified voice ID:", voiceId);
 
       const response = await fetch(`${this.baseUrl}/v1/text-to-speech`, {
         method: "POST",
@@ -48,7 +29,7 @@ export class TypecastService {
         body: JSON.stringify({
           text,
           model: "ssfm-v21",
-          voice_id: selectedVoice.voice_id,
+          voice_id: voiceId,
           prompt: {
             preset: "normal",
             preset_intensity: 1.0
