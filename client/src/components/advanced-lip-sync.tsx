@@ -24,7 +24,7 @@ interface VisemeData {
 }
 
 // Viseme mapping based on phonetic analysis
-const VISEME_MOUTH_SHAPES = {
+const VISEME_MOUTH_SHAPES: Record<string, { openness: number; width: number; height: number }> = {
   'sil': { openness: 0, width: 1, height: 0.2 }, // Silence
   'p': { openness: 0, width: 1, height: 0.3 },   // P, B, M
   'f': { openness: 0.2, width: 1.2, height: 0.4 }, // F, V

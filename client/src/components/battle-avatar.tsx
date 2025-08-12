@@ -22,6 +22,13 @@ export function BattleAvatar({
   const [currentEmotion, setCurrentEmotion] = useState<"neutral" | "angry" | "happy">("neutral");
   const [lipSyncLevel, setLipSyncLevel] = useState(0);
   const [mouthShape, setMouthShape] = useState<"closed" | "small" | "medium" | "large">("closed");
+  const [lipSyncData, setLipSyncData] = useState({
+    mouthOpenness: 0,
+    jawRotation: 0,
+    lipCornerPull: 0,
+    tongueTip: 0,
+    intensity: 0
+  });
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
