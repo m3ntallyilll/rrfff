@@ -90,7 +90,7 @@ Return only the raw rap verses with natural line breaks, no quotation marks or c
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "ft-7a9b8c6d5e4f3d2c1b0a-model",
+        model: "llama-3.1-8b-instant",
         messages: [
           {
             role: "user",

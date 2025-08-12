@@ -62,9 +62,17 @@ export function useBattleState(battleId?: string) {
       const formData = new FormData();
       if (data.audio) {
         formData.append("audio", data.audio, "recording.wav");
+        console.log("Added audio to FormData:", data.audio.size, "bytes");
       }
       if (data.userVerse) {
         formData.append("userVerse", data.userVerse);
+        console.log("Added userVerse to FormData:", data.userVerse);
+      }
+      
+      // Debug FormData contents
+      console.log("FormData entries:");
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
       }
 
       const res = await fetch(`/api/battles/${currentBattleId}/rounds`, {
@@ -73,6 +81,8 @@ export function useBattleState(battleId?: string) {
       });
 
       if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Battle round failed:", res.status, errorText);
         throw new Error(`Battle round failed: ${res.statusText}`);
       }
 
