@@ -99,8 +99,7 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
         ],
         max_completion_tokens: 1024,
         temperature: difficulty === "hard" ? 0.95 : difficulty === "normal" ? 0.85 : 0.75,
-        top_p: 0.9,
-        reasoning_effort: "low",
+        top_p: 0.9
       }),
     });
 
