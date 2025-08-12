@@ -132,13 +132,13 @@ export function BattleAvatar({
               alt={character.displayName}
               className="w-full h-full object-cover"
               animate={{
-                // Animate the entire face based on lip sync data from AdvancedLipSync
-                scaleY: isAISpeaking ? (1 + (lipSyncData.mouthOpenness * 0.005)) : 1,
-                scaleX: isAISpeaking ? (1 + (lipSyncData.lipCornerPull * 0.002)) : 1,
-                transformOrigin: "center 75%", // Pivot around mouth area
+                // More pronounced avatar animation based on lip sync data
+                scaleY: isAISpeaking ? (1 + (lipSyncData.mouthOpenness * 0.02)) : 1,
+                scaleX: isAISpeaking ? (1 + (lipSyncData.lipCornerPull * 0.008)) : 1,
+                transformOrigin: "center 70%", // Focus on mouth area
                 filter: isAISpeaking ? 
-                  `brightness(${1 + lipSyncData.intensity * 0.01}) contrast(${1 + lipSyncData.intensity * 0.005})` : 
-                  'brightness(1) contrast(1)'
+                  `brightness(${1 + lipSyncData.intensity * 0.02}) contrast(${1 + lipSyncData.intensity * 0.015}) saturate(${1 + lipSyncData.intensity * 0.01})` : 
+                  'brightness(1) contrast(1) saturate(1)'
               }}
               transition={{ duration: 0.08, ease: "easeOut" }}
             />
