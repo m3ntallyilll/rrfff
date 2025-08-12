@@ -1,0 +1,286 @@
+{
+  "training_data": [
+    {
+      "prompt": "Create a battle rap verse using multi-syllabic rhymes and internal rhyme schemes",
+      "completion": "Intellectual battle, my syllables rattle like cattle in Seattle\nYour flow's fragile, I handle and tackle with verbal shrapnel\nCombat-able, adaptable, naturally craftable rhymes\nYour attacks are laughable, mine are factual prime time",
+      "difficulty": "hard",
+      "style": "technical",
+      "rhyme_scheme": "multi-syllabic internal",
+      "techniques": ["multi-syllabic rhymes", "internal rhymes", "alliteration", "metaphor"]
+    },
+    {
+      "prompt": "Use near rhymes and slant rhymes in a battle rap context",
+      "completion": "I'm beyond your comprehension, your pension for tension\nIs nothing but pretension, my invention brings ascension\nWhile you're stuck in detention, I'm reaching new dimensions\nYour rap's just a mention, mine's a lyrical extension",
+      "difficulty": "normal",
+      "style": "flow-heavy",
+      "rhyme_scheme": "AAAA slant",
+      "techniques": ["near rhymes", "slant rhymes", "consonance", "progression"]
+    },
+    {
+      "prompt": "Demonstrate rhyme juggling and complex wordplay patterns",
+      "completion": "I juggle rhymes like a struggle with time, trouble with crime\nDouble the grind, bubble and shine, subtle design\nMy rhymes interlock like pieces of a puzzle in mind\nWhile you hustle for dimes, I muscle through lines refined",
+      "difficulty": "hard",
+      "style": "wordplay",
+      "rhyme_scheme": "complex juggling",
+      "techniques": ["rhyme juggling", "compound rhymes", "internal patterns", "word manipulation"]
+    },
+    {
+      "prompt": "Create bars using idioms and common expressions twisted into battle context",
+      "completion": "Don't count your chickens before they hatch, your rap's a mismatch\nI'm cooking with gas while you're striking a match\nYou're barking up the wrong tree, I'm the cat's meow\nBreak a leg? Nah, I'll break your whole style right now",
+      "difficulty": "normal",
+      "style": "clever",
+      "rhyme_scheme": "ABAB",
+      "techniques": ["idiom twisting", "metaphorical language", "wordplay", "cultural references"]
+    },
+    {
+      "prompt": "Use similes and metaphors in aggressive battle rap",
+      "completion": "I'm like lightning in a bottle, you're like water in drought\nMy flow's like a river, yours trickles without clout\nI strike like a cobra, you crawl like a snail\nMy words cut like swords while your bars always fail",
+      "difficulty": "easy",
+      "style": "metaphorical",
+      "rhyme_scheme": "ABAB",
+      "techniques": ["similes", "metaphors", "nature imagery", "weapon metaphors"]
+    },
+    {
+      "prompt": "Demonstrate phonetic rhyming and sound-based wordplay",
+      "completion": "My flow's so clean, I'm the king of the scene\nYou're weak in the knees, can't compete with my schemes\nI speak with such ease while you wheeze and you freeze\nMy expertise guarantees that you'll never appease",
+      "difficulty": "normal",
+      "style": "phonetic",
+      "rhyme_scheme": "phonetic patterns",
+      "techniques": ["phonetic rhyming", "assonance", "consonance", "sound repetition"]
+    },
+    {
+      "prompt": "Create battle rap with homophones and homonyms",
+      "completion": "I'm the soul winner, you're just a sole loser on the floor\nMy raps are so pure while yours are sore and poor\nYou can't see the sea of skills I bring to the shore\nI'll beat you beat by beat, that's what I'm here for",
+      "difficulty": "normal",
+      "style": "wordplay",
+      "rhyme_scheme": "homophone-based",
+      "techniques": ["homophones", "homonyms", "double meanings", "puns"]
+    },
+    {
+      "prompt": "Use alliteration and consonant clusters in battle rap",
+      "completion": "Dangerous dialect destroys and devastates dull dummies\nBringing brutal bars, breaking bones in battles, buddy\nClever combinations crush competitors completely cold\nMy masterful method makes mediocre MCs fold",
+      "difficulty": "normal",
+      "style": "alliterative",
+      "rhyme_scheme": "consonant-heavy",
+      "techniques": ["alliteration", "consonant clusters", "rhythm emphasis", "sound texture"]
+    },
+    {
+      "prompt": "Demonstrate compound rhymes and multi-word rhyming",
+      "completion": "I'm outstanding, you're not landing any hits worth commanding\nYour understanding's lacking, I'm attacking with expanding\nMy rhymes are so demanding while your flow needs rebranding\nI'm the real deal McCoy while you're just pretending",
+      "difficulty": "hard",
+      "style": "compound",
+      "rhyme_scheme": "compound multi-word",
+      "techniques": ["compound rhymes", "multi-word rhymes", "extended phrases", "complex patterns"]
+    },
+    {
+      "prompt": "Create battle rap using onomatopoeia and sound effects",
+      "completion": "BOOM! My bars explode like dynamite, CRACK!\nYour weak flow goes SNAP under pressure, WHACK!\nI go ZOOM past your level, SWOOSH through the track\nPOW! That's the sound of your career going back",
+      "difficulty": "easy",
+      "style": "energetic",
+      "rhyme_scheme": "sound-effect enhanced",
+      "techniques": ["onomatopoeia", "sound effects", "dynamic delivery", "emphasis"]
+    },
+    {
+      "prompt": "Use anapest and dactylic meter in battle rap",
+      "completion": "In the beginning, I'm winning, your grinning is thinning\nYou're spinning and pinning your hopes on a prayer\nBut I'm never relenting, preventing, tormenting\nYour flow that's lamenting while mine's in the air",
+      "difficulty": "hard",
+      "style": "rhythmic",
+      "rhyme_scheme": "anapestic",
+      "techniques": ["anapest meter", "dactylic patterns", "rhythmic complexity", "metrical variation"]
+    },
+    {
+      "prompt": "Demonstrate enjambment and line breaks in rap flow",
+      "completion": "I take your whole style and break it down to\nNothing but fragments, your talent won't\nSave you from this lyrical decimation\nI'm the definition of pure domination",
+      "difficulty": "hard",
+      "style": "structural",
+      "rhyme_scheme": "enjambed",
+      "techniques": ["enjambment", "line breaks", "flow variation", "structural complexity"]
+    },
+    {
+      "prompt": "Create battle rap with internal rhyme chains",
+      "completion": "I spit fire, inspire, take you higher then retire\nYour entire empire, I'll acquire and rewire\nYou're a liar, I'm the buyer of souls, the supplier\nOf flows that expose all your flaws, I'm the tiger",
+      "difficulty": "hard",
+      "style": "internal-heavy",
+      "rhyme_scheme": "internal chains",
+      "techniques": ["internal rhyme chains", "rhyme density", "flow acceleration", "pattern consistency"]
+    },
+    {
+      "prompt": "Use consonant rhymes and half-rhymes effectively",
+      "completion": "I'm the best at this test while you rest in distress\nMy success is a blessing, your mess needs addressing\nI confess, you're just guessing while I'm impressing\nWith flows that are fresh, leaving you second-guessing",
+      "difficulty": "normal",
+      "style": "consonant-focused",
+      "rhyme_scheme": "consonant rhymes",
+      "techniques": ["consonant rhymes", "half-rhymes", "consonant clusters", "sound matching"]
+    },
+    {
+      "prompt": "Demonstrate perfect rhymes vs. imperfect rhymes in battle context",
+      "completion": "Perfect rhymes shine bright in the light of the night\nBut imperfect connects with effects that protect\nThe respect I collect when I wreck and direct\nEvery line that I design to make your style decline",
+      "difficulty": "normal",
+      "style": "technical",
+      "rhyme_scheme": "mixed perfect/imperfect",
+      "techniques": ["perfect rhymes", "imperfect rhymes", "rhyme variation", "contrast"]
+    },
+    {
+      "prompt": "Create battle rap using triple rhymes and complex patterns",
+      "completion": "Magnetically, energetically, alphabetically I organize\nMy rhymes strategically, dramatically, automatically hypnotize\nYour flow chaotically, sporadically, frantically tries to rise\nBut systematically, I dramatically leave you paralyzed",
+      "difficulty": "hard",
+      "style": "complex",
+      "rhyme_scheme": "triple rhymes",
+      "techniques": ["triple rhymes", "polysyllabic patterns", "rhythm acceleration", "technical precision"]
+    },
+    {
+      "prompt": "Use vowel rhymes and assonance in battle rap",
+      "completion": "I make waves while you cave to the grave of your fame\nMy name blazes through phases while your game stays plain\nI take aim at your brain with verbal cocaine\nWhile you drain down the drain in lyrical pain",
+      "difficulty": "normal",
+      "style": "vowel-focused",
+      "rhyme_scheme": "assonant",
+      "techniques": ["vowel rhymes", "assonance", "vowel progression", "sound harmony"]
+    },
+    {
+      "prompt": "Demonstrate rap battle comebacks and rebuttals",
+      "completion": "You said I was weak? Well that's quite bold to speak\nWhen your flow's so meek, it makes strong rappers weep\nYou critique my technique but your bars barely creak\nI'm the mountain peak while you're stuck in the creek",
+      "difficulty": "normal",
+      "style": "rebuttal",
+      "rhyme_scheme": "response pattern",
+      "techniques": ["direct response", "counter-attack", "line flipping", "defensive offense"]
+    },
+    {
+      "prompt": "Create bars with embedded rhymes and hidden patterns",
+      "completion": "I embed my threat in every letter I send\nYour respect I collect, your defect I detect\nEvery syllable's designed to make your mind decline\nWhile my rhymes align in patterns you can't define",
+      "difficulty": "hard",
+      "style": "embedded",
+      "rhyme_scheme": "hidden patterns",
+      "techniques": ["embedded rhymes", "hidden patterns", "syllabic precision", "layered meaning"]
+    },
+    {
+      "prompt": "Use geographical and cultural references in battle rap",
+      "completion": "From Brooklyn to Oakland, my flow stays golden\nLike California dreaming while your hopes are folding\nI rep every borough with skills so thorough\nWhile you're stuck in your sorrow, I'm leading tomorrow",
+      "difficulty": "easy",
+      "style": "cultural",
+      "rhyme_scheme": "geographical",
+      "techniques": ["cultural references", "geographical knowledge", "regional pride", "cultural awareness"]
+    },
+    {
+      "prompt": "Demonstrate syncopated rhythms and off-beat rhyming",
+      "completion": "I'm off the beat but still complete, my flow's unique\nYour technique can't compete when I speak, you're weak\nI break the mold, my story's told in gold, you fold\nI'm hot, you're cold, my style's sold, yours is old",
+      "difficulty": "hard",
+      "style": "syncopated",
+      "rhyme_scheme": "off-beat",
+      "techniques": ["syncopation", "rhythm variation", "beat displacement", "tempo control"]
+    },
+    {
+      "prompt": "Create battle rap with scientific and technical terminology",
+      "completion": "I'm breaking down your molecular structure with lyrical rupture\nYour flow's unstable, mine's stable like a mathematical sculpture\nI calculate rhymes while you perpetrate crimes against rhythm\nMy algorithm's precision cuts through your linguistic schism",
+      "difficulty": "hard",
+      "style": "technical",
+      "rhyme_scheme": "scientific",
+      "techniques": ["technical vocabulary", "scientific metaphors", "academic language", "intellectual wordplay"]
+    },
+    {
+      "prompt": "Use emotional storytelling in aggressive battle context",
+      "completion": "I came from nothing, struggling, hustling through pain\nEvery loss, every cost taught me how to maintain\nNow I channel that anger into lyrical danger\nYou're just a stranger to this level of chamber",
+      "difficulty": "normal",
+      "style": "emotional",
+      "rhyme_scheme": "storytelling",
+      "techniques": ["emotional narrative", "personal history", "pain-to-power", "vulnerability as strength"]
+    },
+    {
+      "prompt": "Demonstrate polysyndeton and rhetorical devices in rap",
+      "completion": "I flow and I grow and I glow and I show\nEvery bar and every scar and every star that I know\nYou lack and you crack and you stack weak attacks\nWhile I pack facts and exact what your whole style lacks",
+      "difficulty": "normal",
+      "style": "rhetorical",
+      "rhyme_scheme": "polysyndetic",
+      "techniques": ["polysyndeton", "rhetorical repetition", "conjunction emphasis", "rhythmic building"]
+    },
+    {
+      "prompt": "Create battle rap using anaphora and parallel structure",
+      "completion": "I am the future, I am the fire, I am the force\nI am the reason you're weak, I am your lyrical source\nI am unstoppable, I am unbreakable, I am the one\nI am your nightmare when the battle's begun",
+      "difficulty": "normal",
+      "style": "emphatic",
+      "rhyme_scheme": "anaphoric",
+      "techniques": ["anaphora", "parallel structure", "repetitive emphasis", "declarative power"]
+    },
+    {
+      "prompt": "Use chiasmus and reversed word patterns in rap",
+      "completion": "I drop knowledge and knowledge drops me to higher levels\nYour flow rebels while rebels flow against your weak bevels\nI create rhymes, rhymes create me, we're in harmony\nYou destroy beats, beats destroy you, that's your tragedy",
+      "difficulty": "hard",
+      "style": "structural",
+      "rhyme_scheme": "chiasmic",
+      "techniques": ["chiasmus", "reversed patterns", "symmetrical structure", "mirror rhyming"]
+    },
+    {
+      "prompt": "Demonstrate speed rap techniques with clarity",
+      "completion": "Rapidlyfirerapidlyfirerapidlyfirerapidlyfire\nMyflowsohotitwillneverdieneverdieneverdieneverdire\nSituationsInavigatewhileyourhymesjustimitate\nMyaccelerationbringsdevastationasyourhopesdissipate",
+      "difficulty": "hard",
+      "style": "speed",
+      "rhyme_scheme": "rapid-fire",
+      "techniques": ["speed rap", "breath control", "articulation", "rapid rhyming"]
+    },
+    {
+      "prompt": "Create battle rap using mathematical concepts and wordplay",
+      "completion": "I multiply problems while you divide your attention\nMy rhymes add up to more than your whole comprehension\nI subtract your confidence, factor out your relevance\nWhile my flow's exponential, yours shows no evidence",
+      "difficulty": "normal",
+      "style": "mathematical",
+      "rhyme_scheme": "calculation-based",
+      "techniques": ["mathematical metaphors", "numerical wordplay", "equation structure", "logical progression"]
+    },
+    {
+      "prompt": "Use musical terminology and rhythm descriptions in battle rap",
+      "completion": "I orchestrate rhymes in perfect time signature\nWhile your off-key melody needs a musical director\nMy bars are in harmony, yours are pure cacophony\nI'm the symphony conductor of this rap ceremony",
+      "difficulty": "normal",
+      "style": "musical",
+      "rhyme_scheme": "harmonic",
+      "techniques": ["musical metaphors", "rhythm terminology", "harmonic language", "tempo references"]
+    },
+    {
+      "prompt": "Demonstrate battle rap with sports metaphors and competitive language",
+      "completion": "I'm in the championship while you're stuck in training camp\nMy flow's a grand slam while yours barely makes the ramp\nI play in the big leagues, you're still in little league\nI'm the MVP while you sit on the bench in fatigue",
+      "difficulty": "easy",
+      "style": "competitive",
+      "rhyme_scheme": "sports-based",
+      "techniques": ["sports metaphors", "competitive imagery", "athletic references", "winning mentality"]
+    },
+    {
+      "prompt": "Create battle rap using literary devices and academic references",
+      "completion": "My metaphors are Shakespearean while yours are elementary\nI write with the precision of a literary commentary\nYour similes are simple, mine are sublimely intricate\nI'm the professor of rap, you're just an undergraduate",
+      "difficulty": "hard",
+      "style": "literary",
+      "rhyme_scheme": "academic",
+      "techniques": ["literary references", "academic language", "educational metaphors", "intellectual superiority"]
+    }
+  ],
+  "metadata": {
+    "total_entries": 30,
+    "difficulty_levels": ["easy", "normal", "hard"],
+    "style_categories": [
+      "technical", "flow-heavy", "wordplay", "clever", "metaphorical", 
+      "phonetic", "alliterative", "compound", "energetic", "rhythmic",
+      "structural", "internal-heavy", "consonant-focused", "complex",
+      "vowel-focused", "rebuttal", "embedded", "cultural", "syncopated",
+      "scientific", "emotional", "rhetorical", "emphatic", "speed",
+      "mathematical", "musical", "competitive", "literary"
+    ],
+    "techniques_covered": [
+      "multi-syllabic rhymes", "internal rhymes", "near rhymes", "slant rhymes",
+      "rhyme juggling", "compound rhymes", "idiom twisting", "similes", "metaphors",
+      "phonetic rhyming", "homophones", "alliteration", "consonant clusters",
+      "onomatopoeia", "anapest meter", "enjambment", "internal rhyme chains",
+      "consonant rhymes", "perfect rhymes", "imperfect rhymes", "triple rhymes",
+      "vowel rhymes", "assonance", "embedded rhymes", "cultural references",
+      "syncopation", "technical vocabulary", "emotional narrative", "polysyndeton",
+      "anaphora", "chiasmus", "speed rap", "mathematical metaphors",
+      "musical metaphors", "sports metaphors", "literary references"
+    ],
+    "rhyme_schemes": [
+      "multi-syllabic internal", "AAAA slant", "complex juggling", "ABAB",
+      "phonetic patterns", "homophone-based", "consonant-heavy", "compound multi-word",
+      "sound-effect enhanced", "anapestic", "enjambed", "internal chains",
+      "consonant rhymes", "mixed perfect/imperfect", "triple rhymes", "assonant",
+      "response pattern", "hidden patterns", "geographical", "off-beat",
+      "scientific", "storytelling", "polysyndetic", "anaphoric", "chiasmic",
+      "rapid-fire", "calculation-based", "harmonic", "sports-based", "academic"
+    ],
+    "description": "Comprehensive battle rap training dataset covering advanced rhyming techniques, wordplay, metaphors, phonetic patterns, rhythmic complexity, and cultural references for AI model fine-tuning.",
+    "usage_instructions": "This dataset is designed for training AI models on sophisticated rap battle techniques. Each entry includes multiple layers of linguistic and rhythmic complexity suitable for advanced natural language processing and creative text generation."
+  }
+}
