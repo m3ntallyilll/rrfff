@@ -170,8 +170,11 @@ export function AdvancedLipSync({
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(() => {
+          // Ignore errors when closing AudioContext
+        });
+        audioContextRef.current = null;
       }
       if (audioRef.current) {
         audioRef.current.pause();
@@ -199,7 +202,7 @@ export function AdvancedLipSync({
         <motion.div
           className="absolute"
           style={{
-            bottom: '35%',
+            bottom: '25%', // Centered positioning
             left: '50%',
             transform: 'translateX(-50%)',
             width: `${20 + mouthShape.width * 15}px`,
@@ -220,7 +223,7 @@ export function AdvancedLipSync({
           <motion.div
             className="absolute bg-pink-800 rounded-full"
             style={{
-              bottom: '36%',
+              bottom: '26%', // Match mouth position
               left: '50%',
               transform: 'translateX(-50%)',
               width: `${4 + lipSyncData.tongueTip * 6}px`,
