@@ -90,16 +90,17 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant", // Using stable model with direct content responses
+        model: "openai/gpt-oss-120b", // Using GPT model with proper reasoning_effort parameter
         messages: [
           {
             role: "user",
             content: prompt
           }
         ],
-        max_tokens: 200,
+        max_completion_tokens: 1024,
         temperature: difficulty === "hard" ? 0.95 : difficulty === "normal" ? 0.85 : 0.75,
         top_p: 0.9,
+        reasoning_effort: "medium",
       }),
     });
 
