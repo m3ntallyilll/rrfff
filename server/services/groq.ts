@@ -60,7 +60,7 @@ Respond with a powerful 4-line rap battle response that:
 
 Return only the rap verses, no additional commentary.`;
 
-    const response = await fetch(`${this.baseUrl}/responses`, {
+    const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${this.apiKey}`,
@@ -68,18 +68,34 @@ Return only the rap verses, no additional commentary.`;
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
-        input: prompt,
-        max_output_tokens: 200,
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_completion_tokens: 200,
         temperature: difficulty === "hard" ? 0.9 : difficulty === "normal" ? 0.8 : 0.7,
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Groq response generation failed: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Groq response generation failed: ${response.statusText} - ${errorText}`);
     }
 
     const result = await response.json();
-    return result.output[0].content[0].text;
+    console.log("Groq API Response:", JSON.stringify(result, null, 2));
+    
+    if (!result.choices || result.choices.length === 0) {
+      throw new Error(`Groq API returned no choices: ${JSON.stringify(result)}`);
+    }
+    
+    if (!result.choices[0].message || !result.choices[0].message.content) {
+      throw new Error(`Groq API response missing content: ${JSON.stringify(result.choices[0])}`);
+    }
+    
+    return result.choices[0].message.content;
   }
 }
 
