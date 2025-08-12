@@ -155,12 +155,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Voice ID mapping for characters (using actual Typecast voice IDs)
       const voiceMapping: Record<string, string> = {
-        'razor': 'tc_6178a6758972cb5bb66f1295', // Character 1 - Rapper type
-        'venom': 'tc_67d237f1782cabcc6155272f', // Character 2 - Rapper type
-        'silk': 'tc_685ca2dcfa58f44bdbe60d65', // Wade - Male  
+        'razor': 'tc_6178a6758972cb5bb66f1295', // Character 1 - Female rapper
+        'venom': 'tc_67d237f1782cabcc6155272f', // Character 2 - Male rapper  
+        'silk': 'tc_61b007392f2010f2aa1a052a', // Character 3 - Black male rapper
         'hardcore-mc': 'tc_6178a6758972cb5bb66f1295',
         'aggressive-mc': 'tc_67d237f1782cabcc6155272f',
-        'smooth-mc': 'tc_685ca2dcfa58f44bdbe60d65'
+        'smooth-mc': 'tc_61b007392f2010f2aa1a052a'
       };
 
       const voiceId = voiceMapping[voice] || voice;
@@ -186,7 +186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const analysis = lyricAnalysisService.analyzeVerse(text);
+      const analysis = await lyricAnalysisService.analyzeVerse(text);
       res.json(analysis);
     } catch (error) {
       res.status(500).json({ 

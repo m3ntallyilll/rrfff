@@ -80,6 +80,9 @@ Required API keys:
 - ✅ **Enhanced Profanity Support**: Authentic street language when profanity filter is disabled
 - ✅ **Model Optimization**: Switched to llama-3.3-70b-versatile for faster, direct responses
 - ✅ **Mobile Microphone Fix**: Enhanced permission handling and codec fallbacks for mobile browsers
+- ✅ **Reasoning Analysis System**: Integrated openai/gpt-oss-120b for comprehensive phonetic analysis
+- ✅ **Enhanced Voice Mapping**: Updated to correct rapper-type voice IDs for all characters
+- ✅ **Character Updates**: MC Silk now properly identified as black male rapper with correct voice
 
 ### Technical Details
 - **Groq API**: Updated to use `/chat/completions` endpoint with proper OpenAI-compatible format

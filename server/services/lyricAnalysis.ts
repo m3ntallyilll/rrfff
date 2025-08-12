@@ -71,12 +71,154 @@ export interface DetailedScoreBreakdown {
 
 export class LyricAnalysisService {
   private scoringService: ScoringService;
+  private groqApiKey: string;
   
   constructor() {
     this.scoringService = new ScoringService();
+    this.groqApiKey = process.env.GROQ_API_KEY || '';
   }
   
-  analyzeVerse(text: string): DetailedScoreBreakdown {
+  async analyzeVerse(text: string): Promise<DetailedScoreBreakdown> {
+    try {
+      // Use reasoning model for comprehensive phonetic analysis
+      const reasoningAnalysis = await this.performReasoningAnalysis(text);
+      
+      // Perform basic analysis
+      const basicAnalysis = this.analyzeVerseBasic(text);
+      
+      // Enhance basic analysis with reasoning insights
+      if (reasoningAnalysis) {
+        return this.mergeAnalyses(basicAnalysis, reasoningAnalysis);
+      }
+      
+      return basicAnalysis;
+    } catch (error) {
+      console.error('Reasoning analysis failed, using basic analysis:', error);
+      return this.analyzeVerseBasic(text);
+    }
+  }
+
+  private async performReasoningAnalysis(text: string) {
+    try {
+      const prompt = `Analyze this rap verse for ALL possible rhyming syllable combinations and phonetic patterns. Use step-by-step reasoning to identify every rhyme type:
+
+"${text}"
+
+COMPREHENSIVE ANALYSIS REQUIRED:
+1. End rhymes (perfect, near, slant)
+2. Internal rhymes (within lines)
+3. Multi-syllabic rhymes (compound rhymes)
+4. Assonance (vowel sound matches)
+5. Consonance (consonant sound matches)
+6. Alliteration (repeated initial sounds)
+7. Complex rhyme schemes (ABAB, AABA, etc.)
+
+For each rhyming element found:
+- Identify the exact syllables/phonemes
+- Classify the rhyme type
+- Rate strength (1-10)
+- Note position in verse
+
+Provide detailed phonetic breakdown using IPA notation where helpful.
+
+Return analysis in this JSON format:
+{
+  "rhymes": {
+    "endRhymes": [{"words": ["word1", "word2"], "type": "perfect", "strength": 9}],
+    "internalRhymes": [{"line": 1, "words": ["word1", "word2"], "strength": 7}],
+    "multiSyllabic": [{"phrase1": "phrase", "phrase2": "phrase", "syllables": 3}]
+  },
+  "phoneticAnalysis": {
+    "totalRhymingSyllables": 15,
+    "rhymeDensity": 0.8,
+    "complexityScore": 9
+  },
+  "flowAnalysis": {
+    "syllablePattern": [8, 7, 8, 9],
+    "stressPattern": "strong",
+    "naturalPauses": 4
+  }
+}`;
+
+      const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${this.groqApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-oss-120b", // Reasoning model for detailed analysis
+          messages: [
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          max_completion_tokens: 2048,
+          temperature: 0.3,
+          reasoning_effort: "high",
+          response_format: { type: "json_object" }
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Reasoning analysis failed:', response.statusText, errorText);
+        return null;
+      }
+
+      const result = await response.json();
+      const reasoning = result.choices?.[0]?.message?.reasoning;
+      const content = result.choices?.[0]?.message?.content;
+      
+      console.log('Reasoning process:', reasoning);
+      
+      if (content) {
+        return JSON.parse(content);
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error in reasoning analysis:', error);
+      return null;
+    }
+  }
+
+  private mergeAnalyses(basicAnalysis: DetailedScoreBreakdown, reasoningAnalysis: any): DetailedScoreBreakdown {
+    // Enhance basic analysis with reasoning insights
+    const enhanced = { ...basicAnalysis };
+    
+    if (reasoningAnalysis.phoneticAnalysis) {
+      enhanced.rhymeDensity = Math.max(enhanced.rhymeDensity, reasoningAnalysis.phoneticAnalysis.rhymeDensity * 100);
+    }
+    
+    if (reasoningAnalysis.rhymes) {
+      // Add reasoning-detected rhymes to highlight data
+      const reasoningRhymes = [
+        ...(reasoningAnalysis.rhymes.endRhymes || []).map((r: any) => ({
+          words: r.words,
+          type: 'end' as const,
+          color: '#ef4444'
+        })),
+        ...(reasoningAnalysis.rhymes.internalRhymes || []).map((r: any) => ({
+          words: r.words,
+          type: 'internal' as const,
+          color: '#3b82f6'
+        })),
+        ...(reasoningAnalysis.rhymes.multiSyllabic || []).map((r: any) => ({
+          words: [r.phrase1, r.phrase2],
+          type: 'multi' as const,
+          color: '#8b5cf6'
+        }))
+      ];
+      
+      enhanced.highlightData.rhymes = [...enhanced.highlightData.rhymes, ...reasoningRhymes];
+    }
+    
+    return enhanced;
+  }
+
+  analyzeVerseBasic(text: string): DetailedScoreBreakdown {
     const lines = text.split('\n').filter(line => line.trim());
     
     // Get basic scores
