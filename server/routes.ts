@@ -5,12 +5,15 @@ import { storage } from "./storage";
 import { groqService } from "./services/groq";
 import { typecastService } from "./services/typecast";
 import { scoringService } from "./services/scoring";
+import { FineTuningService } from "./services/fine-tuning";
 import { insertBattleSchema, insertBattleRoundSchema } from "@shared/schema";
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
 });
+
+const fineTuningService = new FineTuningService();
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create a new battle
