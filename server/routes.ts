@@ -7,6 +7,7 @@ import { typecastService } from "./services/typecast";
 import { scoringService } from "./services/scoring";
 import { FineTuningService } from "./services/fine-tuning";
 import { ARTalkService } from "./services/artalkService";
+import { LyricAnalysisService } from "./services/lyricAnalysis";
 import { insertBattleSchema, insertBattleRoundSchema } from "@shared/schema";
 
 const upload = multer({
@@ -16,6 +17,7 @@ const upload = multer({
 
 const fineTuningService = new FineTuningService();
 const artalkService = new ARTalkService();
+const lyricAnalysisService = new LyricAnalysisService();
 
 // Initialize ARTalk service
 artalkService.initialize().catch(console.error);
@@ -168,6 +170,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: error instanceof Error ? error.message : "TTS generation failed",
         error: "TTS_GENERATION_FAILED"
+      });
+    }
+  });
+
+  // Analyze lyrics for detailed breakdown
+  app.post("/api/analyze-lyrics", async (req, res) => {
+    try {
+      const { text } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ 
+          message: "Text is required for lyric analysis",
+          error: "MISSING_TEXT"
+        });
+      }
+
+      const analysis = lyricAnalysisService.analyzeVerse(text);
+      res.json(analysis);
+    } catch (error) {
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Lyric analysis failed",
+        error: "LYRIC_ANALYSIS_FAILED"
       });
     }
   });

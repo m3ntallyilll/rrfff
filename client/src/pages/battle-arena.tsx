@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Mic, Trophy, Clock, Flame, Wifi, History, Share, Dumbbell, User } from "lucide-react";
+import { Mic, Trophy, Clock, Flame, Wifi, History, Share, Dumbbell, User, BarChart3 } from "lucide-react";
 import { CharacterSelector } from "@/components/character-selector";
 import type { BattleCharacter } from "@shared/characters";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { RecordingPanel } from "@/components/recording-panel";
 import { BattleAvatar } from "@/components/battle-avatar";
 import { BattleTextDisplay } from "@/components/battle-text-display";
 import { AudioControls } from "@/components/audio-controls";
+import { LyricBreakdown } from "@/components/lyric-breakdown";
 import { formatDuration } from "@/lib/audio-utils";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -27,6 +28,8 @@ export default function BattleArena() {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState<BattleCharacter | null>(null);
   const [showCharacterSelector, setShowCharacterSelector] = useState(false);
+  const [showLyricBreakdown, setShowLyricBreakdown] = useState(false);
+  const [currentAnalysisText, setCurrentAnalysisText] = useState("");
 
   const { toast } = useToast();
   const {
@@ -128,6 +131,16 @@ export default function BattleArena() {
 
   const getConnectionStatus = () => {
     return "Connected"; // Could implement real connection monitoring
+  };
+
+  const handleAnalyzeLyrics = (text: string, source: string) => {
+    setCurrentAnalysisText(text);
+    setShowLyricBreakdown(true);
+  };
+
+  const handleCloseLyricBreakdown = () => {
+    setShowLyricBreakdown(false);
+    setCurrentAnalysisText("");
   };
 
   if (isLoading) {
@@ -374,6 +387,43 @@ export default function BattleArena() {
                   setAiResponse("");
                 }}
               />
+
+              {/* Lyric Analysis Buttons */}
+              {(liveTranscription || aiResponse) && (
+                <Card className="bg-battle-gray border-gray-700">
+                  <CardContent className="p-4">
+                    <h3 className="font-orbitron font-bold text-sm mb-3 text-accent-gold">
+                      Interactive Lyric Analysis
+                    </h3>
+                    <div className="flex gap-2">
+                      {liveTranscription && (
+                        <Button
+                          onClick={() => handleAnalyzeLyrics(liveTranscription, "user")}
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 border-blue-500 text-blue-400 hover:bg-blue-500/10"
+                          data-testid="button-analyze-user-lyrics"
+                        >
+                          <BarChart3 className="w-4 h-4 mr-1" />
+                          Analyze Your Verse
+                        </Button>
+                      )}
+                      {aiResponse && (
+                        <Button
+                          onClick={() => handleAnalyzeLyrics(aiResponse, "ai")}
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 border-red-500 text-red-400 hover:bg-red-500/10"
+                          data-testid="button-analyze-ai-lyrics"
+                        >
+                          <BarChart3 className="w-4 h-4 mr-1" />
+                          Analyze AI Response
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* AI & Audio Controls Panel */}
