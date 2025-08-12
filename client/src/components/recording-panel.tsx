@@ -37,6 +37,13 @@ export function RecordingPanel({
   const getRecordingStatus = () => {
     if (disabled) return "Battle in progress...";
     if (isRecording) return "Recording... Speak now!";
+    
+    // Check if we're on mobile and provide specific guidance
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      return "Tap to record (ensure mic permission is enabled)";
+    }
+    
     return "Press to start recording";
   };
 

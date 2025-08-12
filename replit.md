@@ -79,6 +79,7 @@ Required API keys:
 - ✅ **Interactive Lyric Breakdown**: Complete analysis feature with modal interface and detailed scoring
 - ✅ **Enhanced Profanity Support**: Authentic street language when profanity filter is disabled
 - ✅ **Model Optimization**: Switched to llama-3.3-70b-versatile for faster, direct responses
+- ✅ **Mobile Microphone Fix**: Enhanced permission handling and codec fallbacks for mobile browsers
 
 ### Technical Details
 - **Groq API**: Updated to use `/chat/completions` endpoint with proper OpenAI-compatible format

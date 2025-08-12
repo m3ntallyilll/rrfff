@@ -23,13 +23,39 @@ export function useAudioRecorder() {
 
   const startRecording = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      // Check if we're on mobile and need to handle permissions differently
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      // Request permissions explicitly on mobile
+      if (isMobile && navigator.permissions) {
+        try {
+          const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+          if (permission.state === 'denied') {
+            throw new Error('Microphone permission denied. Please enable microphone access in your browser settings.');
+          }
+        } catch (permError) {
+          console.log('Permission query not supported, proceeding with getUserMedia');
+        }
+      }
+
+      // Mobile-optimized audio constraints
+      const audioConstraints = isMobile ? {
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          channelCount: 1,
+          sampleRate: 48000,
+        }
+      } : {
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
           sampleRate: 44100,
         }
-      });
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(audioConstraints);
       
       streamRef.current = stream;
       
@@ -43,10 +69,21 @@ export function useAudioRecorder() {
       const bufferLength = analyserRef.current.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
       
-      // Set up media recorder
-      mediaRecorderRef.current = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
-      });
+      // Set up media recorder with fallback for mobile compatibility
+      let mimeType = 'audio/webm;codecs=opus';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        if (MediaRecorder.isTypeSupported('audio/webm')) {
+          mimeType = 'audio/webm';
+        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
+        } else {
+          mimeType = ''; // Let browser choose
+        }
+      }
+
+      mediaRecorderRef.current = new MediaRecorder(stream, 
+        mimeType ? { mimeType } : undefined
+      );
       
       const chunks: Blob[] = [];
       
@@ -57,7 +94,7 @@ export function useAudioRecorder() {
       };
       
       mediaRecorderRef.current.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/webm' });
+        const blob = new Blob(chunks, { type: mimeType || 'audio/webm' });
         const url = URL.createObjectURL(blob);
         
         // Calculate duration (approximate)
@@ -98,9 +135,23 @@ export function useAudioRecorder() {
       updateLevels();
       
     } catch (error) {
+      let errorMessage = "Failed to access microphone. Please check permissions.";
+      
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          errorMessage = "Microphone access denied. Please allow microphone permissions and try again.";
+        } else if (error.name === 'NotFoundError') {
+          errorMessage = "No microphone found. Please connect a microphone and try again.";
+        } else if (error.name === 'NotSupportedError') {
+          errorMessage = "Audio recording not supported on this browser.";
+        } else if (error.message.includes('permission')) {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Recording Error",
-        description: "Failed to access microphone. Please check permissions.",
+        description: errorMessage,
         variant: "destructive",
       });
       console.error("Error starting recording:", error);
