@@ -24,7 +24,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     difficulty: 'hard',
     backstory: 'Street-bred MC from the underground scene, known for cutting down opponents with surgical precision',
     signature: 'My bars cut deep like a razor blade, your career about to fade',
-    avatar: 'Female_battle_rapper_avatar_adff121c.png'
+    avatar: 'MC_Razor_face_closeup.svg'
   },
   {
     id: 'venom',
@@ -37,7 +37,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     difficulty: 'hard',
     backstory: 'Former battle league champion known for poisoning opponents minds with deadly wordplay',
     signature: 'I inject venom in every line, watch your confidence decline',
-    avatar: 'Male_battle_rapper_avatar_33a86b0c.png'
+    avatar: 'MC_Venom_face_closeup.svg'
   },
   {
     id: 'silk',
@@ -50,7 +50,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     difficulty: 'normal',
     backstory: 'Polished MC who rose through the ranks with charm and technical skill',
     signature: 'Smooth as silk but sharp as steel, making every rival kneel',
-    avatar: 'Smooth_male_rapper_avatar_384d0d40.png'
+    avatar: 'MC_Silk_face_closeup.svg'
   }
 ];
 

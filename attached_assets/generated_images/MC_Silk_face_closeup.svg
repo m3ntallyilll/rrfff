@@ -1,0 +1,89 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="skinGradS" cx="0.5" cy="0.3" r="0.7">
+      <stop offset="0%" stop-color="#F4D4B8"/>
+      <stop offset="100%" stop-color="#E6C2A6"/>
+    </radialGradient>
+    <linearGradient id="hairGradS" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B4513"/>
+      <stop offset="50%" stop-color="#A0522D"/>
+      <stop offset="100%" stop-color="#6B3410"/>
+    </radialGradient>
+    <radialGradient id="eyeGradS" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#4A90E2"/>
+      <stop offset="100%" stop-color="#2E5C8A"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="400" fill="#1A1A1A"/>
+  
+  <!-- Face shadow -->
+  <ellipse cx="200" cy="215" rx="95" ry="108" fill="#D4B098" opacity="0.3"/>
+  
+  <!-- Main face (refined features) -->
+  <ellipse cx="200" cy="205" rx="90" ry="103" fill="url(#skinGradS)" stroke="#D4B098" stroke-width="2"/>
+  
+  <!-- Refined jawline -->
+  <path d="M 135 260 Q 200 295 265 260 Q 235 280 200 285 Q 165 280 135 260" fill="#E6C2A6" opacity="0.6"/>
+  
+  <!-- Hair (styled/wavy) -->
+  <path d="M 110 155 Q 200 85 290 155 Q 275 105 200 95 Q 125 105 110 155" fill="url(#hairGradS)"/>
+  <path d="M 115 145 Q 140 125 170 135 Q 145 150 115 145" fill="url(#hairGradS)" opacity="0.8"/>
+  <path d="M 230 135 Q 260 125 285 145 Q 255 150 230 135" fill="url(#hairGradS)" opacity="0.8"/>
+  <path d="M 180 130 Q 200 120 220 130 Q 200 140 180 130" fill="url(#hairGradS)" opacity="0.6"/>
+  
+  <!-- Left eyebrow (well-groomed) -->
+  <path d="M 162 178 Q 180 173 192 178 Q 175 182 162 178" fill="#6B3410" opacity="0.8"/>
+  
+  <!-- Right eyebrow -->
+  <path d="M 208 178 Q 220 173 238 178 Q 225 182 208 178" fill="#6B3410" opacity="0.8"/>
+  
+  <!-- Left eye (charismatic) -->
+  <ellipse cx="175" cy="195" rx="17" ry="11" fill="#F4D4B8" opacity="0.5"/>
+  <ellipse cx="175" cy="195" rx="15" ry="10" fill="white"/>
+  <ellipse cx="175" cy="195" rx="8" ry="10" fill="url(#eyeGradS)"/>
+  <ellipse cx="175" cy="195" rx="4" ry="4" fill="black"/>
+  <ellipse cx="177" cy="193" rx="1.5" ry="1.5" fill="white" opacity="0.9"/>
+  
+  <!-- Right eye -->
+  <ellipse cx="225" cy="195" rx="17" ry="11" fill="#F4D4B8" opacity="0.5"/>
+  <ellipse cx="225" cy="195" rx="15" ry="10" fill="white"/>
+  <ellipse cx="225" cy="195" rx="8" ry="10" fill="url(#eyeGradS)"/>
+  <ellipse cx="225" cy="195" rx="4" ry="4" fill="black"/>
+  <ellipse cx="227" cy="193" rx="1.5" ry="1.5" fill="white" opacity="0.9"/>
+  
+  <!-- Nose (refined) -->
+  <path d="M 196 205 Q 200 220 204 205 Q 200 218 196 205" fill="#D4B098"/>
+  <ellipse cx="198" cy="220" rx="2" ry="1.5" fill="#C49B7B"/>
+  <ellipse cx="202" cy="220" rx="2" ry="1.5" fill="#C49B7B"/>
+  
+  <!-- Mouth area -->
+  <ellipse cx="200" cy="245" rx="20" ry="13" fill="#E6C2A6"/>
+  
+  <!-- Lips (slight smile) -->
+  <path id="lips" d="M 185 245 Q 200 248 215 245 Q 200 250 185 245" fill="#B8705A" stroke="#A05D47" stroke-width="1"/>
+  
+  <!-- Dimples -->
+  <ellipse cx="175" cy="250" rx="3" ry="5" fill="#D4B098" opacity="0.4"/>
+  <ellipse cx="225" cy="250" rx="3" ry="5" fill="#D4B098" opacity="0.4"/>
+  
+  <!-- Cheek definition -->
+  <ellipse cx="155" cy="225" rx="12" ry="22" fill="#F4D4B8" opacity="0.4"/>
+  <ellipse cx="245" cy="225" rx="12" ry="22" fill="#F4D4B8" opacity="0.4"/>
+  
+  <!-- Chin -->
+  <ellipse cx="200" cy="275" rx="25" ry="16" fill="#D4B098" opacity="0.4"/>
+  
+  <!-- Smooth expression lines -->
+  <path d="M 172 187 Q 182 189 187 192" stroke="#6B3410" stroke-width="1" opacity="0.4" fill="none"/>
+  <path d="M 213 192 Q 218 189 228 187" stroke="#6B3410" stroke-width="1" opacity="0.4" fill="none"/>
+  
+  <!-- Confident smile lines -->
+  <path d="M 180 235 Q 190 240 200 240" stroke="#C49B7B" stroke-width="1" opacity="0.5" fill="none"/>
+  <path d="M 200 240 Q 210 240 220 235" stroke="#C49B7B" stroke-width="1" opacity="0.5" fill="none"/>
+  
+  <!-- Character name label -->
+  <text x="200" y="350" text-anchor="middle" fill="#4AA0FF" font-family="Arial, sans-serif" font-size="24" font-weight="bold">MC SILK</text>
+  <text x="200" y="375" text-anchor="middle" fill="#CCCCCC" font-family="Arial, sans-serif" font-size="14">SMOOTH BATTLE MC</text>
+</svg>

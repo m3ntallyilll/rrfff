@@ -1,0 +1,88 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="skinGrad" cx="0.5" cy="0.3" r="0.7">
+      <stop offset="0%" stop-color="#D4A574"/>
+      <stop offset="100%" stop-color="#B8956A"/>
+    </radialGradient>
+    <linearGradient id="hairGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2A1810"/>
+      <stop offset="50%" stop-color="#3D2518"/>
+      <stop offset="100%" stop-color="#1A0F08"/>
+    </linearGradient>
+    <radialGradient id="eyeGrad" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#4A3C2A"/>
+      <stop offset="100%" stop-color="#2D1F10"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="400" fill="#1A1A1A"/>
+  
+  <!-- Face shadow/depth -->
+  <ellipse cx="200" cy="220" rx="95" ry="110" fill="#A68860" opacity="0.3"/>
+  
+  <!-- Main face -->
+  <ellipse cx="200" cy="210" rx="90" ry="105" fill="url(#skinGrad)" stroke="#9E7B5F" stroke-width="2"/>
+  
+  <!-- Jaw definition -->
+  <path d="M 130 260 Q 200 300 270 260 Q 235 285 200 290 Q 165 285 130 260" fill="#B8956A" opacity="0.7"/>
+  
+  <!-- Hair -->
+  <path d="M 110 150 Q 200 80 290 150 Q 280 100 200 90 Q 120 100 110 150" fill="url(#hairGrad)"/>
+  <path d="M 105 140 Q 130 120 160 130 Q 140 145 105 140" fill="url(#hairGrad)"/>
+  <path d="M 240 130 Q 270 120 295 140 Q 260 145 240 130" fill="url(#hairGrad)"/>
+  
+  <!-- Left eyebrow -->
+  <path d="M 160 175 Q 180 170 190 175 Q 175 180 160 175" fill="#2A1810" opacity="0.8"/>
+  
+  <!-- Right eyebrow -->
+  <path d="M 210 175 Q 220 170 240 175 Q 225 180 210 175" fill="#2A1810" opacity="0.8"/>
+  
+  <!-- Left eye socket -->
+  <ellipse cx="175" cy="190" rx="18" ry="12" fill="#C5A882" opacity="0.5"/>
+  
+  <!-- Right eye socket -->
+  <ellipse cx="225" cy="190" rx="18" ry="12" fill="#C5A882" opacity="0.5"/>
+  
+  <!-- Left eye -->
+  <ellipse cx="175" cy="190" rx="15" ry="10" fill="white"/>
+  <ellipse cx="175" cy="190" rx="8" ry="10" fill="url(#eyeGrad)"/>
+  <ellipse cx="175" cy="190" rx="4" ry="4" fill="black"/>
+  <ellipse cx="177" cy="188" rx="1.5" ry="1.5" fill="white" opacity="0.8"/>
+  
+  <!-- Right eye -->
+  <ellipse cx="225" cy="190" rx="15" ry="10" fill="white"/>
+  <ellipse cx="225" cy="190" rx="8" ry="10" fill="url(#eyeGrad)"/>
+  <ellipse cx="225" cy="190" rx="4" ry="4" fill="black"/>
+  <ellipse cx="227" cy="188" rx="1.5" ry="1.5" fill="white" opacity="0.8"/>
+  
+  <!-- Nose -->
+  <path d="M 195 200 Q 200 220 205 200 Q 200 215 195 200" fill="#A68860"/>
+  <ellipse cx="197" cy="218" rx="2" ry="1.5" fill="#9E7B5F"/>
+  <ellipse cx="203" cy="218" rx="2" ry="1.5" fill="#9E7B5F"/>
+  
+  <!-- Mouth area (optimized for lip sync) -->
+  <ellipse cx="200" cy="245" rx="20" ry="12" fill="#B8956A"/>
+  
+  <!-- Lips (default closed state for animation) -->
+  <path id="lips" d="M 185 245 Q 200 250 215 245 Q 200 248 185 245" fill="#8B4444" stroke="#7A3838" stroke-width="1"/>
+  
+  <!-- Cheek definition -->
+  <ellipse cx="155" cy="220" rx="12" ry="20" fill="#C5A882" opacity="0.3"/>
+  <ellipse cx="245" cy="220" rx="12" ry="20" fill="#C5A882" opacity="0.3"/>
+  
+  <!-- Chin -->
+  <ellipse cx="200" cy="280" rx="25" ry="15" fill="#A68860" opacity="0.4"/>
+  
+  <!-- Earrings -->
+  <circle cx="120" cy="200" r="4" fill="#FFD700" stroke="#FFA500" stroke-width="1"/>
+  <circle cx="280" cy="200" r="4" fill="#FFD700" stroke="#FFA500" stroke-width="1"/>
+  
+  <!-- Fierce expression details -->
+  <path d="M 170 183 L 180 185" stroke="#2A1810" stroke-width="2" opacity="0.6"/>
+  <path d="M 220 185 L 230 183" stroke="#2A1810" stroke-width="2" opacity="0.6"/>
+  
+  <!-- Character name label -->
+  <text x="200" y="350" text-anchor="middle" fill="#FF4444" font-family="Arial, sans-serif" font-size="24" font-weight="bold">MC RAZOR</text>
+  <text x="200" y="375" text-anchor="middle" fill="#CCCCCC" font-family="Arial, sans-serif" font-size="14">HARDCORE BATTLE MC</text>
+</svg>

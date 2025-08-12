@@ -239,60 +239,97 @@ export function BattleAvatar({
               🤖
             </div>
           )}
-          {/* MuseTalk-Inspired Advanced Lip Sync Overlay */}
+          {/* SVG-Optimized Lip Sync Overlay for Face-Focused Avatars */}
           {character?.avatar && (
             <div className="absolute inset-0 pointer-events-none">
-              {/* Multi-layered mouth animation inspired by MuseTalk's approach */}
+              {/* Advanced SVG mouth manipulation for precise lip sync */}
               <motion.div 
-                className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
+                className="absolute"
                 style={{
-                  width: `${12 + lipSyncLevel * 20}px`,
-                  height: `${6 + lipSyncLevel * 15}px`,
+                  bottom: character.id === 'razor' ? '35%' : 
+                          character.id === 'venom' ? '30%' : '33%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: `${16 + lipSyncLevel * 25}px`,
+                  height: `${8 + lipSyncLevel * 18}px`,
                 }}
                 animate={{
-                  scaleY: mouthShape === "large" ? 2.2 : 
-                          mouthShape === "medium" ? 1.6 : 
-                          mouthShape === "small" ? 1.2 : 0.8,
-                  scaleX: mouthShape === "large" ? 1.4 : 
-                          mouthShape === "medium" ? 1.25 : 
-                          mouthShape === "small" ? 1.1 : 1,
-                  rotateZ: lipSyncLevel > 0.5 ? `${(lipSyncLevel - 0.5) * 3}deg` : 0,
+                  scaleY: mouthShape === "large" ? 2.5 : 
+                          mouthShape === "medium" ? 1.8 : 
+                          mouthShape === "small" ? 1.3 : 0.9,
+                  scaleX: mouthShape === "large" ? 1.6 : 
+                          mouthShape === "medium" ? 1.35 : 
+                          mouthShape === "small" ? 1.15 : 1,
+                  rotateZ: lipSyncLevel > 0.6 ? `${(lipSyncLevel - 0.6) * 4}deg` : 0,
                 }}
-                transition={{ duration: 0.08, ease: "easeOut" }}
+                transition={{ duration: 0.06, ease: "easeOut" }}
               >
-                {/* Outer lip contour */}
+                {/* Character-specific mouth styling */}
                 <div className={`absolute inset-0 ${
-                  mouthShape === "closed" ? "rounded-full bg-red-900/70" :
-                  mouthShape === "small" ? "rounded-full bg-red-800/75" :
-                  mouthShape === "medium" ? "rounded-lg bg-red-700/85" :
-                  "rounded-lg bg-red-600/90"
-                } shadow-2xl border border-red-500/30`} />
+                  character.id === 'razor' ? 
+                    (mouthShape === "closed" ? "rounded-full bg-gradient-to-b from-red-800/80 to-red-900/90" :
+                     mouthShape === "small" ? "rounded-full bg-gradient-to-b from-red-700/85 to-red-800/95" :
+                     mouthShape === "medium" ? "rounded-lg bg-gradient-to-b from-red-600/90 to-red-700/95" :
+                     "rounded-lg bg-gradient-to-b from-red-500/95 to-red-600/100") :
+                  character.id === 'venom' ? 
+                    (mouthShape === "closed" ? "rounded-full bg-gradient-to-b from-slate-800/80 to-slate-900/90" :
+                     mouthShape === "small" ? "rounded-full bg-gradient-to-b from-slate-700/85 to-slate-800/95" :
+                     mouthShape === "medium" ? "rounded-lg bg-gradient-to-b from-slate-600/90 to-slate-700/95" :
+                     "rounded-lg bg-gradient-to-b from-slate-500/95 to-slate-600/100") :
+                    (mouthShape === "closed" ? "rounded-full bg-gradient-to-b from-amber-800/80 to-amber-900/90" :
+                     mouthShape === "small" ? "rounded-full bg-gradient-to-b from-amber-700/85 to-amber-800/95" :
+                     mouthShape === "medium" ? "rounded-lg bg-gradient-to-b from-amber-600/90 to-amber-700/95" :
+                     "rounded-lg bg-gradient-to-b from-amber-500/95 to-amber-600/100")
+                } shadow-2xl border ${
+                  character.id === 'razor' ? 'border-red-400/40' :
+                  character.id === 'venom' ? 'border-green-400/40' :
+                  'border-blue-400/40'
+                }`} />
                 
-                {/* Inner mouth cavity for open states */}
+                {/* Enhanced inner mouth cavity */}
                 {mouthShape !== "closed" && (
                   <motion.div 
-                    className="absolute inset-1 bg-black/80 rounded-full"
+                    className="absolute inset-1 bg-gradient-to-b from-black/90 to-red-950/80 rounded-full"
                     animate={{
-                      scaleY: mouthShape === "large" ? 1.2 : 
-                              mouthShape === "medium" ? 0.9 : 0.6,
+                      scaleY: mouthShape === "large" ? 1.4 : 
+                              mouthShape === "medium" ? 1.1 : 0.8,
+                      opacity: mouthShape === "large" ? 0.95 : 
+                               mouthShape === "medium" ? 0.85 : 0.7,
                     }}
-                    transition={{ duration: 0.06 }}
+                    transition={{ duration: 0.05 }}
                   />
                 )}
                 
-                {/* Teeth highlight for wide mouth shapes */}
+                {/* Enhanced teeth/tongue details */}
                 {(mouthShape === "large" || mouthShape === "medium") && (
-                  <motion.div
-                    className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-white/60 rounded-b-full"
-                    style={{
-                      width: `${mouthShape === "large" ? "80%" : "60%"}`,
-                      height: "30%",
-                    }}
-                    animate={{
-                      opacity: mouthShape === "large" ? 0.8 : 0.5,
-                    }}
-                    transition={{ duration: 0.1 }}
-                  />
+                  <>
+                    <motion.div
+                      className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-gradient-to-b from-white/70 to-gray-200/50 rounded-b-full"
+                      style={{
+                        width: `${mouthShape === "large" ? "85%" : "65%"}`,
+                        height: "35%",
+                      }}
+                      animate={{
+                        opacity: mouthShape === "large" ? 0.9 : 0.6,
+                        scaleY: mouthShape === "large" ? 1.2 : 1,
+                      }}
+                      transition={{ duration: 0.08 }}
+                    />
+                    {/* Tongue detail for certain phonemes */}
+                    {lipSyncLevel > 0.7 && (
+                      <motion.div
+                        className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-pink-600/60 rounded-full"
+                        style={{
+                          width: `${4 + lipSyncLevel * 3}px`,
+                          height: `${2 + lipSyncLevel * 2}px`,
+                        }}
+                        animate={{
+                          opacity: [0.4, 0.8, 0.4],
+                        }}
+                        transition={{ duration: 0.2, repeat: Infinity }}
+                      />
+                    )}
+                  </>
                 )}
               </motion.div>
               
