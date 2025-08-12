@@ -13,23 +13,31 @@ export class TypecastService {
     text: string,
     voice: string = "hardcore-mc"
   ): Promise<{ audioUrl: string; duration: number }> {
+    console.log("Attempting Typecast TTS generation for text:", text.substring(0, 50) + "...");
+    
     try {
-      // First try to get available voices to find a valid voice ID
+      // First check if we can access the API at all by getting voices
       const voicesResponse = await fetch(`${this.baseUrl}/v1/voices`, {
         headers: {
           "X-API-KEY": this.apiKey,
         },
       });
 
-      let voiceId = "tc_62a8975e695ad26f7fb514d1"; // fallback
-      
-      if (voicesResponse.ok) {
-        const voices = await voicesResponse.json();
-        if (voices && voices.length > 0) {
-          voiceId = voices[0].voice_id; // Use first available voice
-          console.log("Using Typecast voice:", voiceId);
-        }
+      if (!voicesResponse.ok) {
+        const errorText = await voicesResponse.text();
+        console.log("Typecast voices endpoint failed:", voicesResponse.status, errorText);
+        throw new Error(`Cannot access Typecast API: ${voicesResponse.status}`);
       }
+
+      const voices = await voicesResponse.json();
+      console.log("Available Typecast voices:", voices?.length || 0);
+      
+      if (!voices || voices.length === 0) {
+        throw new Error("No voices available in Typecast account");
+      }
+
+      const selectedVoice = voices[0];
+      console.log("Using voice:", selectedVoice.voice_name, selectedVoice.voice_id);
 
       const response = await fetch(`${this.baseUrl}/v1/text-to-speech`, {
         method: "POST",
@@ -39,54 +47,41 @@ export class TypecastService {
         },
         body: JSON.stringify({
           text,
-          voice_id: voiceId,
           model: "ssfm-v21",
-          language: "eng",
+          voice_id: selectedVoice.voice_id,
           prompt: {
-            emotion_preset: "normal",
-            emotion_intensity: 1.0
-          },
-          output: {
-            volume: 100,
-            audio_pitch: 0,
-            audio_tempo: 1.0,
-            audio_format: "mp3"
+            preset: "normal",
+            preset_intensity: 1.0
           }
         }),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log("Typecast TTS failed, using fallback:", errorText);
-        // Fall back to a text-based response instead of failing
-        return {
-          audioUrl: "", // Empty URL indicates no audio available
-          duration: Math.floor(text.length / 15), // Rough estimate: ~15 chars per second
-        };
+        console.log("TTS generation failed:", response.status, errorText);
+        throw new Error(`TTS generation failed: ${response.status}`);
       }
 
-      // Handle the response - this might be binary data or a URL
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('audio')) {
-        // Binary audio data - we'd need to save it and return a URL
-        // For now, return a placeholder
-        return {
-          audioUrl: "data:audio/mp3;base64,generated-audio-placeholder",
-          duration: Math.floor(text.length / 15),
-        };
-      } else {
-        // JSON response with URL
-        const result = await response.json();
-        return {
-          audioUrl: result.audio_url || result.audioUrl || "",
-          duration: result.duration || Math.floor(text.length / 15),
-        };
-      }
-    } catch (error) {
-      console.log("Typecast TTS error, using fallback:", error);
-      // Graceful fallback - don't fail the whole battle round
+      // According to the docs, this should return binary audio data
+      const audioBuffer = await response.arrayBuffer();
+      console.log("Generated audio size:", audioBuffer.byteLength, "bytes");
+      
+      // Convert to base64 data URL for embedding
+      const base64Audio = Buffer.from(audioBuffer).toString('base64');
+      const audioUrl = `data:audio/wav;base64,${base64Audio}`;
+
       return {
-        audioUrl: "", // No audio available
+        audioUrl,
+        duration: Math.floor(text.length / 15), // Estimate duration
+      };
+
+    } catch (error) {
+      console.log("Typecast TTS completely failed:", error instanceof Error ? error.message : error);
+      
+      // For now, gracefully continue without audio rather than breaking the battle
+      // This allows the user to experience the text-based battle while TTS issues are resolved
+      return {
+        audioUrl: "", // No audio - the frontend should handle this gracefully
         duration: Math.floor(text.length / 15),
       };
     }

@@ -1,0 +1,115 @@
+ STARTED
+Quickstart
+Get started with Typecast and create your first AI voice.
+
+​
+Get Started with Authentication
+To use the Typecast API, you’ll need to authenticate your requests with an API key. Follow these steps:
+1
+First Step
+
+Visit your Typecast Dashboard to generate a new API key
+2
+Second Step
+
+Keep your API key secure - we recommend storing it as an environment variable
+You can set up your API key in two ways:
+Configure it directly in your application code
+Set it as a shell environment variable
+
+Shell (Linux/macOS)
+
+Shell (Windows)
+
+Copy
+
+Ask AI
+# Set for current session
+export TYPECAST_API_KEY='YOUR_API_KEY'
+​
+Make your first request
+Direct API
+
+Python
+
+Javascript
+
+cURL
+
+Copy
+
+Ask AI
+import requests
+import os
+
+api_key = os.environ.get("TYPECAST_API_KEY", "YOUR_API_KEY")
+
+url = "https://api.typecast.ai/v1/text-to-speech"
+headers = {"X-API-KEY": api_key, "Content-Type": "application/json"}
+payload = {
+    "text": "Hello there! I am your friendly text-to-speech agent.",
+    "model": "ssfm-v21",
+    "voice_id": "tc_62a8975e695ad26f7fb514d1",
+    "prompt": {
+        "preset": "happy",
+        "preset_intensity": 2.0
+    }
+}
+
+response = requests.post(url, headers=headers, json=payload)
+
+if response.status_code == 200:
+    with open('typecast.wav', 'wb') as f:
+        f.write(response.content)
+    print("Audio file saved as typecast.wav")
+else:
+    print(f"Error: {response.status_code} - {response.text}")
+To browse and select available voice IDs for your requests, please refer to Listing all voices in our API Reference.
+​
+List all voices
+To use Typecast effectively, you need access to voice IDs. The /v1/voices endpoint provides a complete list of available voices with their unique identifiers, names, models, and supported emotions.
+You can also filter voices by model type using the optional model query parameter.
+You can explore our complete voice catalog in more detail on the Voices page, where you’ll find additional information about each voice’s characteristics, sample audio clips, and recommended use cases.
+
+Python
+
+Javascript
+
+cURL
+
+Copy
+
+Ask AI
+import requests
+import os
+
+api_key = os.environ.get("TYPECAST_API_KEY", "YOUR_API_KEY")
+
+url = "https://api.typecast.ai/v1/voices"
+headers = {"X-API-KEY": api_key}
+params = {"model": "ssfm-v21"}  # Optional
+
+response = requests.get(url, headers=headers, params=params)
+
+if response.status_code == 200:
+    voices = response.json()
+    print(f"Found {len(voices)} voices:")
+    for voice in voices:
+        print(f"ID: {voice['voice_id']}, Name: {voice['voice_name']}, Emotions: {', '.join(voice['emotions'])}")
+else:
+    print(f"Error: {response.status_code} - {response.text}")
+The response will be a JSON array of voice objects, each containing:
+
+Copy
+
+Ask AI
+{
+  "voice_id": "tc_62a8975e695ad26f7fb514d1",
+  "voice_name": "Olivia",
+  "model": "ssfm-v21",
+  "emotions": ["tonemid", "toneup", "normal", "happy", "sad", "angry"]
+}
+You’ll need a valid voice ID when making text-to-speech requests. Make sure to select a voice that supports your desired emotion for the best results.
+​
+Next steps
+Congratulations on creating your first AI voice! Here are some resources to help you dive deeper:
