@@ -94,6 +94,23 @@ export function AdvancedLipSync({
 
   // Audio analysis and lip sync processing
   useEffect(() => {
+    if (!isPlaying) {
+      // Reset to neutral state
+      setCurrentViseme('sil');
+      setMouthShape(VISEME_MOUTH_SHAPES['sil']);
+      setAudioIntensity(0);
+      return;
+    }
+    
+    // Only initialize once per audio session
+    if (!audioRef.current && audioUrl) {
+      audioRef.current = new Audio(audioUrl);
+      audioRef.current.crossOrigin = 'anonymous';
+    }
+  }, [audioUrl, isPlaying]);
+  
+  // Separate effect for audio analysis to prevent infinite loops
+  useEffect(() => {
     if (!audioUrl || !isPlaying) {
       setCurrentViseme('sil');
       setMouthShape(VISEME_MOUTH_SHAPES['sil']);
@@ -203,7 +220,7 @@ export function AdvancedLipSync({
         }
       }
     };
-  }, [audioUrl, isPlaying, currentViseme, detectPhonemeFromFrequency, generateLipSyncData, onLipSyncData, disableAudioPlayback]);
+  }, [audioUrl, isPlaying, disableAudioPlayback]); // Removed dependencies causing infinite renders
 
   // This component only provides data - no visual rendering
   return null;

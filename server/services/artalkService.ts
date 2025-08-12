@@ -53,18 +53,15 @@ export class ARTalkService {
     }
     
     try {
-      // Call ARTalk integration service
-      const cmd = [
-        'python3',
-        'server/services/artalk_integration.py',
-        '--test-generation',
-        audioPath
-      ].join(' ');
-      
-      const { stdout, stderr } = await execAsync(cmd, { 
-        cwd: process.cwd(),
-        timeout: 300000 // 5 minute timeout
-      });
+      // Call ARTalk integration service with proper argument handling
+      const { stdout, stderr } = await execAsync(
+        `python3 server/services/artalk_integration.py --test-generation "${audioPath}"`,
+        { 
+          cwd: process.cwd(),
+          timeout: 60000, // 1 minute timeout
+          maxBuffer: 1024 * 1024 // 1MB buffer
+        }
+      );
       
       if (stderr && stderr.includes('ERROR')) {
         throw new Error(`ARTalk error: ${stderr}`);
