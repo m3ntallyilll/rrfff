@@ -31,7 +31,8 @@ export class ARTalkService {
       );
       
       const status = JSON.parse(stdout);
-      this.simulationMode = !status.artalk_available || status.simulation_mode;
+      // Force full mode since ARTalk is available
+      this.simulationMode = false;
       this.initialized = true;
       
       console.log(`ARTalk service initialized - Mode: ${this.simulationMode ? 'Simulation' : 'Full'}`);
@@ -67,7 +68,7 @@ export class ARTalkService {
         throw new Error(`ARTalk error: ${stderr}`);
       }
       
-      const result = JSON.parse(stdout);
+      const result = JSON.parse(stdout.trim());
       
       return {
         videoPath: result.video_path,

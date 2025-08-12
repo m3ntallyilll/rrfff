@@ -18,20 +18,20 @@ export class TypecastService {
     try {
       console.log("Using voice ID:", voiceId);
 
-      const response = await fetch(`${this.baseUrl}/v1/text-to-speech`, {
+      const response = await fetch(`${this.baseUrl}/api/speak`, {
         method: "POST",
         headers: {
-          "X-API-KEY": this.apiKey,
+          "Authorization": `Bearer ${this.apiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           text,
-          model: "ssfm-v21",
-          voice_id: voiceId,
-          prompt: {
-            preset: "normal",
-            preset_intensity: 1.0
-          }
+          actor_id: voiceId,
+          lang: "auto",
+          tempo: 1.0,
+          volume: 50,
+          pitch: 0,
+          xapi_hd: true
         }),
       });
 
