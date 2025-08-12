@@ -155,11 +155,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Voice ID mapping for characters (using actual Typecast voice IDs)
       const voiceMapping: Record<string, string> = {
-        'razor': 'tc_684a5a7ba2ce934624b59c6e', // Nia - Female
-        'venom': 'tc_6837b58f80ceeb17115bb771', // Walter - Male
+        'razor': 'tc_6178a6758972cb5bb66f1295', // Character 1 - Rapper type
+        'venom': 'tc_67d237f1782cabcc6155272f', // Character 2 - Rapper type
         'silk': 'tc_685ca2dcfa58f44bdbe60d65', // Wade - Male  
-        'hardcore-mc': 'tc_684a5a7ba2ce934624b59c6e',
-        'aggressive-mc': 'tc_6837b58f80ceeb17115bb771',
+        'hardcore-mc': 'tc_6178a6758972cb5bb66f1295',
+        'aggressive-mc': 'tc_67d237f1782cabcc6155272f',
         'smooth-mc': 'tc_685ca2dcfa58f44bdbe60d65'
       };
 

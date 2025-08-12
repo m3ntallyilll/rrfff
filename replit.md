@@ -80,8 +80,8 @@ Required API keys:
 ### Technical Details
 - **Groq API**: Updated to use `/chat/completions` endpoint with proper OpenAI-compatible format
 - **Typecast API**: Multi-voice support with character-specific voice IDs (WORKING):
-  - `tc_684a5a7ba2ce934624b59c6e` (Nia - Female - MC Razor)
-  - `tc_6837b58f80ceeb17115bb771` (Walter - Male - MC Venom)  
+  - `tc_6178a6758972cb5bb66f1295` (Character 1 - Rapper type - MC Razor)
+  - `tc_67d237f1782cabcc6155272f` (Character 2 - Rapper type - MC Venom)  
   - `tc_685ca2dcfa58f44bdbe60d65` (Wade - Male - MC Silk)
 - **Audio Generation**: Successfully generating 1.5MB+ audio files per battle round
 - **Database Schema**: Fixed circular references between Battle and BattleRound types
