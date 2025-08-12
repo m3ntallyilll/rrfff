@@ -6,6 +6,7 @@ interface AdvancedLipSyncProps {
   isPlaying: boolean;
   avatarImageUrl: string;
   onLipSyncData?: (data: LipSyncData) => void;
+  disableAudioPlayback?: boolean; // Prevent duplicate audio playback
 }
 
 interface LipSyncData {
@@ -45,7 +46,8 @@ export function AdvancedLipSync({
   audioUrl, 
   isPlaying, 
   avatarImageUrl,
-  onLipSyncData 
+  onLipSyncData,
+  disableAudioPlayback = true // Default to true to prevent duplicate playback
 }: AdvancedLipSyncProps) {
   const [currentViseme, setCurrentViseme] = useState<string>('sil');
   const [mouthShape, setMouthShape] = useState(VISEME_MOUTH_SHAPES['sil']);
@@ -114,16 +116,47 @@ export function AdvancedLipSync({
 
     const setupAudioAnalysis = async () => {
       try {
+        if (disableAudioPlayback) {
+          // Pure visual lip sync without audio playback - simulate based on timing
+          const simulateLipSync = () => {
+            if (isPlaying) {
+              // Simulate mouth movements with randomized patterns
+              const time = Date.now() / 100;
+              const intensity = (Math.sin(time * 0.5) + 1) * 0.5;
+              const phonemeIndex = Math.floor(time / 5) % Object.keys(VISEME_MOUTH_SHAPES).length;
+              const phonemeKeys = Object.keys(VISEME_MOUTH_SHAPES);
+              const currentPhoneme = phonemeKeys[phonemeIndex];
+              
+              setCurrentViseme(currentPhoneme);
+              setMouthShape(VISEME_MOUTH_SHAPES[currentPhoneme]);
+              setAudioIntensity(intensity * 100);
+              
+              const lipSync = generateLipSyncData(currentPhoneme, intensity * 100);
+              setLipSyncData(lipSync);
+              onLipSyncData?.(lipSync);
+              
+              animationFrameRef.current = requestAnimationFrame(simulateLipSync);
+            }
+          };
+          
+          simulateLipSync();
+          console.log('MuseTalk-inspired lip sync initialized with simulation mode (no audio duplication)');
+          return;
+        }
+        
+        // Original audio analysis code (only used if disableAudioPlayback is false)
         audioRef.current = new Audio(audioUrl);
+        audioRef.current.volume = 0.1; // Very low volume to prevent interference
+        audioRef.current.preload = 'auto';
+        
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
         
         const source = audioContextRef.current.createMediaElementSource(audioRef.current);
         analyserRef.current = audioContextRef.current.createAnalyser();
-        analyserRef.current.fftSize = 128; // Higher resolution for better phoneme detection
+        analyserRef.current.fftSize = 128;
         analyserRef.current.smoothingTimeConstant = 0.8;
         
         source.connect(analyserRef.current);
-        analyserRef.current.connect(audioContextRef.current.destination);
         
         const bufferLength = analyserRef.current.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
@@ -153,8 +186,12 @@ export function AdvancedLipSync({
           }
         };
         
-        audioRef.current.play();
-        processAudio();
+        if (!disableAudioPlayback && audioRef.current) {
+          audioRef.current.play().catch(() => {
+            // Ignore autoplay policy errors
+          });
+          processAudio();
+        }
         
       } catch (error) {
         console.warn('Advanced lip sync setup failed:', error);
@@ -177,7 +214,11 @@ export function AdvancedLipSync({
         audioContextRef.current = null;
       }
       if (audioRef.current) {
-        audioRef.current.pause();
+        // Only pause if it's our own audio element (not the main one)
+        const existingAudio = document.querySelector('audio') as HTMLAudioElement;
+        if (!existingAudio || audioRef.current !== existingAudio) {
+          audioRef.current.pause();
+        }
       }
     };
   }, [audioUrl, isPlaying, currentViseme, detectPhonemeFromFrequency, generateLipSyncData, onLipSyncData]);
