@@ -190,8 +190,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         battle.profanityFilter
       );
 
-      // Generate TTS for AI response
-      const ttsResult = await typecastService.generateSpeech(aiVerse);
+      // Get AI character voice ID from battle data
+      const aiVoiceId = battle.aiVoiceId || "tc_67d237f1782cabcc6155272f";
+      
+      // Generate TTS for AI response using character's voice
+      const ttsResult = await typecastService.generateSpeech(aiVerse, aiVoiceId);
 
       // Calculate scores
       const scores = scoringService.scoreRound(userVerse, aiVerse);

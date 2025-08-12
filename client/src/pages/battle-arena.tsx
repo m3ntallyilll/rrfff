@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Mic, Trophy, Clock, Flame, Wifi, History, Share, Dumbbell } from "lucide-react";
+import { Mic, Trophy, Clock, Flame, Wifi, History, Share, Dumbbell, User } from "lucide-react";
+import { CharacterSelector } from "@/components/character-selector";
+import type { BattleCharacter } from "@shared/characters";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +25,8 @@ export default function BattleArena() {
   const [aiResponse, setAiResponse] = useState("");
   const [currentAiAudio, setCurrentAiAudio] = useState<string>();
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [selectedCharacter, setSelectedCharacter] = useState<BattleCharacter | null>(null);
+  const [showCharacterSelector, setShowCharacterSelector] = useState(false);
 
   const { toast } = useToast();
   const {
@@ -60,10 +64,10 @@ export default function BattleArena() {
 
   // Initialize new battle on component mount
   useEffect(() => {
-    if (!currentBattleId) {
-      startNewBattle(difficulty, profanityFilter);
+    if (!currentBattleId && !showCharacterSelector) {
+      setShowCharacterSelector(true);
     }
-  }, [currentBattleId, difficulty, profanityFilter, startNewBattle]);
+  }, [currentBattleId, showCharacterSelector]);
 
   const handleRecordingComplete = async (recording: { blob: Blob; duration: number; url: string }) => {
     try {
@@ -99,7 +103,14 @@ export default function BattleArena() {
     setAiResponse("");
     setCurrentAiAudio(undefined);
     setBattleTimer(120);
-    startNewBattle(difficulty, profanityFilter);
+    setShowCharacterSelector(true);
+  };
+
+  const handleCharacterSelect = (character: BattleCharacter) => {
+    setSelectedCharacter(character);
+    setShowCharacterSelector(false);
+    // Start battle with selected character
+    startNewBattle(difficulty, profanityFilter, character.id);
   };
 
   const handleDifficultyChange = (value: string) => {
@@ -181,6 +192,49 @@ export default function BattleArena() {
 
       <main className="min-h-screen">
         <div className="max-w-7xl mx-auto px-4 py-6">
+          {/* Character Selection Modal */}
+          <AnimatePresence>
+            {showCharacterSelector && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              >
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  className="bg-battle-gray rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto border border-gray-700"
+                >
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-orbitron font-bold text-center text-white mb-2">
+                      Select Your Opponent
+                    </h2>
+                    <p className="text-gray-400 text-center">
+                      Each character has unique voice, style, and difficulty level
+                    </p>
+                  </div>
+                  
+                  <CharacterSelector
+                    onCharacterSelect={handleCharacterSelect}
+                    selectedCharacter={selectedCharacter || undefined}
+                  />
+                  
+                  <div className="flex justify-center mt-6">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowCharacterSelector(false)}
+                      className="border-gray-600 text-gray-400 hover:bg-gray-700"
+                      data-testid="button-cancel-character-select"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           {/* Battle Status Bar */}
           <Card className="mb-6 bg-battle-gray border-gray-700">
             <CardContent className="p-4">

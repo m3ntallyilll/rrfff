@@ -19,6 +19,9 @@ export const battles = pgTable("battles", {
   aiScore: integer("ai_score").notNull().default(0),
   difficulty: text("difficulty").notNull().default("normal"), // easy, normal, hard
   profanityFilter: boolean("profanity_filter").notNull().default(true),
+  aiCharacterId: text("ai_character_id"),
+  aiCharacterName: text("ai_character_name"),
+  aiVoiceId: text("ai_voice_id"),
   rounds: jsonb("rounds").$type<Array<{
     id: string;
     battleId: string;

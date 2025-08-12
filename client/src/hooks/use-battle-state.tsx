@@ -26,7 +26,11 @@ export function useBattleState(battleId?: string) {
 
   // Create new battle mutation
   const createBattleMutation = useMutation({
-    mutationFn: async (battleData: { difficulty: string; profanityFilter: boolean }) => {
+    mutationFn: async (battleData: { 
+      difficulty: string; 
+      profanityFilter: boolean; 
+      aiCharacterId?: string;
+    }) => {
       const res = await apiRequest("POST", "/api/battles", battleData);
       return res.json();
     },
@@ -87,8 +91,12 @@ export function useBattleState(battleId?: string) {
     },
   });
 
-  const startNewBattle = (difficulty: "easy" | "normal" | "hard", profanityFilter: boolean = true) => {
-    createBattleMutation.mutate({ difficulty, profanityFilter });
+  const startNewBattle = (
+    difficulty: "easy" | "normal" | "hard", 
+    profanityFilter: boolean = true,
+    aiCharacterId?: string
+  ) => {
+    createBattleMutation.mutate({ difficulty, profanityFilter, aiCharacterId });
   };
 
   const updateBattleState = (updates: Partial<BattleState>) => {

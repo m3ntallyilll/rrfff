@@ -11,14 +11,12 @@ export class TypecastService {
 
   async generateSpeech(
     text: string,
-    voice: string = "hardcore-mc"
+    voiceId: string = "tc_67d237f1782cabcc6155272f"
   ): Promise<{ audioUrl: string; duration: number }> {
     console.log("Attempting Typecast TTS generation for text:", text.substring(0, 50) + "...");
     
     try {
-      // Use the user's specific voice ID
-      const voiceId = "tc_67d237f1782cabcc6155272f";
-      console.log("Using specified voice ID:", voiceId);
+      console.log("Using voice ID:", voiceId);
 
       const response = await fetch(`${this.baseUrl}/v1/text-to-speech`, {
         method: "POST",

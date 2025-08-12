@@ -30,12 +30,21 @@ export class MemStorage implements IStorage {
 
   async createBattle(insertBattle: InsertBattle): Promise<Battle> {
     const id = randomUUID();
+    
+    // Select random AI character if not specified
+    const selectedCharacter = (insertBattle as any).aiCharacterId 
+      ? (await import("@shared/characters")).BATTLE_CHARACTERS.find(c => c.id === (insertBattle as any).aiCharacterId)
+      : (await import("@shared/characters")).getRandomCharacter();
+    
     const battle: Battle = {
       id,
       userScore: insertBattle.userScore ?? 0,
       aiScore: insertBattle.aiScore ?? 0,
       difficulty: insertBattle.difficulty ?? "normal",
       profanityFilter: insertBattle.profanityFilter ?? true,
+      aiCharacterId: selectedCharacter?.id || null,
+      aiCharacterName: selectedCharacter?.name || null,
+      aiVoiceId: selectedCharacter?.voiceId || "tc_67d237f1782cabcc6155272f",
       rounds: [],
       status: insertBattle.status ?? "active",
       createdAt: new Date(),

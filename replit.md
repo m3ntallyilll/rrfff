@@ -63,10 +63,16 @@ Required API keys:
 - ✅ **MAJOR**: Created comprehensive battle rap training dataset with 30 advanced examples
 - ✅ **MAJOR**: Added fine-tuning infrastructure with complete API endpoints  
 - ✅ **PRODUCTION**: Updated system to use custom fine-tuned model `ft-7a9b8c6d5e4f3d2c1b0a-model`
+- ✅ **NEW**: Generated 3 unique battle character avatars with distinct personalities
+- ✅ **NEW**: Implemented character selection system with voice ID mapping  
+- ✅ **NEW**: Added character profiles: MC Razor (female, hardcore), MC Venom (male, aggressive), MC Silk (male, smooth)
 
 ### Technical Details
 - **Groq API**: Updated to use `/chat/completions` endpoint with proper OpenAI-compatible format
-- **Typecast API**: Fixed payload structure using `preset`/`preset_intensity` with user's voice ID `tc_67d237f1782cabcc6155272f`
+- **Typecast API**: Multi-voice support with character-specific voice IDs:
+  - `tc_6178a6758972cb5bb66f1295` (Female - MC Razor)
+  - `tc_61b007392f2010f2aa1a052a` (Male - MC Venom)  
+  - `tc_67d237f1782cabcc6155272f` (Male - MC Silk)
 - **Database Schema**: Fixed circular references between Battle and BattleRound types
 - **Frontend State**: Improved async mutation handling with proper error states
 - **Storage Layer**: Added null coalescing for required fields
