@@ -22,76 +22,87 @@ export function AudioControls({
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState([85]);
   const [isMuted, setIsMuted] = useState(false);
-  const [voiceType, setVoiceType] = useState("hardcore");
-  const [currentTrack, setCurrentTrack] = useState("AI Battle Response");
   const [audioError, setAudioError] = useState<string | null>(null);
+  const [audioLoaded, setAudioLoaded] = useState(false);
+  const [voiceType, setVoiceType] = useState("hardcore");
+  
+  const currentTrack = audioUrl && !audioError ? "AI Battle Response" : "No audio available";
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const previousAudioUrl = useRef<string | undefined>();
 
+  // Only reload audio when URL actually changes
   useEffect(() => {
-    if (audioUrl && audioUrl.trim() !== "" && audioUrl.startsWith('data:audio/')) {
+    if (audioUrl && audioUrl !== previousAudioUrl.current && audioUrl.startsWith('data:audio/')) {
+      previousAudioUrl.current = audioUrl;
       console.log('Loading new audio URL, size:', audioUrl.length, 'bytes');
-      
-      // Reset state when changing audio
-      setIsPlaying(false);
-      setCurrentTime(0);
-      setDuration(0);
-      setAudioError(null);
       
       // Clean up previous audio
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.currentTime = 0;
         audioRef.current.src = '';
       }
       
-      audioRef.current = new Audio(audioUrl);
-      const audio = audioRef.current;
+      // Reset states
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setDuration(0);
+      setAudioError(null);
+      setAudioLoaded(false);
       
-      // Set up event listeners
-      const updateTime = () => setCurrentTime(audio.currentTime);
-      const updateDuration = () => setDuration(audio.duration || 0);
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      
+      const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+      const handleLoadedMetadata = () => {
+        setDuration(audio.duration || 0);
+        setAudioLoaded(true);
+        console.log('Audio loaded, duration:', audio.duration);
+      };
       const handleEnded = () => {
         setIsPlaying(false);
         setCurrentTime(0);
         onPlaybackChange?.(false);
       };
-      
-      const handleError = (e: Event) => {
-        const error = e as ErrorEvent;
-        console.error('Audio loading error:', error);
+      const handleError = () => {
+        console.error('Audio loading failed');
         setAudioError('Failed to load audio');
-        setIsPlaying(false);
+        setAudioLoaded(false);
         onPlaybackChange?.(false);
       };
-
-      const handleCanPlay = () => {
-        console.log('Audio ready to play, duration:', audio.duration);
-        setAudioError(null);
-        setCurrentTrack(`AI Rap Response ${Math.floor(Date.now() / 1000) % 100}`);
-      };
       
-      audio.addEventListener('timeupdate', updateTime);
-      audio.addEventListener('loadedmetadata', updateDuration);
+      audio.addEventListener('timeupdate', handleTimeUpdate);
+      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
       audio.addEventListener('ended', handleEnded);
       audio.addEventListener('error', handleError);
-      audio.addEventListener('canplay', handleCanPlay);
       
-      // Set volume
       audio.volume = isMuted ? 0 : volume[0] / 100;
       
       return () => {
-        audio.removeEventListener('timeupdate', updateTime);
-        audio.removeEventListener('loadedmetadata', updateDuration);
+        audio.removeEventListener('timeupdate', handleTimeUpdate);
+        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
         audio.removeEventListener('ended', handleEnded);
         audio.removeEventListener('error', handleError);
-        audio.removeEventListener('canplay', handleCanPlay);
         audio.pause();
+        audio.src = '';
       };
+    } else if (!audioUrl) {
+      // Clear audio when no URL
+      previousAudioUrl.current = undefined;
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setDuration(0);
+      setAudioError(null);
+      setAudioLoaded(false);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
+      }
     }
-  }, [audioUrl]); // Remove onPlaybackChange from dependencies
+  }, [audioUrl]);
 
-  // Separate effect for volume changes
+  // Handle volume changes separately
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume[0] / 100;
@@ -99,7 +110,10 @@ export function AudioControls({
   }, [volume, isMuted]);
 
   const togglePlayback = async () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || !audioLoaded) {
+      console.warn('Audio not ready for playback');
+      return;
+    }
     
     try {
       if (isPlaying) {
@@ -107,8 +121,10 @@ export function AudioControls({
         setIsPlaying(false);
         onPlaybackChange?.(false);
       } else {
-        // Ensure we wait for the promise to resolve
-        await audioRef.current.play();
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          await playPromise;
+        }
         setIsPlaying(true);
         onPlaybackChange?.(true);
       }
@@ -116,6 +132,7 @@ export function AudioControls({
       console.error('Audio playback error:', error);
       setIsPlaying(false);
       onPlaybackChange?.(false);
+      setAudioError('Playback failed');
     }
   };
 
@@ -201,8 +218,8 @@ export function AudioControls({
         
         <Button
           onClick={togglePlayback}
-          disabled={!audioUrl}
-          className="bg-gradient-to-r from-accent-red to-red-600 hover:from-red-500 hover:to-red-700 w-16 h-16 rounded-full transition transform hover:scale-105"
+          disabled={!audioUrl || !audioLoaded || audioError !== null}
+          className="bg-gradient-to-r from-accent-red to-red-600 hover:from-red-500 hover:to-red-700 w-16 h-16 rounded-full transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
           data-testid="button-toggle-playback"
         >
           {isPlaying ? (
