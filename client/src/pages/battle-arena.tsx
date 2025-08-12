@@ -38,7 +38,7 @@ export default function BattleArena() {
   } = useBattleState();
 
   // Fetch battle history
-  const { data: battleHistory } = useQuery({
+  const { data: battleHistory = [] } = useQuery({
     queryKey: ["/api/battles"],
   });
 
@@ -72,14 +72,14 @@ export default function BattleArena() {
 
       const result = await submitRound({ audio: recording.blob });
       
-      if (result.data) {
-        setLiveTranscription(result.data.round.userVerse);
-        setAiResponse(result.data.round.aiVerse);
-        setCurrentAiAudio(result.data.aiAudioUrl);
+      if (result) {
+        setLiveTranscription(result.round.userVerse);
+        setAiResponse(result.round.aiVerse);
+        setCurrentAiAudio(result.aiAudioUrl);
         
         toast({
           title: "Round Complete!",
-          description: `Score: You ${result.data.scores.userScore} - AI ${result.data.scores.aiScore}`,
+          description: `Score: You ${result.scores.userScore} - AI ${result.scores.aiScore}`,
         });
       }
     } catch (error) {
@@ -330,7 +330,7 @@ export default function BattleArena() {
 
                   <div className="space-y-3 max-h-64 overflow-y-auto">
                     <AnimatePresence>
-                      {battleHistory?.slice(0, 3).map((historyBattle: any, index: number) => (
+                      {Array.isArray(battleHistory) && battleHistory.slice(0, 3).map((historyBattle: any, index: number) => (
                         <motion.div
                           key={historyBattle.id}
                           initial={{ opacity: 0, y: 20 }}

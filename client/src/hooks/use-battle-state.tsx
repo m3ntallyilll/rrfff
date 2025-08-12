@@ -95,8 +95,8 @@ export function useBattleState(battleId?: string) {
     updateStateMutation.mutate(updates);
   };
 
-  const submitRound = (data: { audio?: Blob; userVerse?: string }) => {
-    processBattleRoundMutation.mutate(data);
+  const submitRound = async (data: { audio?: Blob; userVerse?: string }) => {
+    return processBattleRoundMutation.mutateAsync(data);
   };
 
   const isLoading = stateLoading || battleLoading || roundsLoading;

@@ -3,13 +3,33 @@ import { pgTable, text, varchar, integer, boolean, timestamp, jsonb } from "driz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Define RoundScores interface first
+export interface RoundScores {
+  userScore: number;
+  aiScore: number;
+  rhymeDensity: number;
+  flowQuality: number;
+  creativity: number;
+  totalScore: number;
+}
+
 export const battles = pgTable("battles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userScore: integer("user_score").notNull().default(0),
   aiScore: integer("ai_score").notNull().default(0),
   difficulty: text("difficulty").notNull().default("normal"), // easy, normal, hard
   profanityFilter: boolean("profanity_filter").notNull().default(true),
-  rounds: jsonb("rounds").$type<BattleRound[]>().notNull().default([]),
+  rounds: jsonb("rounds").$type<Array<{
+    id: string;
+    battleId: string;
+    roundNumber: number;
+    userVerse: string | null;
+    aiVerse: string;
+    userAudioUrl: string | null;
+    aiAudioUrl: string | null;
+    scores: RoundScores;
+    createdAt: Date;
+  }>>().notNull().default([]),
   status: text("status").notNull().default("active"), // active, completed, abandoned
   createdAt: timestamp("created_at").notNull().defaultNow(),
   completedAt: timestamp("completed_at"),
@@ -42,15 +62,6 @@ export type InsertBattle = z.infer<typeof insertBattleSchema>;
 export type Battle = typeof battles.$inferSelect;
 export type InsertBattleRound = z.infer<typeof insertBattleRoundSchema>;
 export type BattleRound = typeof battleRounds.$inferSelect;
-
-export interface RoundScores {
-  userScore: number;
-  aiScore: number;
-  rhymeDensity: number;
-  flowQuality: number;
-  creativity: number;
-  totalScore: number;
-}
 
 export interface BattleState {
   id: string;

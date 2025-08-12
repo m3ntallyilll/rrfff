@@ -31,8 +31,13 @@ export class MemStorage implements IStorage {
   async createBattle(insertBattle: InsertBattle): Promise<Battle> {
     const id = randomUUID();
     const battle: Battle = {
-      ...insertBattle,
       id,
+      userScore: insertBattle.userScore ?? 0,
+      aiScore: insertBattle.aiScore ?? 0,
+      difficulty: insertBattle.difficulty ?? "normal",
+      profanityFilter: insertBattle.profanityFilter ?? true,
+      rounds: [],
+      status: insertBattle.status ?? "active",
       createdAt: new Date(),
       completedAt: null,
     };
@@ -79,8 +84,14 @@ export class MemStorage implements IStorage {
   async createBattleRound(insertRound: InsertBattleRound): Promise<BattleRound> {
     const id = randomUUID();
     const round: BattleRound = {
-      ...insertRound,
       id,
+      battleId: insertRound.battleId,
+      roundNumber: insertRound.roundNumber,
+      userVerse: insertRound.userVerse ?? null,
+      aiVerse: insertRound.aiVerse,
+      userAudioUrl: insertRound.userAudioUrl ?? null,
+      aiAudioUrl: insertRound.aiAudioUrl ?? null,
+      scores: insertRound.scores,
       createdAt: new Date(),
     };
     this.battleRounds.set(id, round);
