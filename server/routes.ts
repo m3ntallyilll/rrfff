@@ -290,6 +290,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // MuseTalk integration endpoints
+  app.get("/api/musetalk/status", (req, res) => {
+    res.json({
+      success: true,
+      available: false, // Will be true when fully integrated
+      message: "MuseTalk integration in development",
+      features: [
+        "Real-time lip sync processing",
+        "Character avatar preparation", 
+        "Video generation with audio sync",
+        "Multi-character support"
+      ]
+    });
+  });
+
   // Fine-tuning endpoints
   app.get("/api/fine-tunings", async (req, res) => {
     try {
