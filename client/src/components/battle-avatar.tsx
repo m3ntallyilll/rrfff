@@ -44,21 +44,26 @@ export function BattleAvatar({
     }
   }, [battleState]);
 
-  // Lip sync audio analysis
+  // MuseTalk-inspired advanced audio analysis and lip sync
   useEffect(() => {
     let audio: HTMLAudioElement | null = null;
     
     if (audioUrl && isAISpeaking) {
       audio = new Audio(audioUrl);
       
-      const startLipSync = () => {
+      const startAdvancedLipSync = () => {
         try {
           audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
           const audioContext = audioContextRef.current;
           
           const source = audioContext.createMediaElementSource(audio!);
           analyserRef.current = audioContext.createAnalyser();
-          analyserRef.current.fftSize = 256;
+          
+          // MuseTalk-inspired settings for better frequency analysis
+          analyserRef.current.fftSize = 512; // Higher resolution for phoneme detection
+          analyserRef.current.smoothingTimeConstant = 0.85; // Smoother transitions
+          analyserRef.current.minDecibels = -90;
+          analyserRef.current.maxDecibels = -10;
           
           const bufferLength = analyserRef.current.frequencyBinCount;
           dataArrayRef.current = new Uint8Array(bufferLength);
@@ -66,52 +71,90 @@ export function BattleAvatar({
           source.connect(analyserRef.current);
           analyserRef.current.connect(audioContext.destination);
           
-          const updateLipSync = () => {
+          const updateAdvancedLipSync = () => {
             if (analyserRef.current && dataArrayRef.current) {
               analyserRef.current.getByteFrequencyData(dataArrayRef.current);
               
-              // Calculate average frequency data for mouth movement
-              const average = dataArrayRef.current.reduce((a, b) => a + b) / dataArrayRef.current.length;
-              const normalizedLevel = average / 255;
+              // Multi-band frequency analysis inspired by MuseTalk
+              const lowFreqs = dataArrayRef.current.slice(1, 8);   // 0-1kHz (vowels)
+              const midFreqs = dataArrayRef.current.slice(8, 32);  // 1-4kHz (consonants)
+              const highFreqs = dataArrayRef.current.slice(32, 64); // 4-8kHz (sibilants)
+              
+              const lowAvg = lowFreqs.reduce((a, b) => a + b) / lowFreqs.length;
+              const midAvg = midFreqs.reduce((a, b) => a + b) / midFreqs.length;
+              const highAvg = highFreqs.reduce((a, b) => a + b) / highFreqs.length;
+              
+              const totalEnergy = (lowAvg + midAvg + highAvg) / 3;
+              const normalizedLevel = Math.min(totalEnergy / 128, 1); // More conservative normalization
               
               setLipSyncLevel(normalizedLevel);
               
-              // Update mouth shape based on audio intensity
-              if (normalizedLevel > 0.7) {
-                setMouthShape("large");
-              } else if (normalizedLevel > 0.4) {
-                setMouthShape("medium");
-              } else if (normalizedLevel > 0.1) {
-                setMouthShape("small");
+              // Phoneme-aware mouth shape detection (inspired by MuseTalk's approach)
+              let detectedMouthShape: "closed" | "small" | "medium" | "large" = "closed";
+              
+              if (normalizedLevel < 0.15) {
+                detectedMouthShape = "closed";
+              } else if (highAvg > midAvg && highAvg > lowAvg) {
+                // High frequency dominant (sibilants: S, SH, F, TH)
+                detectedMouthShape = normalizedLevel > 0.6 ? "medium" : "small";
+              } else if (lowAvg > midAvg) {
+                // Low frequency dominant (vowels: A, O, U)
+                detectedMouthShape = normalizedLevel > 0.7 ? "large" : 
+                                  normalizedLevel > 0.4 ? "medium" : "small";
               } else {
-                setMouthShape("closed");
+                // Mid frequency dominant (consonants: T, D, K, G)
+                detectedMouthShape = normalizedLevel > 0.6 ? "medium" : "small";
+              }
+              
+              setMouthShape(detectedMouthShape);
+              
+              // Update facial emotions based on intensity patterns
+              if (normalizedLevel > 0.8) {
+                setCurrentEmotion("angry"); // Intense speech
+              } else if (normalizedLevel > 0.5 && lowAvg > midAvg) {
+                setCurrentEmotion("happy"); // Expressive vowels
+              } else {
+                setCurrentEmotion("neutral");
               }
             }
             
             if (isAISpeaking) {
-              animationFrameRef.current = requestAnimationFrame(updateLipSync);
+              animationFrameRef.current = requestAnimationFrame(updateAdvancedLipSync);
             }
           };
           
           audio!.play();
-          updateLipSync();
+          updateAdvancedLipSync();
+          
+          console.log("MuseTalk-inspired lip sync initialized with advanced frequency analysis");
           
         } catch (error) {
-          console.warn("Lip sync not supported:", error);
-          // Fallback to simple mouth animation
-          setMouthShape(isAISpeaking ? "medium" : "closed");
+          console.warn("Advanced lip sync not supported, falling back:", error);
+          // Enhanced fallback animation
+          const fallbackAnimation = () => {
+            if (isAISpeaking) {
+              const shapes: Array<"closed" | "small" | "medium" | "large"> = ["small", "medium", "small", "large"];
+              const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+              setMouthShape(randomShape);
+              setTimeout(fallbackAnimation, 150 + Math.random() * 200);
+            }
+          };
+          fallbackAnimation();
         }
       };
       
-      startLipSync();
+      startAdvancedLipSync();
       
       audio.addEventListener('ended', () => {
         setMouthShape("closed");
         setLipSyncLevel(0);
+        setCurrentEmotion("neutral");
+        console.log("Advanced lip sync session ended");
       });
     } else {
       setMouthShape("closed");
       setLipSyncLevel(0);
+      setCurrentEmotion("neutral");
     }
     
     return () => {
@@ -196,42 +239,123 @@ export function BattleAvatar({
               🤖
             </div>
           )}
-          {/* Lip Sync Overlay for Character Images */}
+          {/* MuseTalk-Inspired Advanced Lip Sync Overlay */}
           {character?.avatar && (
             <div className="absolute inset-0 pointer-events-none">
-              {/* Animated Mouth Overlay for Lip Sync */}
+              {/* Multi-layered mouth animation inspired by MuseTalk's approach */}
               <motion.div 
-                className="absolute bottom-16 left-1/2 transform -translate-x-1/2 flex justify-center"
-                animate={{
-                  scaleY: mouthShape === "large" ? 1.8 : 
-                          mouthShape === "medium" ? 1.4 : 
-                          mouthShape === "small" ? 1.1 : 1,
-                  scaleX: mouthShape === "large" ? 1.3 : 
-                          mouthShape === "medium" ? 1.2 : 
-                          mouthShape === "small" ? 1.1 : 1,
+                className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
+                style={{
+                  width: `${12 + lipSyncLevel * 20}px`,
+                  height: `${6 + lipSyncLevel * 15}px`,
                 }}
-                transition={{ duration: 0.1, ease: "easeOut" }}
+                animate={{
+                  scaleY: mouthShape === "large" ? 2.2 : 
+                          mouthShape === "medium" ? 1.6 : 
+                          mouthShape === "small" ? 1.2 : 0.8,
+                  scaleX: mouthShape === "large" ? 1.4 : 
+                          mouthShape === "medium" ? 1.25 : 
+                          mouthShape === "small" ? 1.1 : 1,
+                  rotateZ: lipSyncLevel > 0.5 ? `${(lipSyncLevel - 0.5) * 3}deg` : 0,
+                }}
+                transition={{ duration: 0.08, ease: "easeOut" }}
               >
-                <div className={`rounded-full ${
-                  mouthShape === "closed" ? "w-4 h-2 bg-red-900 opacity-60" :
-                  mouthShape === "small" ? "w-5 h-3 bg-red-800 opacity-70" :
-                  mouthShape === "medium" ? "w-6 h-4 bg-red-700 opacity-80" :
-                  "w-8 h-5 bg-red-600 opacity-90"
-                } transition-all duration-100 shadow-lg`} />
+                {/* Outer lip contour */}
+                <div className={`absolute inset-0 ${
+                  mouthShape === "closed" ? "rounded-full bg-red-900/70" :
+                  mouthShape === "small" ? "rounded-full bg-red-800/75" :
+                  mouthShape === "medium" ? "rounded-lg bg-red-700/85" :
+                  "rounded-lg bg-red-600/90"
+                } shadow-2xl border border-red-500/30`} />
+                
+                {/* Inner mouth cavity for open states */}
+                {mouthShape !== "closed" && (
+                  <motion.div 
+                    className="absolute inset-1 bg-black/80 rounded-full"
+                    animate={{
+                      scaleY: mouthShape === "large" ? 1.2 : 
+                              mouthShape === "medium" ? 0.9 : 0.6,
+                    }}
+                    transition={{ duration: 0.06 }}
+                  />
+                )}
+                
+                {/* Teeth highlight for wide mouth shapes */}
+                {(mouthShape === "large" || mouthShape === "medium") && (
+                  <motion.div
+                    className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-white/60 rounded-b-full"
+                    style={{
+                      width: `${mouthShape === "large" ? "80%" : "60%"}`,
+                      height: "30%",
+                    }}
+                    animate={{
+                      opacity: mouthShape === "large" ? 0.8 : 0.5,
+                    }}
+                    transition={{ duration: 0.1 }}
+                  />
+                )}
               </motion.div>
               
-              {/* Lip sync intensity indicator */}
+              {/* Advanced intensity visualization with frequency bands */}
               {isAISpeaking && (
-                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2">
-                  <motion.div 
-                    className="w-1 bg-accent-gold rounded-full"
-                    style={{
-                      height: `${8 + lipSyncLevel * 16}px`,
-                    }}
-                    animate={{ opacity: [0.7, 1, 0.7] }}
-                    transition={{ duration: 0.3, repeat: Infinity }}
-                  />
+                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                  {[...Array(5)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-1 bg-gradient-to-t from-accent-gold to-accent-red rounded-full"
+                      style={{
+                        height: `${4 + (lipSyncLevel * (i + 1) * 4)}px`,
+                        opacity: 0.6 + lipSyncLevel * 0.4,
+                      }}
+                      animate={{
+                        scaleY: [0.8, 1.2, 0.8],
+                        opacity: [0.6, 1, 0.6],
+                      }}
+                      transition={{
+                        duration: 0.4 + i * 0.1,
+                        repeat: Infinity,
+                        delay: i * 0.1,
+                      }}
+                    />
+                  ))}
                 </div>
+              )}
+              
+              {/* Facial feature enhancement during speech */}
+              {isAISpeaking && lipSyncLevel > 0.6 && (
+                <>
+                  {/* Eye blink animation during intense speech */}
+                  <motion.div
+                    className="absolute top-8 left-1/2 transform -translate-x-1/2 w-16 h-2 bg-black/30 rounded-full"
+                    animate={{
+                      scaleY: [1, 0.1, 1],
+                      opacity: [0, 0.7, 0],
+                    }}
+                    transition={{
+                      duration: 0.3,
+                      repeat: Infinity,
+                      repeatDelay: 2,
+                    }}
+                  />
+                  
+                  {/* Cheek movement during speech */}
+                  <motion.div
+                    className="absolute top-10 left-2 w-4 h-6 bg-red-500/20 rounded-full"
+                    animate={{
+                      scaleX: [1, 1.1, 1],
+                      x: [0, 2, 0],
+                    }}
+                    transition={{ duration: 0.2, repeat: Infinity }}
+                  />
+                  <motion.div
+                    className="absolute top-10 right-2 w-4 h-6 bg-red-500/20 rounded-full"
+                    animate={{
+                      scaleX: [1, 1.1, 1],
+                      x: [0, -2, 0],
+                    }}
+                    transition={{ duration: 0.2, repeat: Infinity }}
+                  />
+                </>
               )}
             </div>
           )}
