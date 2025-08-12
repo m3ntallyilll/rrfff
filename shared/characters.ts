@@ -17,7 +17,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     id: 'razor',
     name: 'MC Razor',
     displayName: 'Razor',
-    voiceId: 'tc_6178a6758972cb5bb66f1295', // Female voice
+    voiceId: 'tc_684a5a7ba2ce934624b59c6e', // Nia - Female voice
     gender: 'female',
     personality: 'Fierce, aggressive, no-nonsense attitude with razor-sharp wit',
     style: 'hardcore',
@@ -30,7 +30,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     id: 'venom',
     name: 'MC Venom',
     displayName: 'Venom',
-    voiceId: 'tc_61b007392f2010f2aa1a052a', // Male voice 1
+    voiceId: 'tc_6837b58f80ceeb17115bb771', // Walter - Male voice
     gender: 'male',
     personality: 'Intense, intimidating, uses psychological warfare and dark imagery',
     style: 'aggressive',
@@ -43,7 +43,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     id: 'silk',
     name: 'MC Silk',
     displayName: 'Silk',
-    voiceId: 'tc_67d237f1782cabcc6155272f', // Male voice 2 (current user's voice)
+    voiceId: 'tc_685ca2dcfa58f44bdbe60d65', // Wade - Male voice
     gender: 'male',
     personality: 'Smooth, charismatic, uses clever wordplay and sophisticated flow',
     style: 'smooth',

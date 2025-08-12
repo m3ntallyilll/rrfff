@@ -54,9 +54,19 @@ export class ARTalkService {
     }
     
     try {
-      // Call ARTalk integration service with proper argument handling
+      // Save audio data to temporary file if it's a data URL
+      let actualAudioPath = audioPath;
+      if (audioPath.startsWith('data:audio/')) {
+        const fs = await import('fs');
+        const path = await import('path');
+        const audioBuffer = Buffer.from(audioPath.split(',')[1], 'base64');
+        actualAudioPath = path.default.join(process.cwd(), 'temp_audio.wav');
+        fs.default.writeFileSync(actualAudioPath, audioBuffer);
+      }
+
+      // Call ARTalk integration service with file path
       const { stdout, stderr } = await execAsync(
-        `python3 server/services/artalk_integration.py --test-generation "${audioPath}"`,
+        `python3 server/services/artalk_integration.py --test-generation "${actualAudioPath}"`,
         { 
           cwd: process.cwd(),
           timeout: 60000, // 1 minute timeout
@@ -68,14 +78,33 @@ export class ARTalkService {
         throw new Error(`ARTalk error: ${stderr}`);
       }
       
-      const result = JSON.parse(stdout.trim());
+      // Extract JSON from stdout by finding the last complete JSON object
+      const lines = stdout.trim().split('\n');
+      let jsonStr = '';
       
-      return {
-        videoPath: result.video_path,
-        success: result.success,
-        message: result.message,
-        mode: result.mode || (this.simulationMode ? 'simulation' : 'full')
-      };
+      // Look for JSON starting from the end
+      for (let i = lines.length - 1; i >= 0; i--) {
+        const line = lines[i].trim();
+        if (line.startsWith('{') || jsonStr.length > 0) {
+          jsonStr = line + '\n' + jsonStr;
+          if (line.startsWith('{')) {
+            try {
+              const result = JSON.parse(jsonStr.trim());
+              return {
+                videoPath: result.video_path,
+                success: result.success,
+                message: result.message,
+                mode: result.mode || (this.simulationMode ? 'simulation' : 'full')
+              };
+            } catch (e) {
+              // Continue searching if JSON is incomplete
+              continue;
+            }
+          }
+        }
+      }
+      
+      throw new Error(`No valid JSON found in ARTalk output: ${stdout.substring(0, 200)}...`);
       
     } catch (error) {
       console.error(`ARTalk generation failed for ${characterId}:`, error);

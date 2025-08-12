@@ -151,7 +151,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const result = await typecastService.generateSpeech(text, voice);
+      // Voice ID mapping for characters (using actual Typecast voice IDs)
+      const voiceMapping: Record<string, string> = {
+        'razor': 'tc_684a5a7ba2ce934624b59c6e', // Nia - Female
+        'venom': 'tc_6837b58f80ceeb17115bb771', // Walter - Male
+        'silk': 'tc_685ca2dcfa58f44bdbe60d65', // Wade - Male  
+        'hardcore-mc': 'tc_684a5a7ba2ce934624b59c6e',
+        'aggressive-mc': 'tc_6837b58f80ceeb17115bb771',
+        'smooth-mc': 'tc_685ca2dcfa58f44bdbe60d65'
+      };
+
+      const voiceId = voiceMapping[voice] || voice;
+      const result = await typecastService.generateSpeech(text, voiceId);
       res.json(result);
     } catch (error) {
       res.status(500).json({ 
