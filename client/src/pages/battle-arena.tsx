@@ -359,6 +359,7 @@ export default function BattleArena() {
               <BattleAvatar
                 isAISpeaking={battleState?.isPlayingAudio || false}
                 battleState={battleState?.isAIResponding ? "battle" : "idle"}
+                audioUrl={currentAiAudio}
               />
 
               {/* Battle Text Display */}
