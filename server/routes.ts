@@ -287,6 +287,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Fine-tuning endpoints
+  app.get("/api/fine-tunings", async (req, res) => {
+    try {
+      const access = await fineTuningService.checkFineTuningAccess();
+      if (!access.available) {
+        return res.json({ 
+          available: false, 
+          message: access.message,
+          models: []
+        });
+      }
+      
+      const models = await fineTuningService.listFineTunings();
+      res.json({ 
+        available: true, 
+        message: "Fine-tuning access confirmed",
+        models 
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to check fine-tuning access",
+        error: "FINE_TUNING_CHECK_FAILED"
+      });
+    }
+  });
+
+  app.post("/api/fine-tunings", async (req, res) => {
+    try {
+      const { name, base_model, training_data } = req.body;
+      
+      // Upload training data first
+      const fileId = await fineTuningService.uploadTrainingFile(training_data);
+      
+      // Create fine-tuning job
+      const job = await fineTuningService.createFineTuning({
+        name: name || "Custom Rap Model",
+        input_file_id: fileId,
+        base_model: base_model || "llama-3.1-8b-instant",
+        type: "lora"
+      });
+      
+      res.json(job);
+    } catch (error) {
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to create fine-tuning job",
+        error: "FINE_TUNING_CREATION_FAILED"
+      });
+    }
+  });
+
+  app.get("/api/fine-tunings/:id", async (req, res) => {
+    try {
+      const job = await fineTuningService.getFineTuning(req.params.id);
+      res.json(job);
+    } catch (error) {
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to get fine-tuning job",
+        error: "FINE_TUNING_GET_FAILED"
+      });
+    }
+  });
+
+  app.get("/api/training-data/sample", async (req, res) => {
+    try {
+      const sampleData = fineTuningService.generateSampleRapData();
+      const jsonl = fineTuningService.exportTrainingDataAsJSONL(sampleData);
+      
+      res.json({
+        sample_data: sampleData,
+        jsonl_format: jsonl,
+        instructions: "Use this format for your training data. Each entry should have prompt, completion, difficulty, and style."
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Failed to generate sample training data",
+        error: "SAMPLE_DATA_FAILED"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
