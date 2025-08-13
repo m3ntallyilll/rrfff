@@ -154,9 +154,9 @@ Return analysis in this JSON format:
               content: prompt
             }
           ],
-          max_completion_tokens: 2048,
-          temperature: 0.3,
-          reasoning_effort: "high",
+          max_completion_tokens: 4096,
+          temperature: 0.2,
+          reasoning_effort: "medium", // Changed from high to medium for better API compatibility
           response_format: { type: "json_object" }
         }),
       });

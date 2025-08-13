@@ -25,6 +25,9 @@ interface DetailedScoreBreakdown {
   rhymeDensity: number;
   flowQuality: number;
   creativity: number;
+  reasoningInsights?: any; // Add reasoning insights field
+  enhancedRhymes?: any;
+  phoneticBreakdown?: any;
   
   rhymeAnalysis: {
     endRhymes: number;

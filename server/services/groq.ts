@@ -51,7 +51,7 @@ export class GroqService {
 
     const profanityNote = profanityFilter 
       ? "Keep language clean but hard-hitting through clever wordplay rather than explicit content." 
-      : "Use authentic street rap language with profanity (fuck, shit, bitch, damn) and explicit content for maximum impact.";
+      : "Use authentic, raw street rap language with explicit profanity (fuck, shit, bitch, damn, pussy, ass), aggressive insults, sexual references, violence metaphors, and hardcore street terminology for maximum battle impact. Don't hold back - this is uncensored battle rap.";
 
     const prompt = `You are a legendary rap battle MC with mastery of every rap technique. The challenger just delivered:
 

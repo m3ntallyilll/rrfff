@@ -38,7 +38,7 @@ export function useAudioRecorder() {
         }
       }
 
-      // Mobile-optimized audio constraints
+      // Enhanced mobile-optimized audio constraints with better quality
       const audioConstraints = isMobile ? {
         audio: {
           echoCancellation: true,
@@ -46,12 +46,17 @@ export function useAudioRecorder() {
           autoGainControl: true,
           channelCount: 1,
           sampleRate: 48000,
+          sampleSize: 16,
+          latency: 0.02, // Low latency for better performance
         }
       } : {
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          sampleRate: 44100,
+          autoGainControl: true,
+          sampleRate: 48000,
+          sampleSize: 16,
+          latency: 0.01,
         }
       };
 

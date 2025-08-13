@@ -8,6 +8,7 @@ import { scoringService } from "./services/scoring";
 import { FineTuningService } from "./services/fine-tuning";
 import { ARTalkService } from "./services/artalkService";
 import { LyricAnalysisService } from "./services/lyricAnalysis";
+import { PerformanceOptimizer } from "./services/performanceOptimizer";
 import { insertBattleSchema, insertBattleRoundSchema } from "@shared/schema";
 
 const upload = multer({
@@ -18,6 +19,7 @@ const upload = multer({
 const fineTuningService = new FineTuningService();
 const artalkService = new ARTalkService();
 const lyricAnalysisService = new LyricAnalysisService();
+const performanceOptimizer = new PerformanceOptimizer();
 
 // Initialize ARTalk service
 artalkService.initialize().catch(console.error);
@@ -186,7 +188,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Check cache first for performance optimization
+      const cacheKey = `analysis:${Buffer.from(text).toString('base64').slice(0, 32)}`;
+      const cachedAnalysis = performanceOptimizer.getCachedAnalysis(cacheKey);
+      
+      if (cachedAnalysis) {
+        return res.json({ ...cachedAnalysis, cached: true });
+      }
+
       const analysis = await lyricAnalysisService.analyzeVerse(text);
+      
+      // Cache the result for 5 minutes
+      performanceOptimizer.cacheAnalysis(cacheKey, analysis, 5);
+      
       res.json(analysis);
     } catch (error) {
       res.status(500).json({ 
