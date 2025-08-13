@@ -1,12 +1,16 @@
+import { AdvancedRhymeEngine } from './advancedRhymeEngine';
+
 export class GroqService {
   private apiKey: string;
   private baseUrl = "https://api.groq.com/openai/v1";
+  private rhymeEngine: AdvancedRhymeEngine;
 
   constructor() {
     this.apiKey = process.env.GROQ_API_KEY || process.env.GROQ_API_KEY_ENV_VAR || "";
     if (!this.apiKey) {
       throw new Error("GROQ_API_KEY environment variable is required");
     }
+    this.rhymeEngine = new AdvancedRhymeEngine();
   }
 
   async transcribeAudio(audioBuffer: Buffer): Promise<string> {
@@ -32,6 +36,26 @@ export class GroqService {
     return result.text;
   }
 
+  // Blend AI response with advanced rhyme techniques
+  private blendResponses(aiResponse: string, enhancedVerse: string): string {
+    // If AI response is too short or generic, use enhanced verse
+    if (aiResponse.length < 50 || !aiResponse.includes('\n')) {
+      return enhancedVerse;
+    }
+    
+    // Try to maintain AI's content while adding technical complexity
+    const aiLines = aiResponse.split('\n').filter(line => line.trim());
+    const enhancedLines = enhancedVerse.split('\n').filter(line => line.trim());
+    
+    if (aiLines.length >= 4) {
+      // AI has good content, keep it
+      return aiResponse;
+    } else {
+      // Blend: use AI's style but enhanced techniques
+      return enhancedVerse;
+    }
+  }
+
   async generateRapResponse(
     userVerse: string,
     difficulty: string = "normal",
@@ -46,7 +70,7 @@ export class GroqService {
     const rapTechniques = {
       easy: "Focus on: Clear delivery, simple punchlines, basic similes, repetition for emphasis.",
       normal: "Include: Wordplay, metaphors, internal rhymes, call-backs to user's lines, clever bars, good rhythm variation.", 
-      hard: "Master: Complex internal rhymes, multi-layered wordplay, extended metaphors, alliterative patterns, sophisticated battle tactics, technical rhyme schemes."
+      hard: "Master: INTERNAL RHYMING (rhymes within each line), RHYME STACKING (multiple rhymes in sequence), RHYME JUGGLING (overlapping rhyme patterns across lines), complex multi-syllabic rhymes, extended metaphors, alliterative patterns, sophisticated battle tactics, technical rhyme schemes."
     };
 
     const profanityNote = profanityFilter 
@@ -63,10 +87,31 @@ RHYME MASTERY: ${difficultyPrompts[difficulty as keyof typeof difficultyPrompts]
 
 RAP TECHNIQUES: ${rapTechniques[difficulty as keyof typeof rapTechniques]}
 
+${difficulty === 'hard' ? `
+ADVANCED RAP SKILLS - MANDATORY FOR HARD DIFFICULTY:
+
+1. INTERNAL RHYMING: Include rhymes WITHIN each line, not just at the ends
+   - Example: "I SPIT fire, GET higher, while you QUIT trying to be a SLICK liar"
+   - Every line must have 2-3 internal rhymes
+
+2. RHYME STACKING: Stack multiple rhyming syllables in sequence
+   - Example: "BACK-to-BACK attacks, CRACK your TRACK, leave you FLAT on your back"
+   - Use consecutive words that rhyme or share sounds
+
+3. RHYME JUGGLING: Overlap rhyme patterns across multiple lines
+   - Line 1 rhymes should connect with Line 3, Line 2 with Line 4
+   - Create complex weaving patterns that show technical mastery
+
+IMPLEMENTATION REQUIREMENTS:
+- Use multi-syllabic rhymes (2+ syllables): "BATTLE-rattle", "NEVER-sever"
+- Include slant rhymes and consonance for density
+- Maintain perfect flow while showcasing technical complexity
+` : ''}
+
 BATTLE STRATEGY:
 - Directly dismantle their specific bars and flip their own words against them
 - Use aggressive confidence and intimidation tactics
-- Show technical superiority through superior wordplay
+- Show technical superiority through superior wordplay and advanced rhyming techniques
 - End with a knockout punchline that silences the crowd
 
 FLOW & DELIVERY:
@@ -122,7 +167,19 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
       throw new Error(`Groq API response missing content and reasoning: ${JSON.stringify(choice)}`);
     }
 
-    // Direct response handling only - no reasoning extraction
+    // Enhance response with advanced rhyming techniques for hard difficulty
+    if (difficulty === "hard") {
+      try {
+        const enhancedVerse = this.rhymeEngine.generateAdvancedVerse(userVerse, difficulty);
+        // Blend AI response with advanced techniques
+        const baseResponse = choice?.message?.content || choice?.message?.reasoning || "";
+        return this.blendResponses(baseResponse.trim(), enhancedVerse);
+      } catch (error) {
+        console.log("Advanced rhyme enhancement failed, using base response:", error);
+      }
+    }
+
+    // Direct response handling
     if (choice?.message?.content) {
       return choice.message.content.trim();
     }
