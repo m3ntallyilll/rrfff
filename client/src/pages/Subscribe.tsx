@@ -34,7 +34,7 @@ const SubscribeForm = ({ tier }: { tier: string }) => {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: window.location.origin,
+        return_url: `${window.location.origin}/api/payment/success`,
       },
     });
 
@@ -47,8 +47,9 @@ const SubscribeForm = ({ tier }: { tier: string }) => {
     } else {
       toast({
         title: "Payment Successful",
-        description: `Welcome to ${tier === 'premium' ? 'Premium' : 'Pro'}! Enjoy unlimited battles.`,
+        description: `Welcome to ${tier === 'premium' ? 'Premium' : 'Pro'}! Redirecting...`,
       });
+      // Redirect will be handled by Stripe
     }
 
     setIsLoading(false);

@@ -57,12 +57,17 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
+  // Ensure new users get proper free tier setup
   await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
+    subscriptionTier: "free",
+    subscriptionStatus: "free", 
+    battlesRemaining: 3,
+    lastBattleReset: new Date(),
   });
 }
 

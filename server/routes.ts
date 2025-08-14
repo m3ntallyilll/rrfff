@@ -179,6 +179,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/battles", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      
+      // Ensure user exists and has proper setup
+      let user = await storage.getUser(userId);
+      if (!user) {
+        // Create user if not exists (shouldn't happen with auth but safety check)
+        user = await storage.upsertUser({
+          id: userId,
+          email: req.user.claims.email,
+          firstName: req.user.claims.first_name,
+          lastName: req.user.claims.last_name,
+          profileImageUrl: req.user.claims.profile_image_url,
+        });
+      }
+
       const canBattle = await storage.canUserStartBattle(userId);
       
       if (!canBattle) {
@@ -199,8 +213,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const battle = await storage.createBattle(battleData);
       res.status(201).json(battle);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating battle:", error);
+      
+      if (error.message === "No battles remaining") {
+        return res.status(403).json({ 
+          message: "Battle limit reached. Upgrade to Premium or Pro for more battles!",
+          upgrade: true 
+        });
+      }
+      
       res.status(500).json({ message: "Failed to create battle" });
     }
   });
@@ -214,6 +236,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching battle history:", error);
       res.status(500).json({ message: "Failed to fetch battle history" });
+    }
+  });
+
+  // Stripe webhook for payment success
+  app.post("/api/stripe/webhook", async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    } catch (err: any) {
+      console.log(`Webhook signature verification failed.`, err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle the event
+    if (event.type === 'payment_intent.succeeded' || event.type === 'invoice.payment_succeeded') {
+      // Payment was successful - upgrade user subscription
+      const session = event.data.object;
+      
+      // Extract customer and subscription info from metadata
+      const customerId = session.customer;
+      if (customerId) {
+        try {
+          // Find user by Stripe customer ID and upgrade
+          const user = await storage.getUserByStripeCustomerId(customerId);
+          if (user) {
+            const tier = session.metadata?.tier || 'premium';
+            const tierInfo = SUBSCRIPTION_TIERS[tier as keyof typeof SUBSCRIPTION_TIERS];
+            
+            await storage.updateUserSubscription(user.id, {
+              subscriptionStatus: 'active',
+              subscriptionTier: tier,
+              battlesRemaining: tierInfo.battlesPerDay === -1 ? 999999 : tierInfo.battlesPerDay,
+            });
+            
+            console.log(`User ${user.id} upgraded to ${tier}`);
+          }
+        } catch (error) {
+          console.error('Error processing payment webhook:', error);
+        }
+      }
+    }
+
+    res.status(200).json({ received: true });
+  });
+
+  // Payment success redirect endpoint
+  app.get("/api/payment/success", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Refresh user data to get updated subscription
+      const user = await storage.getUser(userId);
+      if (user && user.subscriptionTier !== 'free') {
+        // Payment successful - redirect to dashboard
+        res.redirect('/?payment_success=true');
+      } else {
+        // Payment may still be processing
+        res.redirect('/?payment_processing=true');
+      }
+    } catch (error) {
+      console.error("Error handling payment success:", error);
+      res.redirect('/?payment_error=true');
     }
   });
 

@@ -9,12 +9,13 @@ import {
   SUBSCRIPTION_TIERS,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, lt } from "drizzle-orm";
+import { eq, and, gte, lt, sql } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
+  getUserByStripeCustomerId(customerId: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   
   // Subscription management
@@ -50,15 +51,38 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserByStripeCustomerId(customerId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.stripeCustomerId, customerId));
+    return user;
+  }
+
   async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values({
+        ...userData,
+        // Ensure defaults for new users
+        subscriptionTier: userData.subscriptionTier || "free",
+        subscriptionStatus: userData.subscriptionStatus || "free",
+        battlesRemaining: userData.battlesRemaining !== undefined ? userData.battlesRemaining : 3,
+        lastBattleReset: userData.lastBattleReset || new Date(),
+        totalBattles: userData.totalBattles || 0,
+        totalWins: userData.totalWins || 0,
+      })
       .onConflictDoUpdate({
         target: users.id,
         set: {
-          ...userData,
+          // Only update user profile info, preserve subscription data
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          profileImageUrl: userData.profileImageUrl,
           updatedAt: new Date(),
+          // Set defaults only if fields are null/undefined
+          subscriptionTier: sql`COALESCE(${users.subscriptionTier}, ${userData.subscriptionTier || "free"})`,
+          subscriptionStatus: sql`COALESCE(${users.subscriptionStatus}, ${userData.subscriptionStatus || "free"})`,
+          battlesRemaining: sql`COALESCE(${users.battlesRemaining}, ${userData.battlesRemaining !== undefined ? userData.battlesRemaining : 3})`,
+          lastBattleReset: sql`COALESCE(${users.lastBattleReset}, ${userData.lastBattleReset || new Date()})`,
         },
       })
       .returning();
@@ -114,13 +138,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createBattle(battleData: any): Promise<Battle> {
-    // Decrement user's daily battles
+    // First ensure user has battles available and decrement
     const user = await this.getUser(battleData.userId);
-    if (user && user.subscriptionTier !== "pro" && (user.battlesRemaining || 0) > 0) {
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Check and reset daily battles if needed
+    await this.canUserStartBattle(battleData.userId);
+    
+    // Decrement user's daily battles (except for Pro users)
+    if (user.subscriptionTier !== "pro") {
+      const updatedUser = await this.getUser(battleData.userId); // Get fresh user data after potential reset
+      if ((updatedUser?.battlesRemaining || 0) <= 0) {
+        throw new Error("No battles remaining");
+      }
+      
       await db
         .update(users)
         .set({
-          battlesRemaining: (user.battlesRemaining || 0) - 1,
+          battlesRemaining: Math.max(0, (updatedUser?.battlesRemaining || 0) - 1),
+          totalBattles: (updatedUser?.totalBattles || 0) + 1,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, battleData.userId));
+    } else {
+      // Pro users - just increment total battles
+      await db
+        .update(users)
+        .set({
           totalBattles: (user.totalBattles || 0) + 1,
           updatedAt: new Date(),
         })
