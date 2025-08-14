@@ -47,6 +47,18 @@ Required API keys:
 
 ## Recent Changes
 
+### 2025-08-14 - Complete Monetization System + Authentication + Stripe Integration
+- ✅ **COMPLETE BUSINESS MODEL**: Implemented full monetization system with user accounts and Stripe payments
+- ✅ **USER AUTHENTICATION**: Replit Auth integration with PostgreSQL database for user management
+- ✅ **SUBSCRIPTION TIERS**: Free (3 battles/day), Premium ($9.99/month, 25 battles/day), Pro ($19.99/month, unlimited)
+- ✅ **STRIPE PAYMENTS**: Secure subscription processing with automatic billing and cancellation
+- ✅ **LANDING PAGE**: Beautiful pricing page for unauthenticated users with referral link
+- ✅ **USER DASHBOARD**: Authenticated home page showing stats, battle limits, and subscription status
+- ✅ **BATTLE LIMITS**: Daily limits that reset automatically, with upgrade prompts when exceeded
+- ✅ **PAYMENT FLOW**: Complete subscription upgrade process with Stripe Elements integration
+- ✅ **DATABASE SCHEMA**: Users, sessions, battles tables with proper relations and constraints
+- ✅ **PROTECTED ROUTES**: Battle creation requires authentication and respects subscription limits
+
 ### 2025-08-12 - Complete System Enhancement + ARTalk Integration + TTS SUCCESS
 - ✅ Fixed Groq API integration (corrected endpoints and request format)
 - ✅ Resolved schema circular reference errors and fixed storage type mismatches
@@ -124,6 +136,7 @@ Required API keys:
 - Use TypeScript for better type safety
 - Implement responsive design for mobile and desktop
 - Use authentic data from real API calls, no mock/placeholder data
+- Include user's Replit referral link for new users signing up to Replit
 
 ## Development Status
 - ✅ Server running successfully on port 5000

@@ -191,6 +191,17 @@ export default function Landing() {
       <div className="border-t border-slate-700 py-8 mt-16">
         <div className="container mx-auto px-4 text-center text-gray-400">
           <p>&copy; 2025 Battle Rap AI. Level up your battle skills.</p>
+          <div className="mt-4 p-4 bg-slate-800 rounded-lg border border-slate-600 max-w-md mx-auto">
+            <p className="text-sm text-gray-300 mb-2">New to Replit? Get started with hosting!</p>
+            <a 
+              href="https://replit.com/~" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-purple-400 hover:text-purple-300 text-sm underline"
+            >
+              Sign up to Replit with my referral link
+            </a>
+          </div>
         </div>
       </div>
     </div>
