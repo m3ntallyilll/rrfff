@@ -1,6 +1,6 @@
 import {
   users,
-  battlesWithUser as battles,
+  battles,
   type User,
   type UpsertUser,
   type Battle,
@@ -27,11 +27,12 @@ export interface IStorage {
   
   // Battle management with user tracking
   canUserStartBattle(userId: string): Promise<boolean>;
-  createBattle(battle: InsertBattle & { userId: string }): Promise<Battle>;
+  createBattle(battle: any): Promise<Battle>;
   getBattle(id: string): Promise<Battle | undefined>;
   getUserBattles(userId: string, limit?: number): Promise<Battle[]>;
   updateBattleScore(battleId: string, userScore: number, aiScore: number): Promise<void>;
   completeBattle(battleId: string): Promise<void>;
+  updateUserStripeInfo(userId: string, data: { stripeCustomerId?: string; stripeSubscriptionId?: string }): Promise<User>;
   
   // Battle analytics
   getUserStats(userId: string): Promise<{
@@ -112,7 +113,7 @@ export class DatabaseStorage implements IStorage {
     return (user.battlesRemaining || 0) > 0;
   }
 
-  async createBattle(battleData: InsertBattle & { userId: string }): Promise<Battle> {
+  async createBattle(battleData: any): Promise<Battle> {
     // Decrement user's daily battles
     const user = await this.getUser(battleData.userId);
     if (user && user.subscriptionTier !== "pro" && (user.battlesRemaining || 0) > 0) {
@@ -152,6 +153,19 @@ export class DatabaseStorage implements IStorage {
       .update(battles)
       .set({ userScore, aiScore })
       .where(eq(battles.id, battleId));
+  }
+
+  async updateUserStripeInfo(userId: string, data: { stripeCustomerId?: string; stripeSubscriptionId?: string }): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        stripeCustomerId: data.stripeCustomerId,
+        stripeSubscriptionId: data.stripeSubscriptionId,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
   }
 
   async completeBattle(battleId: string): Promise<void> {

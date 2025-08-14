@@ -14,12 +14,14 @@ export interface RoundScores {
   totalScore: number;
 }
 
+// Battles table with user authentication
 export const battles = pgTable("battles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
   userScore: integer("user_score").notNull().default(0),
   aiScore: integer("ai_score").notNull().default(0),
-  difficulty: text("difficulty").notNull().default("normal"), // easy, normal, hard
-  profanityFilter: boolean("profanity_filter").notNull().default(true),
+  difficulty: text("difficulty").notNull().default("normal"),
+  profanityFilter: boolean("profanity_filter").notNull().default(false),
   aiCharacterId: text("ai_character_id"),
   aiCharacterName: text("ai_character_name"),
   aiVoiceId: text("ai_voice_id"),
@@ -34,7 +36,7 @@ export const battles = pgTable("battles", {
     scores: RoundScores;
     createdAt: Date;
   }>>().notNull().default([]),
-  status: text("status").notNull().default("active"), // active, completed, abandoned
+  status: text("status").notNull().default("active"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   completedAt: timestamp("completed_at"),
 });
@@ -139,40 +141,15 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Update battles table to include user reference
-export const battlesWithUser = pgTable("battles", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id),
-  userScore: integer("user_score").notNull().default(0),
-  aiScore: integer("ai_score").notNull().default(0),
-  difficulty: text("difficulty").notNull().default("normal"),
-  profanityFilter: boolean("profanity_filter").notNull().default(false),
-  aiCharacterId: text("ai_character_id"),
-  aiCharacterName: text("ai_character_name"),
-  aiVoiceId: text("ai_voice_id"),
-  rounds: jsonb("rounds").$type<Array<{
-    id: string;
-    battleId: string;
-    roundNumber: number;
-    userVerse: string | null;
-    aiVerse: string;
-    userAudioUrl: string | null;
-    aiAudioUrl: string | null;
-    scores: RoundScores;
-    createdAt: Date;
-  }>>().notNull().default([]),
-  status: text("status").notNull().default("active"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  completedAt: timestamp("completed_at"),
-});
+
 
 // Relations
 export const userRelations = relations(users, ({ many }) => ({
-  battles: many(battlesWithUser),
+  battles: many(battles),
 }));
 
-export const battleRelations = relations(battlesWithUser, ({ one }) => ({
-  user: one(users, { fields: [battlesWithUser.userId], references: [users.id] }),
+export const battleRelations = relations(battles, ({ one }) => ({
+  user: one(users, { fields: [battles.userId], references: [users.id] }),
 }));
 
 // Type definitions
