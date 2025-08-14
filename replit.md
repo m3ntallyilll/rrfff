@@ -47,6 +47,12 @@ Required API keys:
 
 ## Recent Changes
 
+### 2025-08-14 - Account Upgraded to Pro + Authentication Fixes
+- ✅ **ACCOUNT UPGRADE**: User account upgraded to Pro tier with unlimited battles
+- ✅ **AUTHENTICATION FIXES**: Resolved issues with users not getting 3 free battles initially
+- ✅ **BATTLE LIMITS**: Fixed daily battle reset functionality and proper limit tracking
+- ✅ **USER EXPERIENCE**: Enhanced battle creation with proper error handling and user feedback
+
 ### 2025-08-14 - Complete Monetization System + Authentication + Stripe Integration
 - ✅ **COMPLETE BUSINESS MODEL**: Implemented full monetization system with user accounts and Stripe payments
 - ✅ **USER AUTHENTICATION**: Replit Auth integration with PostgreSQL database for user management
