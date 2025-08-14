@@ -23,7 +23,7 @@ const getOidcConfig = memoize(
 );
 
 export function getSession() {
-  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  const sessionTtl = 30 * 24 * 60 * 60 * 1000; // 30 days for better persistence
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
@@ -36,10 +36,12 @@ export function getSession() {
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    rolling: true, // Extend session on activity
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production', // Allow non-HTTPS in dev
       maxAge: sessionTtl,
+      sameSite: 'lax', // Better compatibility
     },
   });
 }
@@ -133,30 +135,51 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  const user = req.user as any;
-
-  if (!req.isAuthenticated() || !user.expires_at) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  const now = Math.floor(Date.now() / 1000);
-  if (now <= user.expires_at) {
-    return next();
-  }
-
-  const refreshToken = user.refresh_token;
-  if (!refreshToken) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
-
   try {
-    const config = await getOidcConfig();
-    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
-    updateUserSession(user, tokenResponse);
-    return next();
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = req.user as any;
+    if (!user || !user.claims) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // For Pro users with unlimited access, skip token validation
+    const userId = user.claims.sub;
+    if (userId) {
+      const dbUser = await storage.getUser(userId);
+      if (dbUser && dbUser.subscriptionTier === 'pro') {
+        // Pro user - allow access without strict token validation
+        return next();
+      }
+    }
+
+    // Check token expiration for non-Pro users
+    const now = Math.floor(Date.now() / 1000);
+    const expiresAt = user.expires_at || user.claims?.exp;
+    
+    if (!expiresAt || now <= expiresAt) {
+      return next();
+    }
+
+    // Try to refresh token if expired
+    const refreshToken = user.refresh_token;
+    if (refreshToken) {
+      try {
+        const config = await getOidcConfig();
+        const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
+        updateUserSession(user, tokenResponse);
+        return next();
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
+        // Fall through to unauthorized
+      }
+    }
+
+    return res.status(401).json({ message: "Unauthorized" });
   } catch (error) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
+    console.error('Authentication middleware error:', error);
+    return res.status(401).json({ message: "Unauthorized" });
   }
 };

@@ -24,6 +24,7 @@ export interface IStorage {
     stripeSubscriptionId?: string;
     subscriptionStatus?: string;
     subscriptionTier?: string;
+    battlesRemaining?: number;
   }): Promise<User>;
   
   // Battle management with user tracking
@@ -112,7 +113,7 @@ export class DatabaseStorage implements IStorage {
     const user = await this.getUser(userId);
     if (!user) return false;
 
-    // Pro users have unlimited battles
+    // Pro users have unlimited battles - always allow
     if (user.subscriptionTier === "pro") return true;
 
     // Check if daily battles need reset
