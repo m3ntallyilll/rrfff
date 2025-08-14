@@ -1,130 +1,218 @@
-import { type Battle, type BattleRound, type InsertBattle, type InsertBattleRound, type BattleState } from "@shared/schema";
-import { randomUUID } from "crypto";
+import {
+  users,
+  battlesWithUser as battles,
+  type User,
+  type UpsertUser,
+  type Battle,
+  type InsertBattle,
+  type RoundScores,
+  SUBSCRIPTION_TIERS,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, and, gte, lt } from "drizzle-orm";
 
+// Interface for storage operations
 export interface IStorage {
-  // Battle operations
-  createBattle(battle: InsertBattle): Promise<Battle>;
+  // User operations (mandatory for Replit Auth)
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  
+  // Subscription management
+  updateUserSubscription(userId: string, subscriptionData: {
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+    subscriptionStatus?: string;
+    subscriptionTier?: string;
+  }): Promise<User>;
+  
+  // Battle management with user tracking
+  canUserStartBattle(userId: string): Promise<boolean>;
+  createBattle(battle: InsertBattle & { userId: string }): Promise<Battle>;
   getBattle(id: string): Promise<Battle | undefined>;
-  updateBattle(id: string, updates: Partial<Battle>): Promise<Battle | undefined>;
-  getAllBattles(): Promise<Battle[]>;
+  getUserBattles(userId: string, limit?: number): Promise<Battle[]>;
+  updateBattleScore(battleId: string, userScore: number, aiScore: number): Promise<void>;
+  completeBattle(battleId: string): Promise<void>;
   
-  // Battle round operations
-  createBattleRound(round: InsertBattleRound): Promise<BattleRound>;
-  getBattleRounds(battleId: string): Promise<BattleRound[]>;
-  
-  // Battle state management
-  getBattleState(battleId: string): Promise<BattleState | undefined>;
-  updateBattleState(battleId: string, state: Partial<BattleState>): Promise<BattleState | undefined>;
+  // Battle analytics
+  getUserStats(userId: string): Promise<{
+    totalBattles: number;
+    totalWins: number;
+    winRate: number;
+    battlesThisMonth: number;
+  }>;
 }
 
-export class MemStorage implements IStorage {
-  private battles: Map<string, Battle>;
-  private battleRounds: Map<string, BattleRound>;
-  private battleStates: Map<string, BattleState>;
-
-  constructor() {
-    this.battles = new Map();
-    this.battleRounds = new Map();
-    this.battleStates = new Map();
+export class DatabaseStorage implements IStorage {
+  // User operations
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
-  async createBattle(insertBattle: InsertBattle): Promise<Battle> {
-    const id = randomUUID();
-    
-    // Select random AI character if not specified
-    const selectedCharacter = (insertBattle as any).aiCharacterId 
-      ? (await import("@shared/characters")).BATTLE_CHARACTERS.find(c => c.id === (insertBattle as any).aiCharacterId)
-      : (await import("@shared/characters")).getRandomCharacter();
-    
-    const battle: Battle = {
-      id,
-      userScore: insertBattle.userScore ?? 0,
-      aiScore: insertBattle.aiScore ?? 0,
-      difficulty: insertBattle.difficulty ?? "normal",
-      profanityFilter: insertBattle.profanityFilter ?? true,
-      aiCharacterId: selectedCharacter?.id || null,
-      aiCharacterName: selectedCharacter?.name || null,
-      aiVoiceId: selectedCharacter?.voiceId || "tc_67d237f1782cabcc6155272f",
-      rounds: [],
-      status: insertBattle.status ?? "active",
-      createdAt: new Date(),
-      completedAt: null,
-    };
-    this.battles.set(id, battle);
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
 
-    // Initialize battle state
-    const battleState: BattleState = {
-      id,
-      currentRound: 1,
-      maxRounds: 3,
-      isRecording: false,
-      isAIResponding: false,
-      isPlayingAudio: false,
-      userScore: battle.userScore,
-      aiScore: battle.aiScore,
-      difficulty: battle.difficulty as "easy" | "normal" | "hard",
-      profanityFilter: battle.profanityFilter,
-      timeRemaining: 120, // 2 minutes per battle
-    };
-    this.battleStates.set(id, battleState);
+  // Subscription management
+  async updateUserSubscription(userId: string, subscriptionData: {
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+    subscriptionStatus?: string;
+    subscriptionTier?: string;
+  }): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        ...subscriptionData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
 
+  // Battle management
+  async canUserStartBattle(userId: string): Promise<boolean> {
+    const user = await this.getUser(userId);
+    if (!user) return false;
+
+    // Pro users have unlimited battles
+    if (user.subscriptionTier === "pro") return true;
+
+    // Check if daily battles need reset
+    const now = new Date();
+    const lastReset = user.lastBattleReset || new Date(0);
+    const daysSinceReset = Math.floor((now.getTime() - lastReset.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysSinceReset > 0) {
+      // Reset daily battles
+      const tier = SUBSCRIPTION_TIERS[user.subscriptionTier as keyof typeof SUBSCRIPTION_TIERS];
+      await db
+        .update(users)
+        .set({
+          battlesRemaining: tier.battlesPerDay,
+          lastBattleReset: now,
+          updatedAt: now,
+        })
+        .where(eq(users.id, userId));
+      return tier.battlesPerDay > 0;
+    }
+
+    return (user.battlesRemaining || 0) > 0;
+  }
+
+  async createBattle(battleData: InsertBattle & { userId: string }): Promise<Battle> {
+    // Decrement user's daily battles
+    const user = await this.getUser(battleData.userId);
+    if (user && user.subscriptionTier !== "pro" && (user.battlesRemaining || 0) > 0) {
+      await db
+        .update(users)
+        .set({
+          battlesRemaining: (user.battlesRemaining || 0) - 1,
+          totalBattles: (user.totalBattles || 0) + 1,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, battleData.userId));
+    }
+
+    const [battle] = await db
+      .insert(battles)
+      .values(battleData)
+      .returning();
     return battle;
   }
 
   async getBattle(id: string): Promise<Battle | undefined> {
-    return this.battles.get(id);
+    const [battle] = await db.select().from(battles).where(eq(battles.id, id));
+    return battle;
   }
 
-  async updateBattle(id: string, updates: Partial<Battle>): Promise<Battle | undefined> {
-    const battle = this.battles.get(id);
-    if (!battle) return undefined;
-
-    const updatedBattle = { ...battle, ...updates };
-    this.battles.set(id, updatedBattle);
-    return updatedBattle;
+  async getUserBattles(userId: string, limit = 10): Promise<Battle[]> {
+    return await db
+      .select()
+      .from(battles)
+      .where(eq(battles.userId, userId))
+      .orderBy(battles.createdAt)
+      .limit(limit);
   }
 
-  async getAllBattles(): Promise<Battle[]> {
-    return Array.from(this.battles.values()).sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-    );
+  async updateBattleScore(battleId: string, userScore: number, aiScore: number): Promise<void> {
+    await db
+      .update(battles)
+      .set({ userScore, aiScore })
+      .where(eq(battles.id, battleId));
   }
 
-  async createBattleRound(insertRound: InsertBattleRound): Promise<BattleRound> {
-    const id = randomUUID();
-    const round: BattleRound = {
-      id,
-      battleId: insertRound.battleId,
-      roundNumber: insertRound.roundNumber,
-      userVerse: insertRound.userVerse ?? null,
-      aiVerse: insertRound.aiVerse,
-      userAudioUrl: insertRound.userAudioUrl ?? null,
-      aiAudioUrl: insertRound.aiAudioUrl ?? null,
-      scores: insertRound.scores,
-      createdAt: new Date(),
+  async completeBattle(battleId: string): Promise<void> {
+    const battle = await this.getBattle(battleId);
+    if (!battle) return;
+
+    await db
+      .update(battles)
+      .set({
+        status: "completed",
+        completedAt: new Date(),
+      })
+      .where(eq(battles.id, battleId));
+
+    // Update user win count if they won
+    if (battle.userScore > battle.aiScore && battle.userId) {
+      const user = await this.getUser(battle.userId);
+      if (user) {
+        await db
+          .update(users)
+          .set({
+            totalWins: (user.totalWins || 0) + 1,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, battle.userId));
+      }
+    }
+  }
+
+  // Analytics
+  async getUserStats(userId: string): Promise<{
+    totalBattles: number;
+    totalWins: number;
+    winRate: number;
+    battlesThisMonth: number;
+  }> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      return { totalBattles: 0, totalWins: 0, winRate: 0, battlesThisMonth: 0 };
+    }
+
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    const userBattles = await db
+      .select()
+      .from(battles)
+      .where(
+        and(
+          eq(battles.userId, userId),
+          gte(battles.createdAt, monthStart)
+        )
+      );
+
+    return {
+      totalBattles: user.totalBattles || 0,
+      totalWins: user.totalWins || 0,
+      winRate: user.totalBattles ? ((user.totalWins || 0) / user.totalBattles) * 100 : 0,
+      battlesThisMonth: userBattles.length,
     };
-    this.battleRounds.set(id, round);
-    return round;
-  }
-
-  async getBattleRounds(battleId: string): Promise<BattleRound[]> {
-    return Array.from(this.battleRounds.values())
-      .filter(round => round.battleId === battleId)
-      .sort((a, b) => a.roundNumber - b.roundNumber);
-  }
-
-  async getBattleState(battleId: string): Promise<BattleState | undefined> {
-    return this.battleStates.get(battleId);
-  }
-
-  async updateBattleState(battleId: string, state: Partial<BattleState>): Promise<BattleState | undefined> {
-    const currentState = this.battleStates.get(battleId);
-    if (!currentState) return undefined;
-
-    const updatedState = { ...currentState, ...state };
-    this.battleStates.set(battleId, updatedState);
-    return updatedState;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

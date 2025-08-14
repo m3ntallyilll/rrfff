@@ -1,7 +1,8 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from 'drizzle-orm';
 
 // Define RoundScores interface first
 export interface RoundScores {
@@ -107,3 +108,95 @@ export interface TypecastTTSResponse {
   audioUrl: string;
   duration: number;
 }
+
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User storage table for authentication and subscriptions
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  subscriptionStatus: varchar("subscription_status").default("free"), // free, active, cancelled, past_due
+  subscriptionTier: varchar("subscription_tier").default("free"), // free, premium, pro
+  battlesRemaining: integer("battles_remaining").default(3), // Daily free battles
+  lastBattleReset: timestamp("last_battle_reset").defaultNow(),
+  totalBattles: integer("total_battles").default(0),
+  totalWins: integer("total_wins").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Update battles table to include user reference
+export const battlesWithUser = pgTable("battles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  userScore: integer("user_score").notNull().default(0),
+  aiScore: integer("ai_score").notNull().default(0),
+  difficulty: text("difficulty").notNull().default("normal"),
+  profanityFilter: boolean("profanity_filter").notNull().default(false),
+  aiCharacterId: text("ai_character_id"),
+  aiCharacterName: text("ai_character_name"),
+  aiVoiceId: text("ai_voice_id"),
+  rounds: jsonb("rounds").$type<Array<{
+    id: string;
+    battleId: string;
+    roundNumber: number;
+    userVerse: string | null;
+    aiVerse: string;
+    userAudioUrl: string | null;
+    aiAudioUrl: string | null;
+    scores: RoundScores;
+    createdAt: Date;
+  }>>().notNull().default([]),
+  status: text("status").notNull().default("active"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+// Relations
+export const userRelations = relations(users, ({ many }) => ({
+  battles: many(battlesWithUser),
+}));
+
+export const battleRelations = relations(battlesWithUser, ({ one }) => ({
+  user: one(users, { fields: [battlesWithUser.userId], references: [users.id] }),
+}));
+
+// Type definitions
+export type UpsertUser = typeof users.$inferInsert;
+export type User = typeof users.$inferSelect;
+
+// Subscription tiers and pricing
+export const SUBSCRIPTION_TIERS = {
+  free: {
+    name: "Free",
+    price: 0,
+    battlesPerDay: 3,
+    features: ["3 battles per day", "Basic AI opponents", "Standard voices"]
+  },
+  premium: {
+    name: "Premium",
+    price: 9.99,
+    battlesPerDay: 25,
+    features: ["25 battles per day", "Advanced AI opponents", "Premium voices", "Battle analysis", "No ads"]
+  },
+  pro: {
+    name: "Pro",
+    price: 19.99,
+    battlesPerDay: -1, // unlimited
+    features: ["Unlimited battles", "All AI opponents", "Custom voices", "Advanced analytics", "Priority support", "Tournament mode"]
+  }
+} as const;
