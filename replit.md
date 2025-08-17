@@ -92,6 +92,8 @@ Required API keys:
 - ✅ **UPGRADED MODEL**: Now using Groq's `openai/gpt-oss-120b` model with `reasoning_effort="medium"` for superior rap generation with internal reasoning
 - ✅ **30-SECOND VERSES**: Enhanced to generate 8-12 lines of battle rap (30 seconds at ~150 BPM) with advanced lyrical techniques
 - ✅ **CLEAN OUTPUT**: Model reasons internally about rhyme schemes and wordplay but outputs only clean rap verses for TTS
+- ✅ **SYLLABLE RHYME MASTER**: Enhanced with advanced multi-syllabic rhymes, internal rhyme stacking, and complex wordplay techniques
+- ✅ **ELITE TECHNIQUES**: Implemented compound rhyming, assonance/consonance matching, and polysyllabic wordplay mastery
 - ✅ **NEW**: Generated 3 unique battle character avatars with distinct personalities
 - ✅ **NEW**: Implemented character selection system with voice ID mapping  
 - ✅ **NEW**: Added character profiles: MC Razor (female, hardcore), MC Venom (male, aggressive), MC Silk (male, smooth)

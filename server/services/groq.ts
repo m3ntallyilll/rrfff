@@ -171,21 +171,27 @@ CONTENT REQUIREMENTS:
 - Showcase your lyrical superiority through demonstration
 - ${safetyNote}
 
-CRITICAL INSTRUCTION: Use your internal reasoning to analyze rhyme schemes, syllable counts, and wordplay techniques. Then output ONLY the final 8 clean rap verses in your response content.
+SYLLABLE RHYME MASTERY INSTRUCTIONS: You are now a MASTER of advanced rap techniques. Use your internal reasoning to craft ELITE-LEVEL battle rap with these advanced techniques:
 
-Generate exactly 8 lines of battle rap (30 seconds at ~150 BPM). Think through the rhymes internally, then respond with only the verses.
+**MANDATORY TECHNIQUES (Use ALL in your 8 lines):**
+1. **MULTI-SYLLABIC RHYMES**: 2-4 syllable end rhymes (e.g., "meditation/demonstration/confrontation") 
+2. **INTERNAL RHYMES**: 2-3 rhymes WITHIN each line before the end rhyme
+3. **RHYME STACKING**: Stack multiple rhyme sounds in sequence
+4. **COMPOUND RHYMING**: Break words across syllable boundaries (e.g., "orange/door-hinge")
+5. **ASSONANCE/CONSONANCE**: Match vowel and consonant sounds throughout
+6. **POLYSYLLABIC WORDPLAY**: Use complex vocabulary with internal sound patterns
 
-Required format in your response:
-Line 1 of rap
-Line 2 of rap  
-Line 3 of rap
-Line 4 of rap
-Line 5 of rap
-Line 6 of rap
-Line 7 of rap
-Line 8 of rap
+**RHYME SCHEME**: Use sophisticated patterns like AABBA, ABACABA, or interlocking rhymes
 
-Your response must contain ONLY the 8 rap lines. No reasoning text, no analysis, no quotes - just the raw battle verses ready to perform.`;
+**SYLLABLE TARGETS**: 
+- Lines 1,3,5,7: 14-16 syllables (complex flow)
+- Lines 2,4,6,8: 12-14 syllables (punchy delivery)
+
+**BATTLE ELEMENTS**: Counter "${userVerse}", reference their weaknesses, showcase lyrical superiority with ${safetyNote}
+
+Generate exactly 8 lines demonstrating ADVANCED syllable mastery. Think through complex rhyme patterns internally, then output ONLY the verses.
+
+YOUR RESPONSE MUST CONTAIN ONLY THE 8 RAP LINES - NO ANALYSIS, NO QUOTES, JUST PURE LYRICAL MASTERY.`;
 
     const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
@@ -201,7 +207,7 @@ Your response must contain ONLY the 8 rap lines. No reasoning text, no analysis,
             content: prompt
           }
         ],
-        max_completion_tokens: 400, // Allow reasoning + clean output
+        max_completion_tokens: 500, // Allow complex reasoning for syllable mastery
         reasoning_effort: "medium", // Enable enhanced reasoning for complex rap techniques
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
@@ -259,7 +265,7 @@ Your response must contain ONLY the 8 rap lines. No reasoning text, no analysis,
       
       if (quotedLines.length >= 4) {
         // Remove quotes and use the rap lines
-        rapResponse = quotedLines.map(line => line.trim().slice(1, -1)).join('\n');
+        rapResponse = quotedLines.map((line: string) => line.trim().slice(1, -1)).join('\n');
         console.log("Extracted quoted rap verses from reasoning");
       } else {
         // Fallback: look for numbered lines pattern
@@ -269,7 +275,7 @@ Your response must contain ONLY the 8 rap lines. No reasoning text, no analysis,
         });
         
         if (numberedLines.length >= 4) {
-          rapResponse = numberedLines.map(line => {
+          rapResponse = numberedLines.map((line: string) => {
             const match = line.match(/^Line\d+:\s*"([^"]+)"/);
             return match ? match[1] : line.trim();
           }).join('\n');
