@@ -358,7 +358,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🎵 Audio received: ${audioBuffer.length} bytes`);
 
       // Fast parallel processing with aggressive timeouts
-      const [transcription, aiResponse, ttsResult] = await Promise.allSettled([
+      const [transcription, aiResponse] = await Promise.allSettled([
         // 1. Fast transcription (2 second timeout)
         Promise.race([
           groqService.transcribeAudio(audioBuffer),
@@ -373,18 +373,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           new Promise<string>((_, reject) => 
             setTimeout(() => reject(new Error("AI timeout")), 2000)
           )
-        ]).catch(() => "Yo, technical difficulties but I'm still here / System glitched but my flow's crystal clear!"),
-
-        // 3. Fast TTS with actual AI response
-        Promise.resolve().then(async () => {
-          const aiText = aiResponse.status === 'fulfilled' ? aiResponse.value : "Yo, technical difficulties but I'm still here!";
-          return await typecastService.generateSpeech(aiText, battle.aiCharacterId || "venom");
-        }).catch(() => ({ audioUrl: "", duration: 0 }))
+        ]).catch(() => "Yo, technical difficulties but I'm still here / System glitched but my flow's crystal clear!")
       ]);
 
       const userText = transcription.status === 'fulfilled' ? transcription.value : "Voice input";
       const aiResponseText = aiResponse.status === 'fulfilled' ? aiResponse.value : "System response ready!";
-      const audioResult = ttsResult.status === 'fulfilled' ? ttsResult.value : {};
+
+      // 3. Generate TTS with actual AI response (separate from parallel processing to avoid dependency issues)
+      const ttsResult = await Promise.race([
+        typecastService.generateSpeech(aiResponseText, battle.aiCharacterId || "venom"),
+        new Promise<any>((resolve) => 
+          setTimeout(() => resolve({ audioUrl: "", duration: 0 }), 3000) // 3 second timeout for TTS
+        )
+      ]).catch(() => ({ audioUrl: "", duration: 0 }));
+
+      const audioResult = ttsResult;
 
       console.log(`🤖 Processing complete (${Date.now() - startTime}ms)`);
 
