@@ -56,12 +56,8 @@ export default function BattleArena() {
         const newTime = battleState.timeRemaining - 1;
         setBattleTimer(newTime);
         if (newTime <= 0) {
-          // End battle - wrap in try/catch to handle promise rejections
-          try {
-            await updateBattleState({ timeRemaining: 0 });
-          } catch (error) {
-            console.log('Battle timer update failed:', error);
-          }
+          // End battle
+          updateBattleState({ timeRemaining: 0 });
         }
       }, 1000);
 
@@ -79,7 +75,7 @@ export default function BattleArena() {
   const handleRecordingComplete = async (recording: { blob: Blob; duration: number; url: string }) => {
     try {
       setIsTranscribing(true);
-      await updateBattleState({ isAIResponding: true }).catch(() => {});
+      updateBattleState({ isAIResponding: true });
 
       const result = await submitRound({ audio: recording.blob });
       
@@ -101,7 +97,7 @@ export default function BattleArena() {
       });
     } finally {
       setIsTranscribing(false);
-      await updateBattleState({ isAIResponding: false }).catch(() => {});
+      updateBattleState({ isAIResponding: false });
     }
   };
 
