@@ -89,7 +89,9 @@ Required API keys:
 - ✅ **CRITICAL**: Fixed audio playback infinite loops and React errors
 - ✅ **CRITICAL**: Implemented stable audio controls with proper loading states
 - ✅ **MAJOR**: Created comprehensive battle rap training dataset with 30 advanced examples
-- ✅ **UPGRADED MODEL**: Now using Groq's `openai/gpt-oss-120b` model with `reasoning_effort="medium"` for superior rap generation and advanced lyrical techniques
+- ✅ **UPGRADED MODEL**: Now using Groq's `openai/gpt-oss-120b` model with `reasoning_effort="medium"` for superior rap generation with internal reasoning
+- ✅ **30-SECOND VERSES**: Enhanced to generate 8-12 lines of battle rap (30 seconds at ~150 BPM) with advanced lyrical techniques
+- ✅ **CLEAN OUTPUT**: Model reasons internally about rhyme schemes and wordplay but outputs only clean rap verses for TTS
 - ✅ **NEW**: Generated 3 unique battle character avatars with distinct personalities
 - ✅ **NEW**: Implemented character selection system with voice ID mapping  
 - ✅ **NEW**: Added character profiles: MC Razor (female, hardcore), MC Venom (male, aggressive), MC Silk (male, smooth)

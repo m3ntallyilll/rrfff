@@ -171,13 +171,21 @@ CONTENT REQUIREMENTS:
 - Showcase your lyrical superiority through demonstration
 - ${safetyNote}
 
-CRITICAL: Return ONLY the final 4 rap lines. No reasoning process, no analysis, no explanations, no quotes. Just the clean battle verses ready to perform.
+CRITICAL OUTPUT FORMAT: You MUST reason internally, then output ONLY the final rap verses. 
 
-Format:
-Line 1
-Line 2  
-Line 3
-Line 4`;
+Generate 8-12 lines of battle rap (30 seconds at ~150 BPM). Use your reasoning to craft perfect rhymes, then output ONLY the clean verses.
+
+FINAL OUTPUT FORMAT:
+[Verse line 1]
+[Verse line 2]
+[Verse line 3]
+[Verse line 4]
+[Verse line 5]
+[Verse line 6]
+[Verse line 7]
+[Verse line 8]
+
+DO NOT include any reasoning text, analysis, or commentary in your final response. Reason internally, output verses only.`;
 
     const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
@@ -193,7 +201,7 @@ Line 4`;
             content: prompt
           }
         ],
-        max_completion_tokens: 200, // Shorter limit for clean rap verses only
+        max_completion_tokens: 400, // Allow reasoning + clean output
         reasoning_effort: "medium", // Enable enhanced reasoning for complex rap techniques
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
@@ -231,23 +239,39 @@ Line 4`;
       }
     }
 
-    // Handle reasoning model response (extract clean verses from reasoning)
+    // Handle reasoning model response - extract only clean rap verses
     let rapResponse = "";
-    if (choice?.message?.reasoning) {
-      // Extract only the final rap lines from reasoning output
-      const reasoning = choice.message.reasoning.trim();
-      // Look for the final 4 lines after all reasoning
-      const lines = reasoning.split('\n').filter(line => line.trim() && !line.includes(':') && !line.includes('syllable') && !line.includes('count')).slice(-4);
-      if (lines.length >= 4) {
-        rapResponse = lines.join('\n');
-        console.log("Extracted clean rap from reasoning output");
-      } else {
-        rapResponse = reasoning.trim();
-        console.log("Using full reasoning output as fallback");
-      }
-    } else if (choice?.message?.content) {
+    
+    if (choice?.message?.content) {
+      // The model should output clean verses in content after internal reasoning
       rapResponse = choice.message.content.trim();
-      console.log("Using content output");
+      console.log("Using content output (clean verses)");
+    } else if (choice?.message?.reasoning) {
+      // Fallback: extract rap verses from reasoning if content is empty
+      const reasoning = choice.message.reasoning.trim();
+      const lines = reasoning.split('\n');
+      
+      // Find lines that look like rap verses (not meta-commentary)
+      const rapLines = lines.filter((line: string) => {
+        const trimmed = line.trim();
+        return trimmed && 
+               !trimmed.includes('user wants') &&
+               !trimmed.includes('syllable') &&
+               !trimmed.includes('Line1:') &&
+               !trimmed.includes('Line2:') &&
+               !trimmed.includes('Line3:') &&
+               !trimmed.includes('Line4:') &&
+               !trimmed.includes('Check') &&
+               !trimmed.includes('Must') &&
+               !trimmed.includes('policy') &&
+               !trimmed.includes('profanity is allowed') &&
+               !trimmed.startsWith('"') &&
+               trimmed.length > 10;
+      });
+      
+      // Take the best rap lines (8-12 lines for 30 seconds)
+      rapResponse = rapLines.slice(-10).join('\n');
+      console.log("Extracted rap verses from reasoning");
     }
     
     if (rapResponse) {
