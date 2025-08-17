@@ -391,15 +391,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const characterId = battle.aiCharacterId || battle.aiCharacterName?.toLowerCase() || "venom";
       console.log(`🎵 Generating TTS for character: ${characterId}`);
       
-      const ttsResult = await Promise.race([
-        typecastService.generateSpeech(aiResponseText, characterId),
-        new Promise<any>((resolve) => 
-          setTimeout(() => resolve({ audioUrl: "", duration: 0 }), 3000) // 3 second timeout for TTS
-        )
-      ]).catch((error) => {
-        console.error(`TTS generation failed for character ${characterId}:`, error);
-        return { audioUrl: "", duration: 0 };
-      });
+      // Try Typecast first, fallback to Groq TTS
+      let ttsResult: any;
+      try {
+        ttsResult = await Promise.race([
+          typecastService.generateSpeech(aiResponseText, characterId),
+          new Promise<any>((resolve) => 
+            setTimeout(() => resolve({ audioUrl: "", duration: 0 }), 3000) // 3 second timeout for TTS
+          )
+        ]);
+        
+        // If Typecast failed or returned empty, try Groq TTS
+        if (!ttsResult.audioUrl || ttsResult.audioUrl === "") {
+          console.log("Typecast failed or empty, switching to Groq TTS");
+          const groqAudioBuffer = await groqService.generateTTS(aiResponseText, characterId);
+          const base64Audio = groqAudioBuffer.toString('base64');
+          ttsResult = {
+            audioUrl: `data:audio/wav;base64,${base64Audio}`,
+            duration: Math.ceil(aiResponseText.length / 10) // Rough estimate: 10 chars per second
+          };
+        }
+      } catch (error) {
+        console.error(`Both Typecast and Groq TTS failed for character ${characterId}:`, error);
+        ttsResult = { audioUrl: "", duration: 0 };
+      }
 
       const audioResult = ttsResult;
 

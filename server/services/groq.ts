@@ -1,5 +1,7 @@
 import { AdvancedRhymeEngine } from './advancedRhymeEngine';
 import { contentModerationService } from './contentModeration';
+import fs from 'fs';
+import path from 'path';
 
 export class GroqService {
   private apiKey: string;
@@ -209,8 +211,7 @@ Line 8:`;
             content: prompt
           }
         ],
-        max_completion_tokens: 300, // Force concise output with clean rap verses
-        reasoning_effort: "medium", // Enable enhanced reasoning for complex rap techniques
+        max_tokens: 400, // Allow space for 8 full rap lines with internal rhymes
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
       }),
@@ -247,13 +248,26 @@ Line 8:`;
       }
     }
 
-    // Handle reasoning model response - extract only clean rap verses
+    // Handle direct text generation - extract clean rap verses
     let rapResponse = "";
     
     if (choice?.message?.content && choice.message.content.trim()) {
-      // The model should output clean verses in content after internal reasoning
+      // Direct content output from gpt-oss-120b model
       rapResponse = choice.message.content.trim();
-      console.log("Using content output (clean verses)");
+      console.log("Using direct content output from gpt-oss-120b");
+      
+      // Clean up any residual formatting
+      const lines = rapResponse.split('\n').filter((line: string) => line.trim());
+      
+      // Look for "Line X:" patterns and clean them
+      const cleanedLines = lines.map((line: string) => {
+        return line.replace(/^Line\s*\d+:\s*/i, '').replace(/["""]/g, '').trim();
+      }).filter((line: string) => line.length > 0);
+      
+      if (cleanedLines.length >= 4) {
+        rapResponse = cleanedLines.slice(0, 8).join('\n');
+        console.log("Cleaned up line formatting from direct output");
+      }
     } else if (choice?.message?.reasoning) {
       // Extract rap verses from reasoning since content is empty
       const reasoning = choice.message.reasoning.trim();
@@ -333,6 +347,49 @@ I'm the KING of this RING bringing STING to your SWING while you CLING to your T
     }
 
     return responseContent;
+  }
+
+  // Groq TTS functionality
+  async generateTTS(text: string, characterId: string): Promise<Buffer> {
+    try {
+      // Map character voices for Groq TTS
+      const voiceMap: Record<string, string> = {
+        'razor': 'alloy',     // Female voice for MC Razor
+        'venom': 'echo',      // Male aggressive voice for MC Venom  
+        'silk': 'fable'       // Male smooth voice for MC Silk
+      };
+
+      const voice = voiceMap[characterId] || 'alloy';
+      
+      console.log(`🎵 Generating Groq TTS for character: ${characterId} with voice: ${voice}`);
+      
+      const response = await fetch(`${this.baseUrl}/audio/speech`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'tts-1',
+          input: text,
+          voice: voice,
+          response_format: 'wav'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Groq TTS failed: ${response.status} ${response.statusText}`);
+      }
+
+      const audioBuffer = Buffer.from(await response.arrayBuffer());
+      console.log(`Generated Groq TTS audio size: ${audioBuffer.length} bytes`);
+      
+      return audioBuffer;
+      
+    } catch (error: any) {
+      console.error('Groq TTS generation failed:', error);
+      throw error;
+    }
   }
 }
 
