@@ -47,7 +47,7 @@ Required API keys:
 
 ## Recent Changes
 
-### 2025-08-17 - Voice System + EXPONENTIAL RAP MASTERY Complete
+### 2025-08-17 - Voice System + EXPONENTIAL RAP MASTERY + Internal Reasoning Fixed
 - ✅ **ALL CHARACTER VOICES VERIFIED**: MC Razor (female), MC Venom (male), MC Silk (male black rapper) - All using authentic rapper voice IDs
 - ✅ **UNCENSORED MODE ENHANCED**: Strong profanity (shit, fuck, damn, bitch, ass, hell) enabled when profanity filter disabled
 - ✅ **AUTHENTIC STREET LANGUAGE**: Battle rap mode uses raw, unfiltered aggressive language for maximum impact
@@ -59,6 +59,7 @@ Required API keys:
 - ✅ **SMART SAFETY LEVELS**: Strict (family-friendly) vs Moderate (battle rap appropriate) filtering
 - ✅ **LYRIC COMPLEXITY SLIDERS**: 0-100% complexity and style intensity controls
 - ✅ **DYNAMIC AI RESPONSES**: Sliders directly influence vocabulary, wordplay, and aggression levels
+- ✅ **INTERNAL REASONING FIXED**: Switched from 120B reasoning model to llama-3.3-70b for clean output without reasoning text overflow
 
 ### 2025-08-14 - Account Upgraded to Pro + Authentication Fixes
 - ✅ **ACCOUNT UPGRADE**: User account upgraded to Pro tier with unlimited battles
