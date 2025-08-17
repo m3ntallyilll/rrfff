@@ -158,6 +158,78 @@ export const battleRelations = relations(battles, ({ one }) => ({
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
+// Tournament system
+export const tournaments = pgTable("tournaments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  name: varchar("name").notNull(),
+  type: varchar("type").notNull().default("single_elimination"), // single_elimination, double_elimination
+  status: varchar("status").notNull().default("active"), // active, completed, abandoned
+  currentRound: integer("current_round").notNull().default(1),
+  totalRounds: integer("total_rounds").notNull(),
+  difficulty: varchar("difficulty").notNull().default("normal"),
+  profanityFilter: boolean("profanity_filter").notNull().default(false),
+  lyricComplexity: integer("lyric_complexity").default(50),
+  styleIntensity: integer("style_intensity").default(50),
+  prize: varchar("prize"), // What player gets for winning
+  opponents: jsonb("opponents").$type<string[]>().notNull().default([]), // Array of character IDs
+  bracket: jsonb("bracket").$type<TournamentBracket>().notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+export const tournamentBattles = pgTable("tournament_battles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").references(() => tournaments.id).notNull(),
+  battleId: varchar("battle_id").references(() => battles.id).notNull(),
+  round: integer("round").notNull(),
+  position: integer("position").notNull(), // Position in the bracket
+  isCompleted: boolean("is_completed").notNull().default(false),
+  winnerId: varchar("winner_id"), // user ID or character ID
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export interface TournamentBracket {
+  rounds: TournamentRound[];
+}
+
+export interface TournamentRound {
+  roundNumber: number;
+  matches: TournamentMatch[];
+}
+
+export interface TournamentMatch {
+  id: string;
+  player1: TournamentPlayer;
+  player2: TournamentPlayer;
+  winner?: TournamentPlayer;
+  battleId?: string;
+  isCompleted: boolean;
+}
+
+export interface TournamentPlayer {
+  id: string;
+  name: string;
+  type: 'user' | 'ai';
+  avatar?: string;
+}
+
+export const insertTournamentSchema = createInsertSchema(tournaments).omit({
+  id: true,
+  createdAt: true,
+  completedAt: true,
+});
+
+export const insertTournamentBattleSchema = createInsertSchema(tournamentBattles).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertTournament = z.infer<typeof insertTournamentSchema>;
+export type Tournament = typeof tournaments.$inferSelect;
+export type InsertTournamentBattle = z.infer<typeof insertTournamentBattleSchema>;
+export type TournamentBattle = typeof tournamentBattles.$inferSelect;
+
 // Subscription tiers and pricing
 export const SUBSCRIPTION_TIERS = {
   free: {

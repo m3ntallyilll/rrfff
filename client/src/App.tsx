@@ -8,6 +8,8 @@ import Landing from "@/pages/Landing";
 import Home from "@/pages/Home";
 import Subscribe from "@/pages/Subscribe";
 import BattleArena from "@/pages/battle-arena";
+import Tournaments from "@/pages/tournaments";
+import TournamentDetail from "@/pages/tournament-detail";
 import FineTuning from "@/pages/fine-tuning";
 import NotFound from "@/pages/not-found";
 
@@ -31,6 +33,8 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/subscribe" component={Subscribe} />
           <Route path="/battle" component={BattleArena} />
+          <Route path="/tournaments" component={Tournaments} />
+          <Route path="/tournament/:id" component={TournamentDetail} />
           <Route path="/fine-tuning" component={FineTuning} />
         </>
       )}

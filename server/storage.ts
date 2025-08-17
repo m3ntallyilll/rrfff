@@ -1,11 +1,20 @@
 import {
   users,
   battles,
+  tournaments,
+  tournamentBattles,
   type User,
   type UpsertUser,
   type Battle,
   type InsertBattle,
+  type Tournament,
+  type InsertTournament,
+  type TournamentBattle,
+  type InsertTournamentBattle,
   type RoundScores,
+  type TournamentBracket,
+  type TournamentMatch,
+  type TournamentPlayer,
   SUBSCRIPTION_TIERS,
 } from "@shared/schema";
 import { db } from "./db";
@@ -47,6 +56,15 @@ export interface IStorage {
     winRate: number;
     battlesThisMonth: number;
   }>;
+  
+  // Tournament operations
+  createTournament(tournament: InsertTournament): Promise<Tournament>;
+  getTournament(id: string): Promise<Tournament | undefined>;
+  getUserTournaments(userId: string): Promise<Tournament[]>;
+  getActiveTournaments(): Promise<Tournament[]>;
+  updateTournament(id: string, updates: Partial<Tournament>): Promise<Tournament>;
+  advanceTournament(tournamentId: string, matchId: string, winnerId: string): Promise<Tournament>;
+  generateTournamentBracket(totalRounds: number, opponents: string[]): TournamentBracket;
 }
 
 export class DatabaseStorage implements IStorage {
