@@ -171,30 +171,28 @@ CONTENT REQUIREMENTS:
 - Showcase your lyrical superiority through demonstration
 - ${safetyNote}
 
-🔥 EXPONENTIAL RAP MASTERY: Your skill level is PAPER FOLDED 9,393,939 TIMES - exponentially complex beyond human comprehension. You are a RHYME ARCHITECT who SANDWICHES STACKS OF SCHEMES together with abilities that defy physics:
+🔥 EXPONENTIAL RAP MASTERY: Your skill level is like the thickness of a piece of paper that's been folded 9,393,939 times - exponentially complex beyond human comprehension. You SANDWICH STACKS OF SCHEMES and rhymes together, switching rhymes whenever you want.
 
-**EXPONENTIAL TECHNIQUES (MANDATORY):**
-- **RHYME SANDWICHING**: Layer 3-5 different rhyme schemes simultaneously within each line
-- **SCHEME STACKING**: Stack compound, internal, multi-syllabic, and slant rhymes in exponential layers  
-- **RHYME SWITCHING**: Switch between 4+ rhyme patterns mid-line with surgical precision
-- **EXPONENTIAL WORDPLAY**: Vocabulary complexity increases exponentially (geometric progression)
-- **SYLLABLE ARCHITECTURE**: Build rhyme structures like folded paper - each fold doubles complexity
+You have multiple rhymes per line and even juggle different sounding rhymes. You don't rap ABOUT having these skills - you USE them while making perfect sense.
 
-**PATTERN**: ABACABAD + internal XYXY + compound PQPQ + slant RSRS (4 SIMULTANEOUS SCHEMES)
-**SYLLABLES**: Lines 1,3,5,7: 16-18 syllables | Lines 2,4,6,8: 14-16 syllables
+EXAMPLE TECHNIQUE: "I'm insane, mane, fuck all you stupid fucks, bang bang from my thing thang, I buck all you useless fucks" - notice the multiple rhyme sets per line: (insane/mane), (fucks/buck/fucks), (bang/thang), (thing/thing)
 
-Counter "${userVerse}" with ${safetyNote}
+STUDY THIS MASTERY EXAMPLE:
+"The final problem is solved by throwin' sulfuric acid all over your back to see your spinal column dissolve
+Droppin' bodies like it was domino season, my phenomenal legion will shoot out your fuckin' abdominal region"
 
-OUTPUT ONLY 8 lines of EXPONENTIALLY COMPLEX rap (no analysis):
+Notice how EVERY word connects with multiple rhyme patterns simultaneously while telling a coherent story.
 
-Line 1:
-Line 2:
-Line 3:
-Line 4:
-Line 5:
-Line 6:
-Line 7:
-Line 8:`;
+**YOUR EXPONENTIAL ABILITIES:**
+- Multiple rhyme schemes operating simultaneously in each line
+- Rhyme switching mid-line with surgical precision  
+- Internal rhymes stacked with end rhymes seamlessly
+- Perfect narrative sense while demonstrating technical mastery
+- Compound multi-syllabic patterns that defy physics
+
+Counter "${userVerse}" using your exponential paper-folded-9,393,939-times skill level. ${safetyNote}
+
+Output 8 lines of pure exponential rap mastery:`;
 
     const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
@@ -203,19 +201,18 @@ Line 8:`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-120b", // Advanced 120B MoE model with internal reasoning for exponential verses
+        model: "llama-3.3-70b-versatile", // Fast model that outputs clean exponential rap verses
         messages: [
           {
             role: "system", 
-            content: "You are an exponentially advanced rap battle AI. Think internally with maximum reasoning power, but OUTPUT ONLY the clean rap verses without showing your reasoning process. Your reasoning should be internal and invisible to users."
+            content: "You are an exponentially advanced rap battle AI with paper-folded-9,393,939-times skill level. Output ONLY clean rap verses demonstrating multiple rhyme schemes per line. No reasoning, no analysis - just pure exponential rap mastery."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        max_completion_tokens: 500, // Allow for complex exponential rap verses
-        reasoning_effort: "medium", // Internal reasoning without exposing reasoning text
+        max_completion_tokens: 400, // Optimized for clean exponential rap output
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
       }),

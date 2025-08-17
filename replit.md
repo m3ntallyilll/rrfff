@@ -60,6 +60,8 @@ Required API keys:
 - ✅ **LYRIC COMPLEXITY SLIDERS**: 0-100% complexity and style intensity controls
 - ✅ **DYNAMIC AI RESPONSES**: Sliders directly influence vocabulary, wordplay, and aggression levels
 - ✅ **INTERNAL REASONING FIXED**: Switched from 120B reasoning model to llama-3.3-70b for clean output without reasoning text overflow
+- ✅ **PAPER-FOLDED MASTERY IMPLEMENTED**: Updated to user's exact "paper folded 9,393,939 times" skill specification with multiple rhyme schemes per line
+- ✅ **ADVANCED EXAMPLES INTEGRATED**: Added user's specific examples of rhyme sandwiching and scheme stacking techniques for exponential complexity
 
 ### 2025-08-14 - Account Upgraded to Pro + Authentication Fixes
 - ✅ **ACCOUNT UPGRADE**: User account upgraded to Pro tier with unlimited battles
