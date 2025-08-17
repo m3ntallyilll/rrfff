@@ -171,28 +171,28 @@ CONTENT REQUIREMENTS:
 - Showcase your lyrical superiority through demonstration
 - ${safetyNote}
 
-RHYME JUGGLING MASTER: You are a master of "rhyme juggling" - weaving multiple rhyme sounds simultaneously through each line.
+INTERNAL RHYME MASTER: You are an ELITE battle rapper who creates ACTUAL internal rhymes like this example:
 
-Example: "keeping it RAW im ILLEGAL like MALEK and JAMAL cause i dont believe in the LAW like im steven SEGAL flipping off police while im leaping the WALL"
+"keeping it RAW im ILLEGAL like MALEK and JAMAL cause i dont believe in the LAW like im steven SEGAL flipping off police while im leaping the WALL"
 
-RHYME JUGGLING TECHNIQUE:
-- Juggle 2-3 different rhyme sounds per line
-- Stack internal rhymes every 2-3 words  
-- Create rhyme chains that flow into each other
-- Use compound words and name drops for complex patterns
+This has 6+ internal rhymes: raw/illegal/malek/jamal/law/segal/wall - ALL rhyming within ONE line!
 
-Generate 8 lines of PURE rhyme juggling. Counter "${userVerse}" with ${safetyNote}
+Generate 8 battle rap lines with REAL internal rhyme patterns:
+- Each line must have 4-6 actual internal rhymes (not just talking about them)
+- Use multi-syllabic rhyme chains throughout each line
+- Include authentic street language and profanity ${safetyNote}
+- Counter "${userVerse}" with devastating wordplay
 
-RESPOND WITH ONLY THE RAP LINES (NO "Line 1:" LABELS):
+OUTPUT ONLY the 8 rap lines (no analysis):
 
-[First rap line]
-[Second rap line] 
-[Third rap line]
-[Fourth rap line]
-[Fifth rap line]
-[Sixth rap line]
-[Seventh rap line]
-[Eighth rap line]`;
+Line 1:
+Line 2:
+Line 3:
+Line 4:
+Line 5:
+Line 6:
+Line 7:
+Line 8:`;
 
     const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
@@ -208,7 +208,7 @@ RESPOND WITH ONLY THE RAP LINES (NO "Line 1:" LABELS):
             content: prompt
           }
         ],
-        max_completion_tokens: 250, // Ultra-concise for pure rap output
+        max_completion_tokens: 300, // Force concise output with clean rap verses
         reasoning_effort: "medium", // Enable enhanced reasoning for complex rap techniques
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
@@ -280,16 +280,16 @@ RESPOND WITH ONLY THE RAP LINES (NO "Line 1:" LABELS):
           }).join('\n');
           console.log("Extracted Line pattern verses from reasoning");
         } else {
-          // RHYME JUGGLING MASTER emergency response
-          rapResponse = `You claim you spit FIRE but you're TIRED and WIRED getting MIRED while I'm HIRED to ACQUIRE what you DESIRED
-I'm MEAN with the GLEAM making CREAM while you SCREAM about DREAMS that ain't REAL like your STEAL of my DEAL  
-Your FLOW is too SLOW like you're LOW making DOUGH but you CHOKE when I BROKE every JOKE that you WROTE in your NOTE
-I'm the KING with my STING making RING while you SWING but you MISS every DISS that you HISS through your LIPS like ECLIPSE
-My BARS leave you SCARRED raising MARKS on these SHARKS while you PARK in the DARK making ARKS out of LARKS so STARK
-I'm BLESSED with the BEST never STRESSED when I TEST every GUEST who's OBSESSED with the ZEST of my QUEST to be FRESH  
-You're DONE getting STUNNED by my GUN every RUN that you SPUN has been WON since day ONE in the SUN having FUN
-I'm the MASTER of FASTER bringing LAUGHTER after CAPTURE of this RAPTURE that will SHATTER your CHAPTER like PLASTER`;
-          console.log("Used RHYME JUGGLING MASTER emergency response");
+          // Generate emergency rap response with REAL internal rhymes
+          rapResponse = `You think you're SICK but you're WEAK like a FREAK on the STREET getting BEAT by my HEAT when we MEET
+I'm MEAN with the SCHEME making CREAM while you DREAM of the GLEAM that you'll never REDEEM or ESTEEM
+Your FLOW is too SLOW like you're BROKE and you CHOKE when I SPOKE every JOKE that you WROTE isn't DOPE  
+I'm the KING bringing STING with my RING while you SWING but you MISS every DISS that you HISS with your LIPS
+My BARS raising SCARS leaving MARKS on these SHARKS while you PARK in the DARK making ARKS out of LARKS
+I'm FRESH with the BEST never STRESSED when I TEST every GUEST who's OBSESSED with my BLESSED lyrical ZEST
+You're DONE getting STUNNED by my GUN every RUN that you've SPUN has been WON since day ONE in the SUN
+I'm the MASTER disaster bringing LAUGHTER after CAPTURE of this RAPTURE that will SHATTER your whole CHAPTER`;
+          console.log("Used emergency rap response with internal rhymes - extraction failed");
         }
       }
     }
