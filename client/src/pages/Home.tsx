@@ -190,20 +190,20 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-800 border-slate-700 text-white">
+          <Card className="bg-gradient-to-r from-amber-800 to-orange-600 border-amber-500 text-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-amber-500" />
-                Battle History
+                <Trophy className="h-5 w-5" />
+                Tournament Mode
               </CardTitle>
-              <CardDescription className="text-gray-400">
-                Review your past performances
+              <CardDescription className="text-amber-100">
+                Compete in elimination brackets for ultimate glory
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/history">
-                <Button variant="outline" className="w-full border-slate-600 text-slate-300 hover:bg-slate-700">
-                  View History
+              <Link href="/tournaments">
+                <Button className="w-full bg-white text-amber-600 hover:bg-gray-100 font-semibold" data-testid="button-tournament-mode">
+                  Enter Tournament
                 </Button>
               </Link>
             </CardContent>
