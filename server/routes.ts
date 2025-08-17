@@ -127,8 +127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       await storage.updateUserSubscription(userId, {
         subscriptionStatus: 'active',
-        subscriptionTier: tier,
-        battlesRemaining: tierInfo.battlesPerDay === -1 ? 999999 : tierInfo.battlesPerDay
+        subscriptionTier: tier
       });
   
       res.json({
@@ -378,7 +377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // 3. Fast TTS (1 second timeout)
         Promise.race([
-          typecastService.generateSpeech("Quick response", battle.aiCharacter),
+          typecastService.generateSpeech("Quick response", battle.aiCharacterId),
           new Promise<any>((resolve) => 
             setTimeout(() => resolve({}), 1000)
           )

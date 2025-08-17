@@ -71,9 +71,9 @@ export function useBattleState(battleId?: string) {
       
       // Debug FormData contents
       console.log("FormData entries:");
-      for (let [key, value] of formData.entries()) {
+      Array.from(formData.entries()).forEach(([key, value]) => {
         console.log(key, value);
-      }
+      });
 
       const res = await fetch(`/api/battles/${currentBattleId}/rounds`, {
         method: "POST",

@@ -80,13 +80,13 @@ export default function BattleArena() {
       const result = await submitRound({ audio: recording.blob });
       
       if (result) {
-        setLiveTranscription(result.round.userVerse);
-        setAiResponse(result.round.aiVerse);
-        setCurrentAiAudio(result.aiAudioUrl);
+        setLiveTranscription(result.userText || "Voice input processed");
+        setAiResponse(result.aiResponse || "AI response generated");
+        setCurrentAiAudio(result.audioUrl);
         
         toast({
           title: "Round Complete!",
-          description: `Score: You ${result.scores.userScore} - AI ${result.scores.aiScore}`,
+          description: `Score: You ${result.userScore || 0} - AI ${result.aiScore || 0}`,
         });
       }
     } catch (error) {
