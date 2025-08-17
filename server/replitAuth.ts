@@ -28,20 +28,20 @@ export function getSession() {
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
     createTableIfMissing: false,
-    ttl: sessionTtl,
+    ttl: Math.floor(sessionTtl / 1000), // Convert to seconds for PostgreSQL
     tableName: "sessions",
   });
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
-    resave: false,
-    saveUninitialized: false,
+    resave: true, // Force session save to avoid expiration
+    saveUninitialized: true, // Save empty sessions
     rolling: true, // Extend session on activity
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Allow non-HTTPS in dev
+      secure: false, // Allow non-HTTPS for development
       maxAge: sessionTtl,
-      sameSite: 'lax', // Better compatibility
+      sameSite: 'lax',
     },
   });
 }
@@ -137,29 +137,37 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   try {
     if (!req.isAuthenticated()) {
+      console.log('User not authenticated via Passport');
       return res.status(401).json({ message: "Unauthorized" });
     }
 
     const user = req.user as any;
     if (!user || !user.claims) {
+      console.log('No user or claims found in session');
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // For Pro users with unlimited access, skip token validation
+    // For Pro users with unlimited access, be very lenient
     const userId = user.claims.sub;
     if (userId) {
-      const dbUser = await storage.getUser(userId);
-      if (dbUser && dbUser.subscriptionTier === 'pro') {
-        // Pro user - allow access without strict token validation
-        return next();
+      try {
+        const dbUser = await storage.getUser(userId);
+        if (dbUser && dbUser.subscriptionTier === 'pro') {
+          // Pro user - always allow access, skip all token checks
+          return next();
+        }
+      } catch (dbError) {
+        console.error('Database error checking user:', dbError);
+        // Continue with token validation
       }
     }
 
-    // Check token expiration for non-Pro users
+    // For non-Pro users, check token expiration with generous buffer
     const now = Math.floor(Date.now() / 1000);
     const expiresAt = user.expires_at || user.claims?.exp;
+    const bufferTime = 300; // 5 minute buffer
     
-    if (!expiresAt || now <= expiresAt) {
+    if (!expiresAt || now <= (expiresAt + bufferTime)) {
       return next();
     }
 
@@ -170,13 +178,14 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         const config = await getOidcConfig();
         const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
         updateUserSession(user, tokenResponse);
+        console.log('Token refreshed successfully');
         return next();
       } catch (refreshError) {
         console.error('Token refresh failed:', refreshError);
-        // Fall through to unauthorized
       }
     }
 
+    console.log('Authentication failed - token expired and refresh failed');
     return res.status(401).json({ message: "Unauthorized" });
   } catch (error) {
     console.error('Authentication middleware error:', error);
