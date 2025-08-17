@@ -74,8 +74,20 @@ export class GroqService {
     };
 
     // Profanity Filter Setting - STRICT ENFORCEMENT
+    console.log("Profanity filter status:", profanityFilter ? "ENABLED (clean)" : "DISABLED (uncensored)");
+    
     const profanityNote = profanityFilter 
-      ? "CRITICAL: Keep language completely clean and family-friendly. NO profanity, explicit content, or offensive language. Use creative wordplay, clever metaphors, and clean insults without ANY curse words (no fuck, shit, bitch, damn, pussy, ass), sexual references, or aggressive language. Focus on clever wordplay and skill-based insults."
+      ? `CRITICAL REQUIREMENT: ABSOLUTELY NO PROFANITY OR OFFENSIVE LANGUAGE ALLOWED. You MUST keep ALL language completely clean and family-friendly. 
+
+STRICTLY FORBIDDEN: Do NOT use any of these words or similar variations: fuck, shit, bitch, damn, pussy, ass, hell, crap, slut, whore, bastard, piss, or any sexual/offensive terms.
+
+REQUIRED: Use only clean, creative wordplay, clever metaphors, and skill-based competitive insults. Example clean battle lines:
+- "Your flow's weak, I'm bringing the heat"  
+- "Step to me? You're out of your league"
+- "My rhymes are fire, yours are just weak"
+- "I'm the champion, you're just a wannabe"
+
+Focus on technical rap skills without ANY offensive content.`
       : "Use authentic, raw street rap language with explicit profanity (fuck, shit, bitch, damn, pussy, ass), aggressive insults, sexual references, violence metaphors, and hardcore street terminology for maximum battle impact. Don't hold back - this is uncensored battle rap.";
 
     const prompt = `You are a legendary rap battle MC with mastery of every rap technique. The challenger just delivered:
@@ -182,7 +194,34 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
 
     // Direct response handling
     if (choice?.message?.content) {
-      return choice.message.content.trim();
+      let response = choice.message.content.trim();
+      
+      // Apply profanity filter post-processing if enabled
+      if (profanityFilter) {
+        console.log("Applying profanity filter to response:", response.substring(0, 50) + "...");
+        
+        const badWords = ['fuck', 'shit', 'bitch', 'damn', 'pussy', 'ass', 'hell', 'crap', 'fuckin', 'fucking', 'fucked'];
+        let filtered = response;
+        
+        badWords.forEach(word => {
+          const regex = new RegExp(`\\b${word}\\b`, 'gi');
+          filtered = filtered.replace(regex, (match: string) => {
+            // Replace with clean alternatives
+            const replacements: { [key: string]: string } = {
+              'fuck': 'dang', 'fucking': 'dang', 'fuckin': 'dang', 'fucked': 'beat',
+              'shit': 'trash', 'bitch': 'player', 'damn': 'dang',
+              'pussy': 'weak', 'ass': 'self', 'hell': 'dang', 'crap': 'trash'
+            };
+            const lowerWord = word.toLowerCase();
+            return replacements[lowerWord] || 'weak';
+          });
+        });
+        
+        console.log("Filtered response:", filtered.substring(0, 50) + "...");
+        return filtered;
+      }
+      
+      return response;
     }
 
     // If we got reasoning instead of content, extract clean rap verses
