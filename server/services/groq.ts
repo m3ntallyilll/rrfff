@@ -89,13 +89,14 @@ Example clean battle techniques:
 - "I'm the champion, you're just a wannabe"
 
 Emphasize technical skill over aggressive language.`
-      : `BATTLE RAP MODE: Use authentic street rap language including competitive aggression, strong language, and battle rap terminology. Focus on lyrical dominance, wordplay mastery, and devastating punchlines. Avoid content that promotes violence, hate, or harm - keep it competitive but within battle rap conventions.
+      : `BATTLE RAP MODE: Use authentic street rap language including strong profanity (shit, fuck, damn, bitch, ass, hell) and competitive aggression. This is hardcore battle rap - be raw, unfiltered, and aggressive with your language for maximum impact. Focus on lyrical dominance, devastating wordplay, and brutal punchlines.
 
 Battle rap techniques encouraged:
-- Aggressive competitive language and insults
-- Street terminology and authentic expressions  
-- Devastating wordplay and punchlines
-- Technical lyrical superiority demonstrations`;
+- Strong profanity and aggressive competitive language
+- Street terminology and authentic urban expressions  
+- Devastating wordplay with uncensored punchlines
+- Raw technical lyrical superiority demonstrations
+- Hardcore battle rap attitude and language`;
 
     // Map complexity levels to descriptive terms
     const complexityLevel = lyricComplexity <= 25 ? 'Basic' : lyricComplexity <= 50 ? 'Intermediate' : lyricComplexity <= 75 ? 'Advanced' : 'Expert';

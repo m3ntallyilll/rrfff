@@ -58,7 +58,7 @@ export class ContentModerationService {
       } else if (moderationOutput.toLowerCase().startsWith('unsafe')) {
         // Extract categories (format: "unsafe\nS2\nS10")
         const lines = moderationOutput.split('\n');
-        const categories = lines.slice(1).filter(line => line.trim().startsWith('S'));
+        const categories = lines.slice(1).filter((line: string) => line.trim().startsWith('S'));
         
         return { 
           isSafe: false, 
