@@ -171,19 +171,20 @@ CONTENT REQUIREMENTS:
 - Showcase your lyrical superiority through demonstration
 - ${safetyNote}
 
-INTERNAL RHYME MASTER: You are an ELITE battle rapper who creates ACTUAL internal rhymes like this example:
+RHYME JUGGLING & SCHEME STACKING MASTER: You are an ELITE battle rapper who JUGGLES RHYMES and STACKS SCHEMES like this example:
 
 "keeping it RAW im ILLEGAL like MALEK and JAMAL cause i dont believe in the LAW like im steven SEGAL flipping off police while im leaping the WALL"
 
-This has 6+ internal rhymes: raw/illegal/malek/jamal/law/segal/wall - ALL rhyming within ONE line!
+This JUGGLES 7+ rhyme sounds: RAW/ILLEGAL/MALEK/JAMAL/LAW/SEGAL/WALL - creating a STACKED SCHEME pattern!
 
-Generate 8 battle rap lines with REAL internal rhyme patterns:
-- Each line must have 4-6 actual internal rhymes (not just talking about them)
-- Use multi-syllabic rhyme chains throughout each line
-- Include authentic street language and profanity ${safetyNote}
+JUGGLE RHYMES AND STACK SCHEMES in 8 battle lines:
+- JUGGLE 5-8 rhyme sounds per line (like juggling balls in the air)
+- STACK multiple rhyme schemes on top of each other  
+- Use compound rhymes, internal rhymes, and multi-syllabic chains
+- Include raw street language ${safetyNote}
 - Counter "${userVerse}" with devastating wordplay
 
-OUTPUT ONLY the 8 rap lines (no analysis):
+JUGGLE AND STACK - OUTPUT ONLY the 8 rap lines:
 
 Line 1:
 Line 2:
@@ -280,16 +281,16 @@ Line 8:`;
           }).join('\n');
           console.log("Extracted Line pattern verses from reasoning");
         } else {
-          // Generate emergency rap response with REAL internal rhymes
-          rapResponse = `You think you're SICK but you're WEAK like a FREAK on the STREET getting BEAT by my HEAT when we MEET
-I'm MEAN with the SCHEME making CREAM while you DREAM of the GLEAM that you'll never REDEEM or ESTEEM
-Your FLOW is too SLOW like you're BROKE and you CHOKE when I SPOKE every JOKE that you WROTE isn't DOPE  
-I'm the KING bringing STING with my RING while you SWING but you MISS every DISS that you HISS with your LIPS
-My BARS raising SCARS leaving MARKS on these SHARKS while you PARK in the DARK making ARKS out of LARKS
-I'm FRESH with the BEST never STRESSED when I TEST every GUEST who's OBSESSED with my BLESSED lyrical ZEST
-You're DONE getting STUNNED by my GUN every RUN that you've SPUN has been WON since day ONE in the SUN
-I'm the MASTER disaster bringing LAUGHTER after CAPTURE of this RAPTURE that will SHATTER your whole CHAPTER`;
-          console.log("Used emergency rap response with internal rhymes - extraction failed");
+          // Generate emergency rap response with JUGGLED RHYMES and STACKED SCHEMES
+          rapResponse = `I'm JUGGLING rhymes like STRUGGLING with TIME while you're FUMBLING and STUMBLING behind my DESIGN
+Your WEAK flow is BLEAK so I SPEAK and I WREAK havoc on GEEKS who are MEEK when they PEEK at my TECHNIQUE  
+I STACK schemes and ATTACK dreams while you CRACK under PRESSURE from my LYRICAL TREASURE that's beyond MEASURE
+You're CHOKING and JOKING while I'm SMOKING this TRACK leaving you BROKEN and WOKEN to the fact you LACK
+My WORDPLAY is DEADLY like MERCURY SPREADING through your HEAD making you DREAD every THREAD that I'm SHREDDING
+I FLIP scripts and RIP hits while you SIT there and QUIT cause you can't SPLIT bars or COMMIT to this SHIT
+Your STYLE is too MILD like a CHILD who's EXILED while I'm WILD and COMPILED with a SMILE that's HOSTILE  
+I'm the KING of this RING bringing STING to your SWING while you CLING to your THING but you'll never take WING`;
+          console.log("Used emergency rap response with juggled rhymes and stacked schemes - extraction failed");
         }
       }
     }

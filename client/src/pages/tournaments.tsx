@@ -104,9 +104,14 @@ export default function Tournaments() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Tournament Mode
-            </h1>
+            <div className="flex items-center gap-4 mb-2">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Tournament Mode
+              </h1>
+              <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold px-3 py-1 text-sm animate-pulse">
+                COMING SOON
+              </Badge>
+            </div>
             <p className="text-gray-400">Compete in elimination tournaments against multiple AI opponents</p>
           </div>
           
