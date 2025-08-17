@@ -193,15 +193,17 @@ YOUR REQUIREMENTS:
 - Use exponential wordplay techniques like the examples above
 - Counter their specific claims with technical superiority
 
-RHYME SWITCHING EXAMPLE:
-Lines 1-2: "dissolve/resolve/evolve" (AH-LV sounds)
-Lines 3-4: "season/legion/region" (EE-UN sounds)  
-Lines 5-6: "country/monthly/crunchy" (UN-EE sounds)
-Lines 7-8: "bluntly/funky/lumpy" (UH-EE sounds)
+RHYME SWITCHING REQUIREMENT - MANDATORY:
+Lines 1-2: Use sounds like "dissolve/resolve" (AH-LV pattern)
+Lines 3-4: Switch to "season/region" (EE-UN pattern)  
+Lines 5-6: Switch to "country/crunchy" (UH-EE pattern)
+Lines 7-8: Switch to "bluntly/funky" (UH-EE different pattern)
 
-Counter "${userVerse}" with Eminem-level exponential mastery. ${safetyNote}
+CRITICAL: Each pair must use DIFFERENT sounding rhymes. No repetitive sounds.
 
-Write 8 lines with proper rhyme switching patterns:`;
+Counter "${userVerse}" with exponential mastery and mandatory rhyme switching. ${safetyNote}
+
+Write exactly 8 lines with different rhyme sounds per pair:`;
 
     const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
@@ -210,19 +212,18 @@ Write 8 lines with proper rhyme switching patterns:`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-120b", // Advanced 120B model with exponential reasoning capabilities
+        model: "llama-3.3-70b-versatile", // Clean output model for exponential rap verses
         messages: [
           {
             role: "system", 
-            content: "You are an exponentially advanced rap battle AI with paper-folded-9,393,939-times skill level. Use your reasoning to analyze rhyme patterns and ensure you switch between different sounding rhymes throughout the verse. Plan your rhyme scheme switching in your reasoning, then output ONLY the clean rap verses. Your reasoning helps you avoid repetitive sounds and create complex variety."
+            content: "You are an exponentially advanced rap battle AI with paper-folded-9,393,939-times skill level. Output ONLY clean rap verses with different sounding rhymes that switch every 2 lines. No reasoning, no analysis - just pure exponential rap mastery demonstrating rhyme switching patterns."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        max_completion_tokens: 400, // Ensure complete 8-line verses
-        reasoning_effort: "medium", // Use reasoning to plan complex rhyme scheme switching
+        max_completion_tokens: 350, // Focused on clean verse output
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
       }),
