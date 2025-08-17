@@ -180,7 +180,7 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile", // Using faster model without reasoning overhead
+        model: "openai/gpt-oss-120b", // Using advanced reasoning model for superior rap generation
         messages: [
           {
             role: "user",
@@ -188,6 +188,7 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
           }
         ],
         max_completion_tokens: 1024,
+        reasoning_effort: "medium", // Enable enhanced reasoning for complex rap techniques
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
       }),
@@ -224,9 +225,18 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
       }
     }
 
-    // Direct response handling
-    if (choice?.message?.content) {
-      let response = choice.message.content.trim();
+    // Handle reasoning model response (prioritize reasoning over content for better rap quality)
+    let response = "";
+    if (choice?.message?.reasoning) {
+      // Extract the final rap from reasoning output
+      response = choice.message.reasoning.trim();
+      console.log("Using reasoning output for enhanced rap quality");
+    } else if (choice?.message?.content) {
+      response = choice.message.content.trim();
+      console.log("Using content output");
+    }
+    
+    if (response) {
       
       // Apply AI-powered content moderation
       const safetyLevel = profanityFilter ? 'strict' : 'moderate';
