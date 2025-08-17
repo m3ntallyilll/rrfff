@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { SUBSCRIPTION_TIERS } from "@shared/schema";
+import { SUBSCRIPTION_TIERS, insertTournamentSchema } from "@shared/schema";
 import { groqService } from "./services/groq";
 import { typecastService } from "./services/typecast";
 import multer from "multer";
@@ -108,8 +108,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create price if not exists (you'll need to create these in Stripe dashboard)
-      const priceId = tier === 'premium' ? 'price_premium' : 'price_pro'; // Replace with actual Stripe price IDs
+          // Use actual Stripe price IDs - these should be created in Stripe Dashboard
+      const priceId = tier === 'premium' ? 
+        process.env.STRIPE_PREMIUM_PRICE_ID || 'price_1QRCfj2eZvKYlo2CiPBJV7q9' : // $9.99/month Premium
+        process.env.STRIPE_PRO_PRICE_ID || 'price_1QRCfj2eZvKYlo2CXb1JYlS6'; // $19.99/month Pro
       
       const subscription = await stripe.subscriptions.create({
         customer: customer.id,
@@ -439,6 +441,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating battle state:", error);
       res.status(500).json({ message: "State update failed" });
+    }
+  });
+
+  // Tournament routes
+  app.get('/api/tournaments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const tournaments = await storage.getUserTournaments(userId);
+      res.json(tournaments);
+    } catch (error) {
+      console.error('Error fetching tournaments:', error);
+      res.status(500).json({ message: 'Failed to fetch tournaments' });
+    }
+  });
+
+  app.get('/api/tournaments/active', async (req, res) => {
+    try {
+      const activeTournaments = await storage.getActiveTournaments();
+      res.json(activeTournaments);
+    } catch (error) {
+      console.error('Error fetching active tournaments:', error);
+      res.status(500).json({ message: 'Failed to fetch active tournaments' });
+    }
+  });
+
+  app.get('/api/tournaments/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const tournament = await storage.getTournament(id);
+      if (!tournament) {
+        return res.status(404).json({ message: 'Tournament not found' });
+      }
+      res.json(tournament);
+    } catch (error) {
+      console.error('Error fetching tournament:', error);
+      res.status(500).json({ message: 'Failed to fetch tournament' });
+    }
+  });
+
+  app.post('/api/tournaments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const tournamentData = { ...req.body, userId };
+      
+      // Validate tournament data
+      const validatedData = insertTournamentSchema.parse(tournamentData);
+      
+      const tournament = await storage.createTournament(validatedData);
+      res.json(tournament);
+    } catch (error: any) {
+      console.error('Error creating tournament:', error);
+      res.status(400).json({ message: 'Failed to create tournament', error: error.message });
+    }
+  });
+
+  app.post('/api/tournaments/:id/battles/:matchId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id: tournamentId, matchId } = req.params;
+      const userId = req.user.claims.sub;
+      
+      const tournament = await storage.getTournament(tournamentId);
+      if (!tournament) {
+        return res.status(404).json({ message: 'Tournament not found' });
+      }
+
+      // Find the match and create a battle for it
+      let targetMatch = null;
+      for (const round of tournament.bracket.rounds) {
+        for (const match of round.matches) {
+          if (match.id === matchId) {
+            targetMatch = match;
+            break;
+          }
+        }
+        if (targetMatch) break;
+      }
+
+      if (!targetMatch) {
+        return res.status(404).json({ message: 'Match not found' });
+      }
+
+      // Create a new battle for this tournament match
+      const battleData = {
+        userId,
+        difficulty: tournament.difficulty,
+        profanityFilter: tournament.profanityFilter,
+        lyricComplexity: tournament.lyricComplexity,
+        styleIntensity: tournament.styleIntensity,
+        aiCharacterId: targetMatch.player2.id,
+        aiCharacterName: targetMatch.player2.name,
+      };
+
+      const battle = await storage.createBattle(battleData);
+      
+      res.json({ battleId: battle.id, tournamentId });
+    } catch (error: any) {
+      console.error('Error starting tournament battle:', error);
+      res.status(500).json({ message: 'Failed to start tournament battle', error: error.message });
     }
   });
 

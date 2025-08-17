@@ -1,26 +1,27 @@
-import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
+import { useState } from 'react';
+import { useStripe, useElements, PaymentElement, Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { useEffect, useState } from 'react';
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Crown, Zap, ArrowLeft } from "lucide-react";
-import { Link } from "wouter";
+import { useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import { Loader2 } from 'lucide-react';
 
-// Make sure to call `loadStripe` outside of a component's render to avoid
-// recreating the `Stripe` object on every render.
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
   throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
 }
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-const SubscribeForm = ({ tier }: { tier: string }) => {
+interface SubscriptionFormProps {
+  tier: 'premium' | 'pro';
+}
+
+function SubscriptionForm({ tier }: SubscriptionFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,174 +30,213 @@ const SubscribeForm = ({ tier }: { tier: string }) => {
       return;
     }
 
-    setIsLoading(true);
+    setIsProcessing(true);
 
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/api/payment/success`,
-      },
-    });
+    try {
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/?payment=success`,
+        },
+      });
 
-    if (error) {
+      if (error) {
+        toast({
+          title: "Payment Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Payment Successful",
+          description: `Welcome to ${tier === 'premium' ? 'Premium' : 'Pro'}! Enjoy unlimited battles.`,
+        });
+      }
+    } catch (err) {
       toast({
-        title: "Payment Failed",
-        description: error.message,
+        title: "Payment Error",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Payment Successful",
-        description: `Welcome to ${tier === 'premium' ? 'Premium' : 'Pro'}! Redirecting...`,
-      });
-      // Redirect will be handled by Stripe
+    } finally {
+      setIsProcessing(false);
     }
-
-    setIsLoading(false);
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <PaymentElement />
       <Button 
         type="submit" 
-        className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3"
-        disabled={!stripe || isLoading}
+        disabled={!stripe || isProcessing}
+        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+        data-testid="button-submit-payment"
       >
-        {isLoading ? "Processing..." : `Subscribe to ${tier === 'premium' ? 'Premium' : 'Pro'}`}
+        {isProcessing ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          `Subscribe to ${tier === 'premium' ? 'Premium' : 'Pro'} - $${tier === 'premium' ? '9.99' : '19.99'}/month`
+        )}
       </Button>
     </form>
   );
-};
+}
 
 export default function Subscribe() {
-  const [clientSecret, setClientSecret] = useState("");
-  const [selectedTier, setSelectedTier] = useState<string>("");
+  const [tier, setTier] = useState<'premium' | 'pro'>('premium');
+  const [clientSecret, setClientSecret] = useState<string>('');
+  const { toast } = useToast();
 
-  // Get tier from URL params
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tier = params.get('tier') || 'premium';
-    setSelectedTier(tier);
-
-    // Create subscription as soon as the page loads
-    apiRequest("POST", "/api/create-subscription", { tier })
-      .then((res) => res.json())
-      .then((data) => {
-        setClientSecret(data.clientSecret)
-      })
-      .catch((error) => {
-        console.error('Subscription creation error:', error);
+  const createSubscription = useMutation({
+    mutationFn: async (selectedTier: 'premium' | 'pro') => {
+      const response = await apiRequest('POST', '/api/create-subscription', { tier: selectedTier });
+      if (!response.ok) {
+        throw new Error('Failed to create subscription');
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setClientSecret(data.clientSecret);
+      toast({
+        title: "Payment Ready",
+        description: "Please complete your payment below.",
       });
-  }, []);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Subscription Error",
+        description: error.message || "Failed to initiate subscription. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleTierSelect = (selectedTier: 'premium' | 'pro') => {
+    setTier(selectedTier);
+    setClientSecret('');
+    createSubscription.mutate(selectedTier);
+  };
 
   if (!clientSecret) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <Card className="bg-slate-800 border-slate-700 text-white max-w-md w-full mx-4">
-          <CardContent className="p-8 text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-purple-400 border-t-transparent rounded-full mx-auto mb-4" />
-            <p>Setting up your subscription...</p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-white mb-4">
+              Choose Your Plan
+            </h1>
+            <p className="text-gray-400 text-lg">
+              Upgrade to unlock unlimited rap battles and premium features
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Premium Plan */}
+            <Card className="bg-gray-800 border-purple-500/50 hover:border-purple-400 transition-colors">
+              <CardHeader>
+                <CardTitle className="text-purple-400 text-2xl">Premium</CardTitle>
+                <CardDescription className="text-gray-300">
+                  Perfect for regular battlers
+                </CardDescription>
+                <div className="text-3xl font-bold text-white">
+                  $9.99<span className="text-lg text-gray-400">/month</span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ul className="space-y-2 text-gray-300">
+                  <li>✓ 25 battles per day</li>
+                  <li>✓ All AI characters</li>
+                  <li>✓ Tournament mode</li>
+                  <li>✓ Advanced scoring</li>
+                  <li>✓ Lyric analysis</li>
+                </ul>
+                <Button
+                  onClick={() => handleTierSelect('premium')}
+                  disabled={createSubscription.isPending}
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  data-testid="button-select-premium"
+                >
+                  {createSubscription.isPending && tier === 'premium' ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Setting up...
+                    </>
+                  ) : (
+                    'Choose Premium'
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Pro Plan */}
+            <Card className="bg-gray-800 border-amber-500/50 hover:border-amber-400 transition-colors relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <span className="bg-amber-500 text-black px-3 py-1 rounded-full text-sm font-semibold">
+                  BEST VALUE
+                </span>
+              </div>
+              <CardHeader>
+                <CardTitle className="text-amber-400 text-2xl">Pro</CardTitle>
+                <CardDescription className="text-gray-300">
+                  For serious rap battle champions
+                </CardDescription>
+                <div className="text-3xl font-bold text-white">
+                  $19.99<span className="text-lg text-gray-400">/month</span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ul className="space-y-2 text-gray-300">
+                  <li>✓ Unlimited battles</li>
+                  <li>✓ All AI characters</li>
+                  <li>✓ Tournament mode</li>
+                  <li>✓ Advanced scoring</li>
+                  <li>✓ Lyric analysis</li>
+                  <li>✓ Priority support</li>
+                  <li>✓ Early access features</li>
+                </ul>
+                <Button
+                  onClick={() => handleTierSelect('pro')}
+                  disabled={createSubscription.isPending}
+                  className="w-full bg-amber-600 hover:bg-amber-700"
+                  data-testid="button-select-pro"
+                >
+                  {createSubscription.isPending && tier === 'pro' ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Setting up...
+                    </>
+                  ) : (
+                    'Choose Pro'
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
 
-  const tierInfo = {
-    premium: {
-      name: "Premium",
-      price: "$9.99",
-      icon: <Zap className="h-6 w-6 text-yellow-400" />,
-      features: ["25 battles per day", "Advanced AI opponents", "Premium voices", "Battle analysis", "No ads"]
-    },
-    pro: {
-      name: "Pro", 
-      price: "$19.99",
-      icon: <Crown className="h-6 w-6 text-amber-500" />,
-      features: ["Unlimited battles", "All AI opponents", "Custom voices", "Advanced analytics", "Priority support", "Tournament mode"]
-    }
-  };
-
-  const currentTier = tierInfo[selectedTier as keyof typeof tierInfo] || tierInfo.premium;
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-      <div className="container mx-auto max-w-2xl">
-        <div className="mb-8">
-          <Link href="/">
-            <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700 mb-4">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </Button>
-          </Link>
-          
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-2">
-              Upgrade to {currentTier.name}
-            </h1>
-            <p className="text-gray-300">
-              Unlock advanced features and unlimited battles
-            </p>
-          </div>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Subscription Details */}
-          <Card className="bg-slate-800 border-slate-700 text-white">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                {currentTier.icon}
-                {currentTier.name} Plan
-              </CardTitle>
-              <CardDescription className="text-gray-400">
-                {currentTier.price}/month • Cancel anytime
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <h4 className="font-semibold text-lg">What's included:</h4>
-                <ul className="space-y-2">
-                  {currentTier.features.map((feature, index) => (
-                    <li key={index} className="flex items-center text-sm">
-                      <span className="text-green-400 mr-2">✓</span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                
-                <div className="pt-4">
-                  <Badge className="bg-purple-900 text-purple-300">
-                    30-day money-back guarantee
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Payment Form */}
-          <Card className="bg-slate-800 border-slate-700 text-white">
-            <CardHeader>
-              <CardTitle>Payment Details</CardTitle>
-              <CardDescription className="text-gray-400">
-                Secure payment powered by Stripe
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Elements stripe={stripePromise} options={{ clientSecret }}>
-                <SubscribeForm tier={selectedTier} />
-              </Elements>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="mt-8 text-center text-sm text-gray-400">
-          <p>
-            By subscribing, you agree to our terms of service and privacy policy.
-            You can cancel your subscription at any time.
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-gray-800 border-purple-500/50">
+        <CardHeader>
+          <CardTitle className="text-white text-2xl text-center">
+            Complete Your Subscription
+          </CardTitle>
+          <CardDescription className="text-gray-400 text-center">
+            {tier === 'premium' ? 'Premium Plan - $9.99/month' : 'Pro Plan - $19.99/month'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <SubscriptionForm tier={tier} />
+          </Elements>
+        </CardContent>
+      </Card>
     </div>
   );
 }

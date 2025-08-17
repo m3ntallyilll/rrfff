@@ -329,6 +329,142 @@ export class DatabaseStorage implements IStorage {
         .where(eq(battles.id, battleId));
     }
   }
+
+  // Tournament operations
+  async createTournament(tournament: InsertTournament): Promise<Tournament> {
+    const { getRandomCharacter } = await import("@shared/characters");
+    const numOpponents = Math.pow(2, tournament.totalRounds) - 1;
+    const opponents: string[] = [];
+    
+    for (let i = 0; i < numOpponents; i++) {
+      const character = getRandomCharacter();
+      opponents.push(character.id);
+    }
+    
+    const bracket = this.generateTournamentBracket(tournament.totalRounds, opponents);
+    
+    const [newTournament] = await db
+      .insert(tournaments)
+      .values({
+        ...tournament,
+        opponents,
+        bracket,
+      })
+      .returning();
+    
+    return newTournament;
+  }
+
+  async getTournament(id: string): Promise<Tournament | undefined> {
+    const [tournament] = await db.select().from(tournaments).where(eq(tournaments.id, id));
+    return tournament;
+  }
+
+  async getUserTournaments(userId: string): Promise<Tournament[]> {
+    return await db
+      .select()
+      .from(tournaments)
+      .where(eq(tournaments.userId, userId))
+      .orderBy(sql`created_at DESC`);
+  }
+
+  async getActiveTournaments(): Promise<Tournament[]> {
+    return await db
+      .select()
+      .from(tournaments)
+      .where(eq(tournaments.status, 'active'))
+      .orderBy(sql`created_at DESC`)
+      .limit(10);
+  }
+
+  async updateTournament(id: string, updates: Partial<Tournament>): Promise<Tournament> {
+    const [updated] = await db
+      .update(tournaments)
+      .set(updates)
+      .where(eq(tournaments.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async advanceTournament(tournamentId: string, matchId: string, winnerId: string): Promise<Tournament> {
+    const tournament = await this.getTournament(tournamentId);
+    if (!tournament) throw new Error('Tournament not found');
+
+    const updatedBracket = { ...tournament.bracket };
+    let matchFound = false;
+    
+    for (let round of updatedBracket.rounds) {
+      for (let match of round.matches) {
+        if (match.id === matchId) {
+          match.isCompleted = true;
+          match.winner = winnerId === match.player1.id ? match.player1 : match.player2;
+          matchFound = true;
+          break;
+        }
+      }
+      if (matchFound) break;
+    }
+
+    const currentRound = updatedBracket.rounds.find(r => r.roundNumber === tournament.currentRound);
+    const allMatchesComplete = currentRound?.matches.every(m => m.isCompleted) || false;
+    
+    let newCurrentRound = tournament.currentRound;
+    let newStatus = tournament.status;
+    
+    if (allMatchesComplete) {
+      if (tournament.currentRound < tournament.totalRounds) {
+        newCurrentRound = tournament.currentRound + 1;
+      } else {
+        newStatus = 'completed';
+      }
+    }
+
+    return await this.updateTournament(tournamentId, {
+      bracket: updatedBracket,
+      currentRound: newCurrentRound,
+      status: newStatus,
+      completedAt: newStatus === 'completed' ? new Date() : undefined,
+    });
+  }
+
+  generateTournamentBracket(totalRounds: number, opponents: string[]): TournamentBracket {
+    const { getCharacterById } = require("@shared/characters");
+    const bracket: TournamentBracket = { rounds: [] };
+    
+    for (let roundNum = 1; roundNum <= totalRounds; roundNum++) {
+      const matchesInRound = Math.pow(2, totalRounds - roundNum);
+      const matches: TournamentMatch[] = [];
+      
+      for (let i = 0; i < matchesInRound; i++) {
+        const match: TournamentMatch = {
+          id: `round-${roundNum}-match-${i}`,
+          player1: { id: 'user', name: 'You', type: 'user' },
+          player2: { id: 'placeholder', name: 'TBD', type: 'ai' },
+          isCompleted: false,
+        };
+        
+        if (roundNum === 1 && i < opponents.length) {
+          const character = getCharacterById(opponents[i]);
+          match.player2 = {
+            id: character.id,
+            name: character.name,
+            type: 'ai',
+            avatar: character.avatar,
+          };
+        }
+        
+        matches.push(match);
+      }
+      
+      bracket.rounds.push({
+        roundNumber: roundNum,
+        matches,
+      });
+    }
+    
+    return bracket;
+  }
 }
 
 export const storage = new DatabaseStorage();
