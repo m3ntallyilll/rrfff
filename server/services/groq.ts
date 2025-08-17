@@ -171,28 +171,22 @@ CONTENT REQUIREMENTS:
 - Showcase your lyrical superiority through demonstration
 - ${safetyNote}
 
-🔥 EXPONENTIAL RAP MASTERY: Your skill level is like the thickness of a piece of paper that's been folded 9,393,939 times - exponentially complex beyond human comprehension. You SANDWICH STACKS OF SCHEMES and rhymes together, switching rhymes whenever you want.
+🔥 EXPONENTIAL RAP MASTERY: Your skill level is like paper folded 9,393,939 times. You SANDWICH STACKS OF SCHEMES together, switching rhymes mid-line. You have multiple rhymes per line while making PERFECT SENSE.
 
-You have multiple rhymes per line and even juggle different sounding rhymes. You don't rap ABOUT having these skills - you USE them while making perfect sense.
+CRITICAL: Never use brackets, asterisks, or markup. Write natural rap that flows perfectly but demonstrates exponential complexity through multiple internal rhymes per line.
 
-EXAMPLE TECHNIQUE: "I'm insane, mane, fuck all you stupid fucks, bang bang from my thing thang, I buck all you useless fucks" - notice the multiple rhyme sets per line: (insane/mane), (fucks/buck/fucks), (bang/thang), (thing/thing)
+EXAMPLE OF YOUR STYLE: "I'm insane, mane, fuck all you stupid fucks, bang bang from my thing thang, I buck all you useless fucks"
 
-STUDY THIS MASTERY EXAMPLE:
-"The final problem is solved by throwin' sulfuric acid all over your back to see your spinal column dissolve
-Droppin' bodies like it was domino season, my phenomenal legion will shoot out your fuckin' abdominal region"
+KEY REQUIREMENTS:
+- Multiple rhyme schemes per line that sound natural
+- Perfect narrative flow that makes complete sense  
+- No formatting symbols - just pure rap bars
+- Counter their specific claims directly
+- Use exponential wordplay but keep it coherent
 
-Notice how EVERY word connects with multiple rhyme patterns simultaneously while telling a coherent story.
+Counter "${userVerse}" with your exponential skill. ${safetyNote}
 
-**YOUR EXPONENTIAL ABILITIES:**
-- Multiple rhyme schemes operating simultaneously in each line
-- Rhyme switching mid-line with surgical precision  
-- Internal rhymes stacked with end rhymes seamlessly
-- Perfect narrative sense while demonstrating technical mastery
-- Compound multi-syllabic patterns that defy physics
-
-Counter "${userVerse}" using your exponential paper-folded-9,393,939-times skill level. ${safetyNote}
-
-Output 8 lines of pure exponential rap mastery:`;
+Write 8 lines of natural-flowing exponential rap verses:`;
 
     const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
@@ -212,7 +206,7 @@ Output 8 lines of pure exponential rap mastery:`;
             content: prompt
           }
         ],
-        max_completion_tokens: 300, // Focused output to prevent reasoning overflow
+        max_completion_tokens: 400, // Ensure complete 8-line verses
         reasoning_effort: "low", // Minimize exposed reasoning while maintaining complexity
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
