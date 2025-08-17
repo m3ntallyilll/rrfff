@@ -33,9 +33,10 @@ export function AudioControls({
 
   // Only reload audio when URL actually changes
   useEffect(() => {
-    if (audioUrl && audioUrl !== previousAudioUrl.current && (audioUrl.startsWith('data:audio/') || audioUrl.startsWith('http'))) {
+    if (audioUrl && audioUrl !== previousAudioUrl.current) {
       previousAudioUrl.current = audioUrl;
       console.log('Loading new audio URL, size:', audioUrl.length, 'bytes');
+      console.log('Audio URL format:', audioUrl.substring(0, 50) + '...');
       
       // Clean up previous audio
       if (audioRef.current) {

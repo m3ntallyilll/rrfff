@@ -84,6 +84,8 @@ export default function BattleArena() {
       if (result) {
         setLiveTranscription(result.userText || "Voice input processed");
         setAiResponse(result.aiResponse || "AI response generated");
+        
+        console.log('Setting current AI audio URL:', result.audioUrl?.substring(0, 100) + '...');
         setCurrentAiAudio(result.audioUrl);
         
         toast({

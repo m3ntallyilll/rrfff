@@ -173,7 +173,7 @@ CONTENT REQUIREMENTS:
 
 Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes, no commentary - just the rap lines.`;
 
-    const response = await fetch(`${this.baseUrl}/chat/completions`, {
+    const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${this.apiKey}`,
@@ -194,12 +194,12 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
       }),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Groq response generation failed: ${response.statusText} - ${errorText}`);
+    if (!apiResponse.ok) {
+      const errorText = await apiResponse.text();
+      throw new Error(`Groq response generation failed: ${apiResponse.statusText} - ${errorText}`);
     }
 
-    const result = await response.json();
+    const result = await apiResponse.json();
     console.log("Groq API Response:", JSON.stringify(result, null, 2));
     
     if (!result.choices || result.choices.length === 0) {
@@ -226,29 +226,29 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
     }
 
     // Handle reasoning model response (prioritize reasoning over content for better rap quality)
-    let response = "";
+    let rapResponse = "";
     if (choice?.message?.reasoning) {
       // Extract the final rap from reasoning output
-      response = choice.message.reasoning.trim();
+      rapResponse = choice.message.reasoning.trim();
       console.log("Using reasoning output for enhanced rap quality");
     } else if (choice?.message?.content) {
-      response = choice.message.content.trim();
+      rapResponse = choice.message.content.trim();
       console.log("Using content output");
     }
     
-    if (response) {
+    if (rapResponse) {
       
       // Apply AI-powered content moderation
       const safetyLevel = profanityFilter ? 'strict' : 'moderate';
       const moderationResult = await contentModerationService.filterContent(
-        response, 
+        rapResponse, 
         safetyLevel, 
         'response'
       );
       
       if (moderationResult.wasFlagged) {
         console.log(`Content filtered: ${moderationResult.reason}`);
-        console.log(`Original: ${response.substring(0, 50)}...`);
+        console.log(`Original: ${rapResponse.substring(0, 50)}...`);
         console.log(`Filtered: ${moderationResult.content.substring(0, 50)}...`);
       }
       
