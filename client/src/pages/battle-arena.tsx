@@ -20,7 +20,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function BattleArena() {
   const [difficulty, setDifficulty] = useState<"easy" | "normal" | "hard">("normal");
-  const [profanityFilter, setProfanityFilter] = useState(true); // Default to censored for testing for authentic battle rap
+  const [profanityFilter, setProfanityFilter] = useState(false); // Default to uncensored for authentic battle rap
   const [battleTimer, setBattleTimer] = useState(105); // 1:45
   const [liveTranscription, setLiveTranscription] = useState("");
   const [aiResponse, setAiResponse] = useState("");

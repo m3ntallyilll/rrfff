@@ -75,18 +75,27 @@ export function useBattleState(battleId?: string) {
         console.log(key, value);
       });
 
-      const res = await fetch(`/api/battles/${currentBattleId}/rounds`, {
-        method: "POST",
-        body: formData,
-      });
+      try {
+        const res = await fetch(`/api/battles/${currentBattleId}/rounds`, {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Battle round failed:", res.status, errorText);
-        throw new Error(`Battle round failed: ${res.statusText}`);
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error("Battle round failed:", res.status, errorText);
+          throw new Error(`Battle round failed: ${res.statusText}`);
+        }
+
+        return res.json();
+      } catch (error) {
+        console.error("Battle round processing error:", error);
+        if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+          throw new Error('Connection lost. Please check your internet and try again.');
+        }
+        throw error;
       }
-
-      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ 
@@ -98,6 +107,9 @@ export function useBattleState(battleId?: string) {
       queryClient.invalidateQueries({ 
         queryKey: ["/api/battles", currentBattleId, "rounds"] 
       });
+    },
+    onError: (error) => {
+      console.error("Battle round mutation error:", error);
     },
   });
 
