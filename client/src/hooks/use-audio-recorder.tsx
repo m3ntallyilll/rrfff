@@ -26,11 +26,11 @@ export function useAudioRecorder() {
       // Check if we're on mobile and need to handle permissions differently
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
-      // Request permissions explicitly on mobile
+      // Request permissions explicitly on mobile - handle all promise rejections
       if (isMobile && navigator.permissions) {
         try {
-          const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-          if (permission.state === 'denied') {
+          const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName }).catch(() => null);
+          if (permission?.state === 'denied') {
             throw new Error('Microphone permission denied. Please enable microphone access in your browser settings.');
           }
         } catch (permError) {
