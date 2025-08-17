@@ -6,6 +6,15 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { SUBSCRIPTION_TIERS } from "@shared/schema";
 import { groqService } from "./services/groq";
 import { typecastService } from "./services/typecast";
+import multer from "multer";
+
+// Configure multer for audio uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+});
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -328,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // FAST Battle Round Processing - Optimized for Speed  
-  app.post("/api/battles/:id/rounds", isAuthenticated, async (req: any, res) => {
+  app.post("/api/battles/:id/rounds", isAuthenticated, upload.single('audio'), async (req: any, res) => {
     const startTime = Date.now();
     console.log(`🎤 Battle Round Processing Started - ${req.params.id}`);
     
@@ -340,20 +349,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Battle not found" });
       }
 
-      // Handle audio data from FormData
-      const audioData = req.body?.audio;
-      if (!audioData) {
-        return res.status(400).json({ message: "No audio provided" });
+      // Handle audio data from multer
+      if (!req.file?.buffer) {
+        return res.status(400).json({ message: "No audio file provided" });
       }
 
-      // Convert audio data to buffer for processing
-      let audioBuffer: Buffer;
-      if (typeof audioData === 'string') {
-        // Handle base64 audio data
-        audioBuffer = Buffer.from(audioData.split(',')[1] || audioData, 'base64');
-      } else {
-        audioBuffer = Buffer.from(audioData);
-      }
+      const audioBuffer = req.file.buffer;
 
       console.log(`🎵 Audio received: ${audioBuffer.length} bytes`);
 

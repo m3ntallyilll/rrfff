@@ -36,6 +36,10 @@ export interface IStorage {
   completeBattle(battleId: string): Promise<void>;
   updateUserStripeInfo(userId: string, data: { stripeCustomerId?: string; stripeSubscriptionId?: string }): Promise<User>;
   
+  // Battle round processing
+  addBattleRound(battleId: string, round: any): Promise<void>;
+  updateBattleState(battleId: string, updates: any): Promise<void>;
+  
   // Battle analytics
   getUserStats(userId: string): Promise<{
     totalBattles: number;
@@ -273,6 +277,34 @@ export class DatabaseStorage implements IStorage {
       winRate: user.totalBattles ? ((user.totalWins || 0) / user.totalBattles) * 100 : 0,
       battlesThisMonth: userBattles.length,
     };
+  }
+
+  // Battle round processing methods
+  async addBattleRound(battleId: string, round: any): Promise<void> {
+    const battle = await this.getBattle(battleId);
+    if (!battle) return;
+    
+    // Add round to existing rounds array
+    const currentRounds = battle.rounds || [];
+    currentRounds.push(round);
+    
+    await db
+      .update(battles)
+      .set({
+        rounds: currentRounds,
+        updatedAt: new Date(),
+      })
+      .where(eq(battles.id, battleId));
+  }
+
+  async updateBattleState(battleId: string, updates: any): Promise<void> {
+    await db
+      .update(battles)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(battles.id, battleId));
   }
 }
 
