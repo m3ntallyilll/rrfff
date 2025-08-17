@@ -203,14 +203,15 @@ Line 8:`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile", // Direct output model for exponential verses
+        model: "openai/gpt-oss-120b", // Advanced 120B MoE model with reasoning for exponential verses
         messages: [
           {
             role: "user",
             content: prompt
           }
         ],
-        max_tokens: 500, // Allow for complex exponential rap verses
+        max_completion_tokens: 400, // Allow for complex exponential rap verses with reasoning
+        reasoning_effort: "high", // Maximum reasoning power for exponential complexity
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
       }),

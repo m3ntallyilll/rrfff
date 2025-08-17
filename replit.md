@@ -96,7 +96,8 @@ Required API keys:
 - ✅ **ELITE TECHNIQUES**: Implemented compound rhyming, assonance/consonance matching, and polysyllabic wordplay mastery
 - ✅ **EXPONENTIAL COMPLEXITY**: Paper-folded-9M-times skill level with rhyme sandwiching and scheme stacking
 - ✅ **RHYME ARCHITECTURE**: 4 simultaneous rhyme patterns (ABACABAD + internal XYXY + compound PQPQ + slant RSRS)
-- ✅ **DIRECT OUTPUT MODEL**: Switched to llama-3.3-70b-versatile for clean exponential verse generation
+- ✅ **ADVANCED 120B MODEL**: Using openai/gpt-oss-120b with "reasoning_effort: high" for maximum exponential complexity
+- ✅ **WORKING OUTPUT**: Fixed reasoning overflow - AI now generates actual exponential rap verses with complex schemes
 - ✅ **NEW**: Generated 3 unique battle character avatars with distinct personalities
 - ✅ **NEW**: Implemented character selection system with voice ID mapping  
 - ✅ **NEW**: Added character profiles: MC Razor (female, hardcore), MC Venom (male, aggressive), MC Silk (male, smooth)
