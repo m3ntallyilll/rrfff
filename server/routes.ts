@@ -375,13 +375,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           )
         ]).catch(() => "Yo, technical difficulties but I'm still here / System glitched but my flow's crystal clear!"),
 
-        // 3. Fast TTS (1 second timeout)
-        Promise.race([
-          typecastService.generateSpeech("Quick response", battle.aiCharacterId),
-          new Promise<any>((resolve) => 
-            setTimeout(() => resolve({}), 1000)
-          )
-        ]).catch(() => ({}))
+        // 3. Fast TTS with actual AI response
+        Promise.resolve().then(async () => {
+          const aiText = aiResponse.status === 'fulfilled' ? aiResponse.value : "Yo, technical difficulties but I'm still here!";
+          return await typecastService.generateSpeech(aiText, battle.aiCharacterId || "venom");
+        }).catch(() => ({ audioUrl: "", duration: 0 }))
       ]);
 
       const userText = transcription.status === 'fulfilled' ? transcription.value : "Voice input";

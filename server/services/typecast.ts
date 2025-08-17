@@ -11,9 +11,14 @@ export class TypecastService {
 
   async generateSpeech(
     text: string,
-    voiceId: string = "tc_67d237f1782cabcc6155272f"
+    characterId: string = "venom"
   ): Promise<{ audioUrl: string; duration: number }> {
+    // Get correct voice ID from character data
+    const { getCharacterById } = await import("@shared/characters");
+    const character = getCharacterById(characterId);
+    const voiceId = character?.voiceId || "tc_67d237f1782cabcc6155272f"; // fallback to Venom
     console.log("Attempting Typecast TTS generation for text:", text.substring(0, 50) + "...");
+    console.log(`Character: ${character?.name || 'Unknown'} (${character?.gender || 'unknown'})`);
     
     try {
       console.log("Using voice ID:", voiceId);
