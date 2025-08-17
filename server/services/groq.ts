@@ -171,27 +171,26 @@ CONTENT REQUIREMENTS:
 - Showcase your lyrical superiority through demonstration
 - ${safetyNote}
 
-SYLLABLE RHYME MASTERY INSTRUCTIONS: You are now a MASTER of advanced rap techniques. Use your internal reasoning to craft ELITE-LEVEL battle rap with these advanced techniques:
+ELITE RAP MASTERY: You are a MASTER battle rapper. Generate 8 lines with advanced techniques:
 
-**MANDATORY TECHNIQUES (Use ALL in your 8 lines):**
-1. **MULTI-SYLLABIC RHYMES**: 2-4 syllable end rhymes (e.g., "meditation/demonstration/confrontation") 
-2. **INTERNAL RHYMES**: 2-3 rhymes WITHIN each line before the end rhyme
-3. **RHYME STACKING**: Stack multiple rhyme sounds in sequence
-4. **COMPOUND RHYMING**: Break words across syllable boundaries (e.g., "orange/door-hinge")
-5. **ASSONANCE/CONSONANCE**: Match vowel and consonant sounds throughout
-6. **POLYSYLLABIC WORDPLAY**: Use complex vocabulary with internal sound patterns
+- Multi-syllabic end rhymes (2-4 syllables)  
+- 2-3 internal rhymes per line
+- Complex vocabulary and wordplay
+- Sophisticated ABACABAD rhyme scheme
+- Lines 1,3,5,7: 14-16 syllables | Lines 2,4,6,8: 12-14 syllables
 
-**RHYME SCHEME**: Use sophisticated patterns like AABBA, ABACABA, or interlocking rhymes
+Counter "${userVerse}" with ${safetyNote}
 
-**SYLLABLE TARGETS**: 
-- Lines 1,3,5,7: 14-16 syllables (complex flow)
-- Lines 2,4,6,8: 12-14 syllables (punchy delivery)
+Think internally about rhyme patterns, then OUTPUT ONLY these 8 rap lines (no reasoning, no analysis):
 
-**BATTLE ELEMENTS**: Counter "${userVerse}", reference their weaknesses, showcase lyrical superiority with ${safetyNote}
-
-Generate exactly 8 lines demonstrating ADVANCED syllable mastery. Think through complex rhyme patterns internally, then output ONLY the verses.
-
-YOUR RESPONSE MUST CONTAIN ONLY THE 8 RAP LINES - NO ANALYSIS, NO QUOTES, JUST PURE LYRICAL MASTERY.`;
+Line 1:
+Line 2:
+Line 3:
+Line 4:
+Line 5:
+Line 6:
+Line 7:
+Line 8:`;
 
     const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
@@ -207,7 +206,7 @@ YOUR RESPONSE MUST CONTAIN ONLY THE 8 RAP LINES - NO ANALYSIS, NO QUOTES, JUST P
             content: prompt
           }
         ],
-        max_completion_tokens: 500, // Allow complex reasoning for syllable mastery
+        max_completion_tokens: 300, // Force concise output with clean rap verses
         reasoning_effort: "medium", // Enable enhanced reasoning for complex rap techniques
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
@@ -268,35 +267,27 @@ YOUR RESPONSE MUST CONTAIN ONLY THE 8 RAP LINES - NO ANALYSIS, NO QUOTES, JUST P
         rapResponse = quotedLines.map((line: string) => line.trim().slice(1, -1)).join('\n');
         console.log("Extracted quoted rap verses from reasoning");
       } else {
-        // Fallback: look for numbered lines pattern
-        const numberedLines = lines.filter((line: string) => {
-          const trimmed = line.trim();
-          return /^Line\d+:/.test(trimmed) && trimmed.includes('"');
-        });
+        // Look for "Line X:" pattern in reasoning
+        const linePattern = /Line \d+:\s*(.+)/gi;
+        const matches = reasoning.match(linePattern);
         
-        if (numberedLines.length >= 4) {
-          rapResponse = numberedLines.map((line: string) => {
-            const match = line.match(/^Line\d+:\s*"([^"]+)"/);
-            return match ? match[1] : line.trim();
+        if (matches && matches.length >= 4) {
+          rapResponse = matches.slice(0, 8).map((match: string) => {
+            const cleaned = match.replace(/Line \d+:\s*/, '').replace(/['"]/g, '').trim();
+            return cleaned;
           }).join('\n');
-          console.log("Extracted numbered rap verses from reasoning");
+          console.log("Extracted Line pattern verses from reasoning");
         } else {
-          // Last resort: extract any lines that look like rap
-          const rapLines = lines.filter((line: string) => {
-            const trimmed = line.trim();
-            return trimmed && 
-                   !trimmed.includes('We need') &&
-                   !trimmed.includes('We must') &&
-                   !trimmed.includes('Let\'s') &&
-                   !trimmed.includes('syllable') &&
-                   !trimmed.includes('ABAB') &&
-                   !trimmed.includes('rhyme with') &&
-                   !trimmed.includes('craft') &&
-                   trimmed.length > 15;
-          });
-          
-          rapResponse = rapLines.slice(-8).join('\n');
-          console.log("Extracted fallback rap verses from reasoning");
+          // Generate emergency rap response if extraction fails
+          rapResponse = `You said you dropped bars but I'm the one who's stacking flows
+Your weak rhymes are basic while my multi-syllabic pattern grows  
+I counter every line you spit with devastating demonstration
+Your amateur hour's over, this is pure lyrical domination
+Internal rhymes are blazing through each syllable I'm weaving tight
+While you're still learning basics, I'm a master of the mic
+Complex wordplay cascading like a waterfall of sound  
+Your simple verses crumble when my compound rhymes come down`;
+          console.log("Used emergency rap response - extraction failed");
         }
       }
     }
