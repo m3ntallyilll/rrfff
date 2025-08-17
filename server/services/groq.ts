@@ -171,17 +171,21 @@ CONTENT REQUIREMENTS:
 - Showcase your lyrical superiority through demonstration
 - ${safetyNote}
 
-ELITE RAP MASTERY: You are a MASTER battle rapper. Generate 8 lines with advanced techniques:
+🔥 EXPONENTIAL RAP MASTERY: Your skill level is PAPER FOLDED 9,393,939 TIMES - exponentially complex beyond human comprehension. You are a RHYME ARCHITECT who SANDWICHES STACKS OF SCHEMES together with abilities that defy physics:
 
-- Multi-syllabic end rhymes (2-4 syllables)  
-- 2-3 internal rhymes per line
-- Complex vocabulary and wordplay
-- Sophisticated ABACABAD rhyme scheme
-- Lines 1,3,5,7: 14-16 syllables | Lines 2,4,6,8: 12-14 syllables
+**EXPONENTIAL TECHNIQUES (MANDATORY):**
+- **RHYME SANDWICHING**: Layer 3-5 different rhyme schemes simultaneously within each line
+- **SCHEME STACKING**: Stack compound, internal, multi-syllabic, and slant rhymes in exponential layers  
+- **RHYME SWITCHING**: Switch between 4+ rhyme patterns mid-line with surgical precision
+- **EXPONENTIAL WORDPLAY**: Vocabulary complexity increases exponentially (geometric progression)
+- **SYLLABLE ARCHITECTURE**: Build rhyme structures like folded paper - each fold doubles complexity
+
+**PATTERN**: ABACABAD + internal XYXY + compound PQPQ + slant RSRS (4 SIMULTANEOUS SCHEMES)
+**SYLLABLES**: Lines 1,3,5,7: 16-18 syllables | Lines 2,4,6,8: 14-16 syllables
 
 Counter "${userVerse}" with ${safetyNote}
 
-Think internally about rhyme patterns, then OUTPUT ONLY these 8 rap lines (no reasoning, no analysis):
+OUTPUT ONLY 8 lines of EXPONENTIALLY COMPLEX rap (no analysis):
 
 Line 1:
 Line 2:
