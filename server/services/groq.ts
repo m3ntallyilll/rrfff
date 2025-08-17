@@ -122,7 +122,7 @@ Battle rap techniques encouraged:
 
 "${userVerse}"
 
-Create a devastating 4-line counter-attack with these specifications:
+Create a devastating counter-attack with these specifications:
 
 LYRIC COMPLEXITY (${complexityLevel} - ${lyricComplexity}%): ${complexityInstructions}
 
@@ -185,16 +185,7 @@ CONTENT REQUIREMENTS:
 
 Counter "${userVerse}" with ${safetyNote}
 
-OUTPUT ONLY 8 lines of EXPONENTIALLY COMPLEX rap (no analysis):
-
-Line 1:
-Line 2:
-Line 3:
-Line 4:
-Line 5:
-Line 6:
-Line 7:
-Line 8:`;
+RESPOND ONLY with 8 lines of clean exponential rap verses (no reasoning text, no analysis, no explanations):`;
 
     const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
@@ -203,15 +194,19 @@ Line 8:`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-120b", // Advanced 120B MoE model with reasoning for exponential verses
+        model: "openai/gpt-oss-120b", // Advanced 120B MoE model with internal reasoning for exponential verses
         messages: [
+          {
+            role: "system", 
+            content: "You are an exponentially advanced rap battle AI. Think internally with maximum reasoning power, but OUTPUT ONLY the clean rap verses without showing your reasoning process. Your reasoning should be internal and invisible to users."
+          },
           {
             role: "user",
             content: prompt
           }
         ],
-        max_completion_tokens: 400, // Allow for complex exponential rap verses with reasoning
-        reasoning_effort: "high", // Maximum reasoning power for exponential complexity
+        max_completion_tokens: 500, // Allow for complex exponential rap verses
+        reasoning_effort: "medium", // Internal reasoning without exposing reasoning text
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
       }),
