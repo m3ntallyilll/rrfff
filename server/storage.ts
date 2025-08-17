@@ -292,19 +292,24 @@ export class DatabaseStorage implements IStorage {
       .update(battles)
       .set({
         rounds: currentRounds,
-        updatedAt: new Date(),
       })
       .where(eq(battles.id, battleId));
   }
 
   async updateBattleState(battleId: string, updates: any): Promise<void> {
-    await db
-      .update(battles)
-      .set({
-        ...updates,
-        updatedAt: new Date(),
-      })
-      .where(eq(battles.id, battleId));
+    // Only update allowed battle fields, skip updatedAt since it's not in schema
+    const allowedUpdates: any = {};
+    if (updates.status) allowedUpdates.status = updates.status;
+    if (updates.userScore !== undefined) allowedUpdates.userScore = updates.userScore;
+    if (updates.aiScore !== undefined) allowedUpdates.aiScore = updates.aiScore;
+    if (updates.rounds) allowedUpdates.rounds = updates.rounds;
+    
+    if (Object.keys(allowedUpdates).length > 0) {
+      await db
+        .update(battles)
+        .set(allowedUpdates)
+        .where(eq(battles.id, battleId));
+    }
   }
 }
 
