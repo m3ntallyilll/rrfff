@@ -218,6 +218,35 @@ export const insertTournamentSchema = createInsertSchema(tournaments).omit({
   id: true,
   createdAt: true,
   completedAt: true,
+}).extend({
+  bracket: z.object({
+    rounds: z.array(z.object({
+      roundNumber: z.number(),
+      matches: z.array(z.object({
+        id: z.string(),
+        player1: z.object({
+          id: z.string(),
+          name: z.string(),
+          type: z.enum(['user', 'ai']),
+          avatar: z.string().optional()
+        }),
+        player2: z.object({
+          id: z.string(),
+          name: z.string(),
+          type: z.enum(['user', 'ai']),
+          avatar: z.string().optional()
+        }),
+        winner: z.object({
+          id: z.string(),
+          name: z.string(),
+          type: z.enum(['user', 'ai']),
+          avatar: z.string().optional()
+        }).optional(),
+        battleId: z.string().optional(),
+        isCompleted: z.boolean()
+      }))
+    }))
+  })
 });
 
 export const insertTournamentBattleSchema = createInsertSchema(tournamentBattles).omit({

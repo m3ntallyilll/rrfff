@@ -483,7 +483,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/tournaments', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const tournamentData = { ...req.body, userId };
+      const { name, type, totalRounds, difficulty, profanityFilter, lyricComplexity, styleIntensity, prize } = req.body;
+      
+      // Generate tournament bracket based on type and rounds
+      const generateBracket = (rounds: number, tournamentType: string) => {
+        const numOpponents = Math.pow(2, rounds - 1); // 2^(rounds-1) opponents for user
+        const characters = ['razor', 'venom', 'silk'];
+        
+        const matches = [];
+        for (let i = 0; i < numOpponents; i++) {
+          const characterId = characters[i % characters.length];
+          const characterName = characterId === 'razor' ? 'MC Razor' : 
+                               characterId === 'venom' ? 'MC Venom' : 'MC Silk';
+          
+          matches.push({
+            id: `match-${i + 1}`,
+            player1: {
+              id: userId,
+              name: 'You',
+              type: 'user' as const
+            },
+            player2: {
+              id: characterId,
+              name: characterName,
+              type: 'ai' as const
+            },
+            isCompleted: false
+          });
+        }
+        
+        return {
+          rounds: [{
+            roundNumber: 1,
+            matches
+          }]
+        };
+      };
+      
+      const tournamentData = {
+        userId,
+        name,
+        type: type || 'single_elimination',
+        totalRounds: totalRounds || 3,
+        difficulty: difficulty || 'normal',
+        profanityFilter: profanityFilter || false,
+        lyricComplexity: lyricComplexity || 50,
+        styleIntensity: styleIntensity || 50,
+        prize: prize || 'Tournament Champion Title',
+        opponents: ['razor', 'venom', 'silk'], // Default opponents
+        bracket: generateBracket(totalRounds || 3, type || 'single_elimination')
+      };
       
       // Validate tournament data
       const validatedData = insertTournamentSchema.parse(tournamentData);
