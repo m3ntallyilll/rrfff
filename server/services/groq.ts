@@ -122,7 +122,7 @@ Battle rap techniques encouraged:
 
 "${userVerse}"
 
-Create a devastating counter-attack with these specifications:
+Create a devastating 4-line counter-attack with these specifications:
 
 LYRIC COMPLEXITY (${complexityLevel} - ${lyricComplexity}%): ${complexityInstructions}
 
@@ -185,7 +185,16 @@ CONTENT REQUIREMENTS:
 
 Counter "${userVerse}" with ${safetyNote}
 
-RESPOND ONLY with 8 lines of clean exponential rap verses (no reasoning text, no analysis, no explanations):`;
+OUTPUT ONLY 8 lines of EXPONENTIALLY COMPLEX rap (no analysis):
+
+Line 1:
+Line 2:
+Line 3:
+Line 4:
+Line 5:
+Line 6:
+Line 7:
+Line 8:`;
 
     const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
@@ -194,18 +203,19 @@ RESPOND ONLY with 8 lines of clean exponential rap verses (no reasoning text, no
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile", // Fast, direct model that outputs clean rap verses without reasoning text
+        model: "openai/gpt-oss-120b", // Advanced 120B MoE model with internal reasoning for exponential verses
         messages: [
           {
             role: "system", 
-            content: "You are an expert rap battle AI. Output ONLY clean rap verses - no reasoning, no analysis, no explanations. Just pure rap bars."
+            content: "You are an exponentially advanced rap battle AI. Think internally with maximum reasoning power, but OUTPUT ONLY the clean rap verses without showing your reasoning process. Your reasoning should be internal and invisible to users."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        max_completion_tokens: 400, // Optimized for clean rap output
+        max_completion_tokens: 500, // Allow for complex exponential rap verses
+        reasoning_effort: "medium", // Internal reasoning without exposing reasoning text
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
       }),
@@ -242,27 +252,44 @@ RESPOND ONLY with 8 lines of clean exponential rap verses (no reasoning text, no
       }
     }
 
-    // Handle clean model response - should output direct rap verses
+    // Handle direct model response - should output clean rap verses
     let rapResponse = "";
     
     if (choice?.message?.content && choice.message.content.trim()) {
       // Direct model outputs clean verses in content
       rapResponse = choice.message.content.trim();
-      console.log("Using direct content output (clean rap verses)");
-    } else {
-      // Fallback: try to generate verses with the rhyme engine
-      console.log("No content from AI, falling back to rhyme engine");
-      try {
-        const enhancedVerse = this.rhymeEngine.generateAdvancedVerse(userVerse, difficulty);
-        rapResponse = enhancedVerse;
-        console.log("Generated fallback verses with rhyme engine");
-      } catch (error) {
-        // Final fallback
-        rapResponse = `Yo, you think you got bars but your flow's weak as hell
-Your rhymes are trash, can't you tell?
-I'm the king of this game, you're just a wannabe
-Step to me again, you'll see who's the MC`;
-        console.log("Using final fallback verses");
+      console.log("Using direct content output (exponential verses)");
+    } else if (choice?.message?.reasoning) {
+      // Extract rap verses from reasoning since content is empty
+      const reasoning = choice.message.reasoning.trim();
+      const lines = reasoning.split('\n');
+      
+      // Find lines that start with quotes (actual rap lines)
+      const quotedLines = lines.filter((line: string) => {
+        const trimmed = line.trim();
+        return trimmed.startsWith('"') && trimmed.endsWith('"') && trimmed.length > 10;
+      });
+      
+      if (quotedLines.length >= 4) {
+        // Remove quotes and use the rap lines
+        rapResponse = quotedLines.map((line: string) => line.trim().slice(1, -1)).join('\n');
+        console.log("Extracted quoted rap verses from reasoning");
+      } else {
+        // Look for "Line X:" pattern in reasoning
+        const linePattern = /Line \d+:\s*(.+)/gi;
+        const matches = reasoning.match(linePattern);
+        
+        if (matches && matches.length >= 4) {
+          rapResponse = matches.slice(0, 8).map((match: string) => {
+            const cleaned = match.replace(/Line \d+:\s*/, '').replace(/['"]/g, '').trim();
+            return cleaned;
+          }).join('\n');
+          console.log("Extracted Line pattern verses from reasoning");
+        } else {
+          // If extraction completely fails, let the user know
+          rapResponse = "EXTRACTION FAILED - AI response did not contain valid rap verses";
+          console.log("Complete extraction failure - no valid rap verses found");
+        }
       }
     }
     
