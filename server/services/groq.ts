@@ -1,7 +1,5 @@
 import { AdvancedRhymeEngine } from './advancedRhymeEngine';
 import { contentModerationService } from './contentModeration';
-import fs from 'fs';
-import path from 'path';
 
 export class GroqService {
   private apiKey: string;
@@ -173,29 +171,28 @@ CONTENT REQUIREMENTS:
 - Showcase your lyrical superiority through demonstration
 - ${safetyNote}
 
-RHYME JUGGLING & SCHEME STACKING MASTER: You are an ELITE battle rapper who JUGGLES RHYMES and STACKS SCHEMES like this example:
+RHYME JUGGLING MASTER: You are a master of "rhyme juggling" - weaving multiple rhyme sounds simultaneously through each line.
 
-"keeping it RAW im ILLEGAL like MALEK and JAMAL cause i dont believe in the LAW like im steven SEGAL flipping off police while im leaping the WALL"
+Example: "keeping it RAW im ILLEGAL like MALEK and JAMAL cause i dont believe in the LAW like im steven SEGAL flipping off police while im leaping the WALL"
 
-This JUGGLES 7+ rhyme sounds: RAW/ILLEGAL/MALEK/JAMAL/LAW/SEGAL/WALL - creating a STACKED SCHEME pattern!
+RHYME JUGGLING TECHNIQUE:
+- Juggle 2-3 different rhyme sounds per line
+- Stack internal rhymes every 2-3 words  
+- Create rhyme chains that flow into each other
+- Use compound words and name drops for complex patterns
 
-JUGGLE RHYMES AND STACK SCHEMES in 8 battle lines:
-- JUGGLE 5-8 rhyme sounds per line (like juggling balls in the air)
-- STACK multiple rhyme schemes on top of each other  
-- Use compound rhymes, internal rhymes, and multi-syllabic chains
-- Include raw street language ${safetyNote}
-- Counter "${userVerse}" with devastating wordplay
+Generate 8 lines of PURE rhyme juggling. Counter "${userVerse}" with ${safetyNote}
 
-JUGGLE AND STACK - OUTPUT ONLY the 8 rap lines:
+RESPOND WITH ONLY THE RAP LINES (NO "Line 1:" LABELS):
 
-Line 1:
-Line 2:
-Line 3:
-Line 4:
-Line 5:
-Line 6:
-Line 7:
-Line 8:`;
+[First rap line]
+[Second rap line] 
+[Third rap line]
+[Fourth rap line]
+[Fifth rap line]
+[Sixth rap line]
+[Seventh rap line]
+[Eighth rap line]`;
 
     const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
@@ -211,7 +208,8 @@ Line 8:`;
             content: prompt
           }
         ],
-        max_tokens: 400, // Allow space for 8 full rap lines with internal rhymes
+        max_completion_tokens: 250, // Ultra-concise for pure rap output
+        reasoning_effort: "medium", // Enable enhanced reasoning for complex rap techniques
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
       }),
@@ -248,26 +246,13 @@ Line 8:`;
       }
     }
 
-    // Handle direct text generation - extract clean rap verses
+    // Handle reasoning model response - extract only clean rap verses
     let rapResponse = "";
     
     if (choice?.message?.content && choice.message.content.trim()) {
-      // Direct content output from gpt-oss-120b model
+      // The model should output clean verses in content after internal reasoning
       rapResponse = choice.message.content.trim();
-      console.log("Using direct content output from gpt-oss-120b");
-      
-      // Clean up any residual formatting
-      const lines = rapResponse.split('\n').filter((line: string) => line.trim());
-      
-      // Look for "Line X:" patterns and clean them
-      const cleanedLines = lines.map((line: string) => {
-        return line.replace(/^Line\s*\d+:\s*/i, '').replace(/["""]/g, '').trim();
-      }).filter((line: string) => line.length > 0);
-      
-      if (cleanedLines.length >= 4) {
-        rapResponse = cleanedLines.slice(0, 8).join('\n');
-        console.log("Cleaned up line formatting from direct output");
-      }
+      console.log("Using content output (clean verses)");
     } else if (choice?.message?.reasoning) {
       // Extract rap verses from reasoning since content is empty
       const reasoning = choice.message.reasoning.trim();
@@ -295,16 +280,16 @@ Line 8:`;
           }).join('\n');
           console.log("Extracted Line pattern verses from reasoning");
         } else {
-          // Generate emergency rap response with JUGGLED RHYMES and STACKED SCHEMES
-          rapResponse = `I'm JUGGLING rhymes like STRUGGLING with TIME while you're FUMBLING and STUMBLING behind my DESIGN
-Your WEAK flow is BLEAK so I SPEAK and I WREAK havoc on GEEKS who are MEEK when they PEEK at my TECHNIQUE  
-I STACK schemes and ATTACK dreams while you CRACK under PRESSURE from my LYRICAL TREASURE that's beyond MEASURE
-You're CHOKING and JOKING while I'm SMOKING this TRACK leaving you BROKEN and WOKEN to the fact you LACK
-My WORDPLAY is DEADLY like MERCURY SPREADING through your HEAD making you DREAD every THREAD that I'm SHREDDING
-I FLIP scripts and RIP hits while you SIT there and QUIT cause you can't SPLIT bars or COMMIT to this SHIT
-Your STYLE is too MILD like a CHILD who's EXILED while I'm WILD and COMPILED with a SMILE that's HOSTILE  
-I'm the KING of this RING bringing STING to your SWING while you CLING to your THING but you'll never take WING`;
-          console.log("Used emergency rap response with juggled rhymes and stacked schemes - extraction failed");
+          // RHYME JUGGLING MASTER emergency response
+          rapResponse = `You claim you spit FIRE but you're TIRED and WIRED getting MIRED while I'm HIRED to ACQUIRE what you DESIRED
+I'm MEAN with the GLEAM making CREAM while you SCREAM about DREAMS that ain't REAL like your STEAL of my DEAL  
+Your FLOW is too SLOW like you're LOW making DOUGH but you CHOKE when I BROKE every JOKE that you WROTE in your NOTE
+I'm the KING with my STING making RING while you SWING but you MISS every DISS that you HISS through your LIPS like ECLIPSE
+My BARS leave you SCARRED raising MARKS on these SHARKS while you PARK in the DARK making ARKS out of LARKS so STARK
+I'm BLESSED with the BEST never STRESSED when I TEST every GUEST who's OBSESSED with the ZEST of my QUEST to be FRESH  
+You're DONE getting STUNNED by my GUN every RUN that you SPUN has been WON since day ONE in the SUN having FUN
+I'm the MASTER of FASTER bringing LAUGHTER after CAPTURE of this RAPTURE that will SHATTER your CHAPTER like PLASTER`;
+          console.log("Used RHYME JUGGLING MASTER emergency response");
         }
       }
     }
@@ -347,49 +332,6 @@ I'm the KING of this RING bringing STING to your SWING while you CLING to your T
     }
 
     return responseContent;
-  }
-
-  // Groq TTS functionality
-  async generateTTS(text: string, characterId: string): Promise<Buffer> {
-    try {
-      // Map character voices for Groq TTS
-      const voiceMap: Record<string, string> = {
-        'razor': 'alloy',     // Female voice for MC Razor
-        'venom': 'echo',      // Male aggressive voice for MC Venom  
-        'silk': 'fable'       // Male smooth voice for MC Silk
-      };
-
-      const voice = voiceMap[characterId] || 'alloy';
-      
-      console.log(`🎵 Generating Groq TTS for character: ${characterId} with voice: ${voice}`);
-      
-      const response = await fetch(`${this.baseUrl}/audio/speech`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'tts-1',
-          input: text,
-          voice: voice,
-          response_format: 'wav'
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Groq TTS failed: ${response.status} ${response.statusText}`);
-      }
-
-      const audioBuffer = Buffer.from(await response.arrayBuffer());
-      console.log(`Generated Groq TTS audio size: ${audioBuffer.length} bytes`);
-      
-      return audioBuffer;
-      
-    } catch (error: any) {
-      console.error('Groq TTS generation failed:', error);
-      throw error;
-    }
   }
 }
 
