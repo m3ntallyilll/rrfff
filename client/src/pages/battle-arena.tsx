@@ -21,6 +21,8 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function BattleArena() {
   const [difficulty, setDifficulty] = useState<"easy" | "normal" | "hard">("normal");
   const [profanityFilter, setProfanityFilter] = useState(false); // Default to uncensored for authentic battle rap
+  const [lyricComplexity, setLyricComplexity] = useState(50); // 0-100 complexity slider
+  const [styleIntensity, setStyleIntensity] = useState(50); // 0-100 style intensity slider
   const [battleTimer, setBattleTimer] = useState(105); // 1:45
   const [liveTranscription, setLiveTranscription] = useState("");
   const [aiResponse, setAiResponse] = useState("");
@@ -112,8 +114,8 @@ export default function BattleArena() {
   const handleCharacterSelect = (character: BattleCharacter) => {
     setSelectedCharacter(character);
     setShowCharacterSelector(false);
-    // Start battle with selected character
-    startNewBattle(difficulty, profanityFilter, character.id);
+    // Start battle with selected character and complexity settings
+    startNewBattle(difficulty, profanityFilter, character.id, lyricComplexity, styleIntensity);
   };
 
   const handleDifficultyChange = (value: string) => {
@@ -317,6 +319,10 @@ export default function BattleArena() {
                 onRecordingComplete={handleRecordingComplete}
                 profanityFilter={profanityFilter}
                 onProfanityFilterChange={setProfanityFilter}
+                lyricComplexity={lyricComplexity}
+                onLyricComplexityChange={setLyricComplexity}
+                styleIntensity={styleIntensity}
+                onStyleIntensityChange={setStyleIntensity}
                 disabled={isProcessing || battleState?.isAIResponding}
               />
 

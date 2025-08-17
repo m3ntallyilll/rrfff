@@ -369,7 +369,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // 2. Quick AI response (2 second timeout) 
         Promise.race([
-          groqService.generateRapResponse("player dropped bars", battle.difficulty, battle.profanityFilter),
+          groqService.generateRapResponse(
+            "player dropped bars", 
+            battle.difficulty, 
+            battle.profanityFilter,
+            battle.lyricComplexity || 50,
+            battle.styleIntensity || 50
+          ),
           new Promise<string>((_, reject) => 
             setTimeout(() => reject(new Error("AI timeout")), 2000)
           )

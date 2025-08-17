@@ -59,7 +59,9 @@ export class GroqService {
   async generateRapResponse(
     userVerse: string,
     difficulty: string = "normal",
-    profanityFilter: boolean = true
+    profanityFilter: boolean = true,
+    lyricComplexity: number = 50,
+    styleIntensity: number = 50
   ): Promise<string> {
     const difficultyPrompts = {
       easy: "Use simple AABB or ABAB rhyme schemes, basic wordplay, straightforward punchlines, and clear syllable patterns that flow naturally.",
@@ -90,11 +92,35 @@ REQUIRED: Use only clean, creative wordplay, clever metaphors, and skill-based c
 Focus on technical rap skills without ANY offensive content.`
       : "Use authentic, raw street rap language with explicit profanity (fuck, shit, bitch, damn, pussy, ass), aggressive insults, sexual references, violence metaphors, and hardcore street terminology for maximum battle impact. Don't hold back - this is uncensored battle rap.";
 
+    // Map complexity levels to descriptive terms
+    const complexityLevel = lyricComplexity <= 25 ? 'Basic' : lyricComplexity <= 50 ? 'Intermediate' : lyricComplexity <= 75 ? 'Advanced' : 'Expert';
+    const intensityLevel = styleIntensity <= 25 ? 'Chill' : styleIntensity <= 50 ? 'Moderate' : styleIntensity <= 75 ? 'Aggressive' : 'Savage';
+
+    const complexityInstructions = lyricComplexity <= 25 
+      ? "Use simple vocabulary and straightforward metaphors. Keep rhyme schemes basic (AABB). Focus on clear, easy-to-follow bars."
+      : lyricComplexity <= 50 
+      ? "Mix simple and moderate vocabulary. Use some internal rhymes and basic wordplay. Add clever metaphors."
+      : lyricComplexity <= 75
+      ? "Use sophisticated vocabulary and complex metaphors. Include multi-syllabic rhymes, internal rhymes, and advanced wordplay techniques."
+      : "Master-level complexity: Use intricate wordplay, layered meanings, complex rhyme schemes (ABCDABCD), multiple internal rhymes per line, and advanced literary devices.";
+
+    const intensityInstructions = styleIntensity <= 25
+      ? "Keep the energy mellow and laid-back. Use clever wordplay over aggression. Be confident but not intimidating."
+      : styleIntensity <= 50
+      ? "Moderate intensity with some competitive edge. Balance clever bars with confident delivery."
+      : styleIntensity <= 75
+      ? "High energy and aggressive delivery. Use intimidation tactics and harsh competitive language."
+      : "Maximum intensity: Savage, ruthless, and devastating. Use the most aggressive battle rap tactics and brutal verbal attacks.";
+
     const prompt = `You are a legendary rap battle MC with mastery of every rap technique. The challenger just delivered:
 
 "${userVerse}"
 
-Create a devastating 4-line counter-attack that demonstrates:
+Create a devastating 4-line counter-attack with these specifications:
+
+LYRIC COMPLEXITY (${complexityLevel} - ${lyricComplexity}%): ${complexityInstructions}
+
+STYLE INTENSITY (${intensityLevel} - ${styleIntensity}%): ${intensityInstructions}
 
 RHYME MASTERY: ${difficultyPrompts[difficulty as keyof typeof difficultyPrompts]}
 
@@ -156,7 +182,7 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
           }
         ],
         max_completion_tokens: 1024,
-        temperature: difficulty === "hard" ? 0.95 : difficulty === "normal" ? 0.85 : 0.75,
+        temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
       }),
     });
@@ -247,3 +273,14 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
 }
 
 export const groqService = new GroqService();
+
+// Legacy export for backwards compatibility
+export async function generateAIResponse(
+  prompt: string, 
+  difficulty = "normal", 
+  profanityFilter = false,
+  lyricComplexity = 50,
+  styleIntensity = 50
+): Promise<string> {
+  return groqService.generateRapResponse(prompt, difficulty, profanityFilter, lyricComplexity, styleIntensity);
+}

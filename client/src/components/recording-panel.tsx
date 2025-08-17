@@ -12,6 +12,10 @@ interface RecordingPanelProps {
   onRecordingComplete?: (recording: { blob: Blob; duration: number; url: string }) => void;
   profanityFilter: boolean;
   onProfanityFilterChange: (enabled: boolean) => void;
+  lyricComplexity: number;
+  onLyricComplexityChange: (value: number) => void;
+  styleIntensity: number;
+  onStyleIntensityChange: (value: number) => void;
   disabled?: boolean;
 }
 
@@ -19,6 +23,10 @@ export function RecordingPanel({
   onRecordingComplete, 
   profanityFilter, 
   onProfanityFilterChange,
+  lyricComplexity,
+  onLyricComplexityChange,
+  styleIntensity,
+  onStyleIntensityChange,
   disabled = false 
 }: RecordingPanelProps) {
   const [micSensitivity, setMicSensitivity] = useState([75]);
@@ -145,6 +153,48 @@ export function RecordingPanel({
             onCheckedChange={onProfanityFilterChange}
             data-testid="switch-profanity-filter"
           />
+        </div>
+
+        {/* Lyric Complexity Slider */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-400">Lyric Complexity</span>
+            <span className="text-xs text-accent-blue font-semibold">{lyricComplexity}%</span>
+          </div>
+          <Slider
+            value={[lyricComplexity]}
+            onValueChange={(value) => onLyricComplexityChange(value[0])}
+            max={100}
+            step={5}
+            className="w-full"
+            data-testid="slider-lyric-complexity"
+          />
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Basic</span>
+            <span>Advanced</span>
+            <span>Expert</span>
+          </div>
+        </div>
+
+        {/* Style Intensity Slider */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-400">Style Intensity</span>
+            <span className="text-xs text-accent-red font-semibold">{styleIntensity}%</span>
+          </div>
+          <Slider
+            value={[styleIntensity]}
+            onValueChange={(value) => onStyleIntensityChange(value[0])}
+            max={100}
+            step={5}
+            className="w-full"
+            data-testid="slider-style-intensity"
+          />
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Chill</span>
+            <span>Aggressive</span>
+            <span>Savage</span>
+          </div>
         </div>
       </div>
     </div>

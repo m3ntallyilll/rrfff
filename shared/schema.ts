@@ -25,6 +25,8 @@ export const battles = pgTable("battles", {
   aiCharacterId: text("ai_character_id"),
   aiCharacterName: text("ai_character_name"),
   aiVoiceId: text("ai_voice_id"),
+  lyricComplexity: integer("lyric_complexity").default(50), // 0-100 complexity level
+  styleIntensity: integer("style_intensity").default(50), // 0-100 style intensity level
   rounds: jsonb("rounds").$type<Array<{
     id: string;
     battleId: string;
