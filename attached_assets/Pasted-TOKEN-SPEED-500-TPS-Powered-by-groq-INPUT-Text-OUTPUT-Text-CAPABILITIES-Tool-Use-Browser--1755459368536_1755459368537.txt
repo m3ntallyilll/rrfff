@@ -1,0 +1,87 @@
+TOKEN SPEED
+~500 TPS
+Powered by
+groq
+INPUT
+Text
+OUTPUT
+Text
+CAPABILITIES
+Tool Use, Browser Search, Code Execution, JSON Object Mode, JSON Schema Mode, Reasoning
+OpenAI logo
+OpenAI
+Model card
+OpenAI's flagship open-weight MoE model with 120B total parameters. Designed for high-capability agentic use, it matches or surpasses proprietary models like OpenAI o4-mini on many benchmarks. With long-context reasoning, competitive math/coding performance, and robust health knowledge, it is ideal for advanced research, autonomous tools, and agentic applications.
+
+PRICING
+Input
+$0.15
+6.7M / $1
+Output
+$0.75
+1.3M / $1
+LIMITS
+CONTEXT WINDOW
+131,072
+MAX OUTPUT TOKENS
+65,536
+QUANTIZATION
+This uses Groq's TruePoint Numerics, which reduces precision only in areas that don't affect accuracy, preserving quality while delivering significant speedup over traditional approaches. Learn more here.
+Key Technical Specifications
+Model Architecture
+Built on a Mixture-of-Experts (MoE) architecture with 120B total parameters (5.1B active per forward pass). Features 36 layers with 128 MoE experts using Top-4 routing per token. Equipped with Grouped Query Attention and rotary embeddings, using RMSNorm pre-layer normalization with 2880 residual width.
+Performance Metrics
+The GPT-OSS 120B model demonstrates exceptional performance across key benchmarks:
+MMLU (General Reasoning): 90.0%
+SWE-Bench Verified (Coding): 62.4%
+HealthBench Realistic (Health): 57.6%
+MMMLU (Multilingual): 81.3% average
+Use Cases
+Frontier-Grade Agentic Applications
+Deploy for high-capability autonomous agents with advanced reasoning, tool use, and multi-step problem solving that matches proprietary model performance.
+Advanced Research & Scientific Computing
+Ideal for research applications requiring robust health knowledge, biosecurity analysis, and scientific reasoning with strong safety alignment.
+High-Accuracy Mathematical & Coding Tasks
+Excels at competitive programming, complex mathematical reasoning, and software engineering tasks with state-of-the-art benchmark performance.
+Multilingual AI Assistants
+Build sophisticated multilingual applications with strong performance across 81+ languages and cultural contexts.
+Best Practices
+Utilize variable reasoning modes (low, medium, high) to balance performance and latency based on your specific use case requirements.
+Leverage the Harmony chat format with proper role hierarchy (System > Developer > User > Assistant) for optimal instruction following and safety compliance.
+Take advantage of the model's preparedness testing for biosecurity and alignment research while respecting safety boundaries.
+Use the full 131K context window for complex, multi-step workflows and comprehensive document analysis.
+Structure tool definitions clearly when using web browsing, Python execution, or function calling capabilities for best results.
+Get Started with GPT-OSS 120B
+Experience openai/gpt-oss-120b on Groq:
+
+curl
+JavaScript
+Python
+JSON
+shell
+
+npm install groq-sdk
+JavaScript
+
+import Groq from "groq-sdk";
+const groq = new Groq();
+async function main() {
+  const completion = await groq.chat.completions.create({
+    model: "openai/gpt-oss-120b",
+    messages: [
+      {
+        role: "user",
+        content: "Explain why fast inference is critical for reasoning models",
+      },
+    ],
+  });
+  console.log(completion.choices[0]?.message?.content);
+}
+main().catch(console.error);
+Was this page helpful?
+
+Yes
+
+No
+
+Suggest Edits

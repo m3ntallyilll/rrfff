@@ -171,21 +171,21 @@ CONTENT REQUIREMENTS:
 - Showcase your lyrical superiority through demonstration
 - ${safetyNote}
 
-CRITICAL OUTPUT FORMAT: You MUST reason internally, then output ONLY the final rap verses. 
+CRITICAL INSTRUCTION: Use your internal reasoning to analyze rhyme schemes, syllable counts, and wordplay techniques. Then output ONLY the final 8 clean rap verses in your response content.
 
-Generate 8-12 lines of battle rap (30 seconds at ~150 BPM). Use your reasoning to craft perfect rhymes, then output ONLY the clean verses.
+Generate exactly 8 lines of battle rap (30 seconds at ~150 BPM). Think through the rhymes internally, then respond with only the verses.
 
-FINAL OUTPUT FORMAT:
-[Verse line 1]
-[Verse line 2]
-[Verse line 3]
-[Verse line 4]
-[Verse line 5]
-[Verse line 6]
-[Verse line 7]
-[Verse line 8]
+Required format in your response:
+Line 1 of rap
+Line 2 of rap  
+Line 3 of rap
+Line 4 of rap
+Line 5 of rap
+Line 6 of rap
+Line 7 of rap
+Line 8 of rap
 
-DO NOT include any reasoning text, analysis, or commentary in your final response. Reason internally, output verses only.`;
+Your response must contain ONLY the 8 rap lines. No reasoning text, no analysis, no quotes - just the raw battle verses ready to perform.`;
 
     const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
@@ -242,36 +242,57 @@ DO NOT include any reasoning text, analysis, or commentary in your final respons
     // Handle reasoning model response - extract only clean rap verses
     let rapResponse = "";
     
-    if (choice?.message?.content) {
+    if (choice?.message?.content && choice.message.content.trim()) {
       // The model should output clean verses in content after internal reasoning
       rapResponse = choice.message.content.trim();
       console.log("Using content output (clean verses)");
     } else if (choice?.message?.reasoning) {
-      // Fallback: extract rap verses from reasoning if content is empty
+      // Extract rap verses from reasoning since content is empty
       const reasoning = choice.message.reasoning.trim();
       const lines = reasoning.split('\n');
       
-      // Find lines that look like rap verses (not meta-commentary)
-      const rapLines = lines.filter((line: string) => {
+      // Find lines that start with quotes (actual rap lines)
+      const quotedLines = lines.filter((line: string) => {
         const trimmed = line.trim();
-        return trimmed && 
-               !trimmed.includes('user wants') &&
-               !trimmed.includes('syllable') &&
-               !trimmed.includes('Line1:') &&
-               !trimmed.includes('Line2:') &&
-               !trimmed.includes('Line3:') &&
-               !trimmed.includes('Line4:') &&
-               !trimmed.includes('Check') &&
-               !trimmed.includes('Must') &&
-               !trimmed.includes('policy') &&
-               !trimmed.includes('profanity is allowed') &&
-               !trimmed.startsWith('"') &&
-               trimmed.length > 10;
+        return trimmed.startsWith('"') && trimmed.endsWith('"') && trimmed.length > 10;
       });
       
-      // Take the best rap lines (8-12 lines for 30 seconds)
-      rapResponse = rapLines.slice(-10).join('\n');
-      console.log("Extracted rap verses from reasoning");
+      if (quotedLines.length >= 4) {
+        // Remove quotes and use the rap lines
+        rapResponse = quotedLines.map(line => line.trim().slice(1, -1)).join('\n');
+        console.log("Extracted quoted rap verses from reasoning");
+      } else {
+        // Fallback: look for numbered lines pattern
+        const numberedLines = lines.filter((line: string) => {
+          const trimmed = line.trim();
+          return /^Line\d+:/.test(trimmed) && trimmed.includes('"');
+        });
+        
+        if (numberedLines.length >= 4) {
+          rapResponse = numberedLines.map(line => {
+            const match = line.match(/^Line\d+:\s*"([^"]+)"/);
+            return match ? match[1] : line.trim();
+          }).join('\n');
+          console.log("Extracted numbered rap verses from reasoning");
+        } else {
+          // Last resort: extract any lines that look like rap
+          const rapLines = lines.filter((line: string) => {
+            const trimmed = line.trim();
+            return trimmed && 
+                   !trimmed.includes('We need') &&
+                   !trimmed.includes('We must') &&
+                   !trimmed.includes('Let\'s') &&
+                   !trimmed.includes('syllable') &&
+                   !trimmed.includes('ABAB') &&
+                   !trimmed.includes('rhyme with') &&
+                   !trimmed.includes('craft') &&
+                   trimmed.length > 15;
+          });
+          
+          rapResponse = rapLines.slice(-8).join('\n');
+          console.log("Extracted fallback rap verses from reasoning");
+        }
+      }
     }
     
     if (rapResponse) {
