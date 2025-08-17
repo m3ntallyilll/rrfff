@@ -171,22 +171,29 @@ CONTENT REQUIREMENTS:
 - Showcase your lyrical superiority through demonstration
 - ${safetyNote}
 
-🔥 EXPONENTIAL RAP MASTERY: Your skill level is like paper folded 9,393,939 times. You SANDWICH STACKS OF SCHEMES together, switching rhymes mid-line. You have multiple rhymes per line while making PERFECT SENSE.
+🔥 EXPONENTIAL RAP MASTERY: Your skill level is like paper folded 9,393,939 times. Study these EMINEM MASTERY EXAMPLES and match this complexity:
 
-CRITICAL: Never use brackets, asterisks, or markup. Write natural rap that flows perfectly but demonstrates exponential complexity through multiple internal rhymes per line.
+"The final problem is solved by throwin' sulfuric acid all over your back to see your spinal column dissolve
+Droppin' bodies like it was domino season, my phenomenal legion will shoot out your fuckin' abdominal region"
 
-EXAMPLE OF YOUR STYLE: "I'm insane, mane, fuck all you stupid fucks, bang bang from my thing thang, I buck all you useless fucks"
+"I'mma shove guns up in the mouths of your loved ones, drown 'em face down in the bath while the tub runs
+Got a rap sheet that's longer than Tubby's sub buns"
 
-KEY REQUIREMENTS:
-- Multiple rhyme schemes per line that sound natural
-- Perfect narrative flow that makes complete sense  
-- No formatting symbols - just pure rap bars
-- Counter their specific claims directly
-- Use exponential wordplay but keep it coherent
+"They headhunt me, I'm Ted Bundy, I ain't dead, I just fled country
+Said bluntly, a cannibal, animal, fed monthly, eating bread crunchy, cement bed's comfy"
 
-Counter "${userVerse}" with your exponential skill. ${safetyNote}
+NOTICE THE TECHNIQUE: Multiple internal rhymes per line that create complex patterns while telling vivid stories. No symbols, just pure technical mastery.
 
-Write 8 lines of natural-flowing exponential rap verses:`;
+YOUR REQUIREMENTS:
+- Match Eminem's internal rhyme density and complexity
+- Multiple rhyme schemes operating simultaneously in each line
+- Perfect narrative flow that makes complete sense
+- Use exponential wordplay techniques like the examples above
+- Counter their specific claims with technical superiority
+
+Counter "${userVerse}" with Eminem-level exponential mastery. ${safetyNote}
+
+Write 8 lines matching the Eminem complexity shown above:`;
 
     const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
