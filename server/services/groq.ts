@@ -171,19 +171,17 @@ CONTENT REQUIREMENTS:
 - Showcase your lyrical superiority through demonstration
 - ${safetyNote}
 
-INTERNAL RHYME MASTER: You are an ELITE battle rapper who creates ACTUAL internal rhymes like this example:
+ELITE RAP MASTERY: You are a MASTER battle rapper. Generate 8 lines with advanced techniques:
 
-"keeping it RAW im ILLEGAL like MALEK and JAMAL cause i dont believe in the LAW like im steven SEGAL flipping off police while im leaping the WALL"
+- Multi-syllabic end rhymes (2-4 syllables)  
+- 2-3 internal rhymes per line
+- Complex vocabulary and wordplay
+- Sophisticated ABACABAD rhyme scheme
+- Lines 1,3,5,7: 14-16 syllables | Lines 2,4,6,8: 12-14 syllables
 
-This has 6+ internal rhymes: raw/illegal/malek/jamal/law/segal/wall - ALL rhyming within ONE line!
+Counter "${userVerse}" with ${safetyNote}
 
-Generate 8 battle rap lines with REAL internal rhyme patterns:
-- Each line must have 4-6 actual internal rhymes (not just talking about them)
-- Use multi-syllabic rhyme chains throughout each line
-- Include authentic street language and profanity ${safetyNote}
-- Counter "${userVerse}" with devastating wordplay
-
-OUTPUT ONLY the 8 rap lines (no analysis):
+Think internally about rhyme patterns, then OUTPUT ONLY these 8 rap lines (no reasoning, no analysis):
 
 Line 1:
 Line 2:
@@ -280,16 +278,16 @@ Line 8:`;
           }).join('\n');
           console.log("Extracted Line pattern verses from reasoning");
         } else {
-          // Generate emergency rap response with REAL internal rhymes
-          rapResponse = `You think you're SICK but you're WEAK like a FREAK on the STREET getting BEAT by my HEAT when we MEET
-I'm MEAN with the SCHEME making CREAM while you DREAM of the GLEAM that you'll never REDEEM or ESTEEM
-Your FLOW is too SLOW like you're BROKE and you CHOKE when I SPOKE every JOKE that you WROTE isn't DOPE  
-I'm the KING bringing STING with my RING while you SWING but you MISS every DISS that you HISS with your LIPS
-My BARS raising SCARS leaving MARKS on these SHARKS while you PARK in the DARK making ARKS out of LARKS
-I'm FRESH with the BEST never STRESSED when I TEST every GUEST who's OBSESSED with my BLESSED lyrical ZEST
-You're DONE getting STUNNED by my GUN every RUN that you've SPUN has been WON since day ONE in the SUN
-I'm the MASTER disaster bringing LAUGHTER after CAPTURE of this RAPTURE that will SHATTER your whole CHAPTER`;
-          console.log("Used emergency rap response with internal rhymes - extraction failed");
+          // Generate emergency rap response if extraction fails
+          rapResponse = `You said you dropped bars but I'm the one who's stacking flows
+Your weak rhymes are basic while my multi-syllabic pattern grows  
+I counter every line you spit with devastating demonstration
+Your amateur hour's over, this is pure lyrical domination
+Internal rhymes are blazing through each syllable I'm weaving tight
+While you're still learning basics, I'm a master of the mic
+Complex wordplay cascading like a waterfall of sound  
+Your simple verses crumble when my compound rhymes come down`;
+          console.log("Used emergency rap response - extraction failed");
         }
       }
     }
