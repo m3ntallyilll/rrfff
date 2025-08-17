@@ -171,7 +171,13 @@ CONTENT REQUIREMENTS:
 - Showcase your lyrical superiority through demonstration
 - ${safetyNote}
 
-Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes, no commentary - just the rap lines.`;
+CRITICAL: Return ONLY the final 4 rap lines. No reasoning process, no analysis, no explanations, no quotes. Just the clean battle verses ready to perform.
+
+Format:
+Line 1
+Line 2  
+Line 3
+Line 4`;
 
     const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
@@ -187,7 +193,7 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
             content: prompt
           }
         ],
-        max_completion_tokens: 1024,
+        max_completion_tokens: 200, // Shorter limit for clean rap verses only
         reasoning_effort: "medium", // Enable enhanced reasoning for complex rap techniques
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
@@ -225,12 +231,20 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
       }
     }
 
-    // Handle reasoning model response (prioritize reasoning over content for better rap quality)
+    // Handle reasoning model response (extract clean verses from reasoning)
     let rapResponse = "";
     if (choice?.message?.reasoning) {
-      // Extract the final rap from reasoning output
-      rapResponse = choice.message.reasoning.trim();
-      console.log("Using reasoning output for enhanced rap quality");
+      // Extract only the final rap lines from reasoning output
+      const reasoning = choice.message.reasoning.trim();
+      // Look for the final 4 lines after all reasoning
+      const lines = reasoning.split('\n').filter(line => line.trim() && !line.includes(':') && !line.includes('syllable') && !line.includes('count')).slice(-4);
+      if (lines.length >= 4) {
+        rapResponse = lines.join('\n');
+        console.log("Extracted clean rap from reasoning output");
+      } else {
+        rapResponse = reasoning.trim();
+        console.log("Using full reasoning output as fallback");
+      }
     } else if (choice?.message?.content) {
       rapResponse = choice.message.content.trim();
       console.log("Using content output");
