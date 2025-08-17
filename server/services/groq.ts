@@ -201,18 +201,19 @@ Output 8 lines of pure exponential rap mastery:`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile", // Fast model that outputs clean exponential rap verses
+        model: "openai/gpt-oss-120b", // Advanced 120B model with exponential reasoning capabilities
         messages: [
           {
             role: "system", 
-            content: "You are an exponentially advanced rap battle AI with paper-folded-9,393,939-times skill level. Output ONLY clean rap verses demonstrating multiple rhyme schemes per line. No reasoning, no analysis - just pure exponential rap mastery."
+            content: "You are an exponentially advanced rap battle AI with paper-folded-9,393,939-times skill level. Your reasoning is INTERNAL only - output ONLY the final clean rap verses. Never show your thinking process. Demonstrate multiple rhyme schemes per line with exponential complexity."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        max_completion_tokens: 400, // Optimized for clean exponential rap output
+        max_completion_tokens: 300, // Focused output to prevent reasoning overflow
+        reasoning_effort: "low", // Minimize exposed reasoning while maintaining complexity
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
       }),
