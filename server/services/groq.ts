@@ -282,16 +282,16 @@ Line 8:`;
           }).join('\n');
           console.log("Extracted Line pattern verses from reasoning");
         } else {
-          // Generate emergency rap response if extraction fails
-          rapResponse = `You said you dropped bars but I'm the one who's stacking flows
-Your weak rhymes are basic while my multi-syllabic pattern grows  
-I counter every line you spit with devastating demonstration
-Your amateur hour's over, this is pure lyrical domination
-Internal rhymes are blazing through each syllable I'm weaving tight
-While you're still learning basics, I'm a master of the mic
-Complex wordplay cascading like a waterfall of sound  
-Your simple verses crumble when my compound rhymes come down`;
-          console.log("Used emergency rap response - extraction failed");
+          // Generate EXPONENTIAL emergency rap response if extraction fails
+          rapResponse = `You dropped bars but I'm SANDWICHING schemes exponentially, syllables multiplying mathematically
+Your basic flow patterns crumble while I'm STACKING internal-compound-multi-slant simultaneously  
+I SWITCH between four rhyme architectures mid-line, complexity folded infinitely
+Amateur patterns dissolve when confronted by my EXPONENTIAL wordplay density
+Rhyme schemes LAYER like paper folded millions, each syllable calculated geometrically
+Your linear thinking SHATTERS against my compound-stacked verbal artillery
+I architect verses with SURGICAL precision, vocabulary expanding exponentially
+Simple minds can't comprehend when RHYME MASTERS demonstrate lyrical supremacy`;
+          console.log("Used EXPONENTIAL emergency rap response - extraction failed");
         }
       }
     }
