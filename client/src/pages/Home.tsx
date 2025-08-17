@@ -7,20 +7,42 @@ import { Progress } from "@/components/ui/progress";
 import { Mic, Trophy, Zap, Crown, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 
+interface SubscriptionStatus {
+  tier: 'free' | 'premium' | 'pro';
+  status: string;
+  battlesRemaining: number;
+  canStartBattle: boolean;
+}
+
+interface UserStats {
+  totalBattles: number;
+  totalWins: number;
+  winRate: number;
+  battlesThisMonth: number;
+}
+
+interface Battle {
+  id: string;
+  aiCharacterName: string;
+  createdAt: string;
+  userScore: number;
+  aiScore: number;
+}
+
 export default function Home() {
   const { user } = useAuth();
   
-  const { data: subscriptionStatus } = useQuery({
+  const { data: subscriptionStatus } = useQuery<SubscriptionStatus>({
     queryKey: ["/api/subscription/status"],
     enabled: !!user,
   });
 
-  const { data: userStats } = useQuery({
+  const { data: userStats } = useQuery<UserStats>({
     queryKey: ["/api/user/stats"],
     enabled: !!user,
   });
 
-  const { data: battleHistory } = useQuery({
+  const { data: battleHistory } = useQuery<Battle[]>({
     queryKey: ["/api/battles/history"],
     enabled: !!user,
   });
@@ -48,7 +70,7 @@ export default function Home() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-white mb-2">
-              Welcome back, {user?.firstName || 'Rapper'}!
+              Welcome back, {(user as any)?.firstName || 'Rapper'}!
             </h1>
             <div className="flex items-center gap-2">
               <Badge className={`${getTierColor(subscriptionStatus?.tier || 'free')} bg-slate-800`}>
