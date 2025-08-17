@@ -203,15 +203,14 @@ Line 8:`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-120b", // Using advanced reasoning model for superior rap generation
+        model: "llama-3.3-70b-versatile", // Direct output model for exponential verses
         messages: [
           {
             role: "user",
             content: prompt
           }
         ],
-        max_completion_tokens: 300, // Force concise output with clean rap verses
-        reasoning_effort: "medium", // Enable enhanced reasoning for complex rap techniques
+        max_tokens: 500, // Allow for complex exponential rap verses
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
       }),
@@ -248,13 +247,13 @@ Line 8:`;
       }
     }
 
-    // Handle reasoning model response - extract only clean rap verses
+    // Handle direct model response - should output clean rap verses
     let rapResponse = "";
     
     if (choice?.message?.content && choice.message.content.trim()) {
-      // The model should output clean verses in content after internal reasoning
+      // Direct model outputs clean verses in content
       rapResponse = choice.message.content.trim();
-      console.log("Using content output (clean verses)");
+      console.log("Using direct content output (exponential verses)");
     } else if (choice?.message?.reasoning) {
       // Extract rap verses from reasoning since content is empty
       const reasoning = choice.message.reasoning.trim();
@@ -282,16 +281,9 @@ Line 8:`;
           }).join('\n');
           console.log("Extracted Line pattern verses from reasoning");
         } else {
-          // Generate EXPONENTIAL emergency rap response if extraction fails
-          rapResponse = `You dropped bars but I'm SANDWICHING schemes exponentially, syllables multiplying mathematically
-Your basic flow patterns crumble while I'm STACKING internal-compound-multi-slant simultaneously  
-I SWITCH between four rhyme architectures mid-line, complexity folded infinitely
-Amateur patterns dissolve when confronted by my EXPONENTIAL wordplay density
-Rhyme schemes LAYER like paper folded millions, each syllable calculated geometrically
-Your linear thinking SHATTERS against my compound-stacked verbal artillery
-I architect verses with SURGICAL precision, vocabulary expanding exponentially
-Simple minds can't comprehend when RHYME MASTERS demonstrate lyrical supremacy`;
-          console.log("Used EXPONENTIAL emergency rap response - extraction failed");
+          // If extraction completely fails, let the user know
+          rapResponse = "EXTRACTION FAILED - AI response did not contain valid rap verses";
+          console.log("Complete extraction failure - no valid rap verses found");
         }
       }
     }
