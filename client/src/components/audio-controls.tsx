@@ -33,7 +33,7 @@ export function AudioControls({
 
   // Only reload audio when URL actually changes
   useEffect(() => {
-    if (audioUrl && audioUrl !== previousAudioUrl.current && audioUrl.startsWith('data:audio/')) {
+    if (audioUrl && audioUrl !== previousAudioUrl.current && (audioUrl.startsWith('data:audio/') || audioUrl.startsWith('http'))) {
       previousAudioUrl.current = audioUrl;
       console.log('Loading new audio URL, size:', audioUrl.length, 'bytes');
       
@@ -64,8 +64,9 @@ export function AudioControls({
         setCurrentTime(0);
         onPlaybackChange?.(false);
       };
-      const handleError = () => {
-        console.error('Audio loading failed');
+      const handleError = (e: any) => {
+        console.error('Audio loading failed:', e);
+        console.log('Audio URL causing error:', audioUrl?.substring(0, 100) + '...');
         setAudioError('Failed to load audio');
         setAudioLoaded(false);
         onPlaybackChange?.(false);

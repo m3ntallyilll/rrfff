@@ -73,8 +73,9 @@ export class GroqService {
       hard: "Master: INTERNAL RHYMING (rhymes within each line), RHYME STACKING (multiple rhymes in sequence), RHYME JUGGLING (overlapping rhyme patterns across lines), complex multi-syllabic rhymes, extended metaphors, alliterative patterns, sophisticated battle tactics, technical rhyme schemes."
     };
 
+    // Profanity Filter Setting - STRICT ENFORCEMENT
     const profanityNote = profanityFilter 
-      ? "Keep language clean but hard-hitting through clever wordplay rather than explicit content." 
+      ? "CRITICAL: Keep language completely clean and family-friendly. NO profanity, explicit content, or offensive language. Use creative wordplay, clever metaphors, and clean insults without ANY curse words (no fuck, shit, bitch, damn, pussy, ass), sexual references, or aggressive language. Focus on clever wordplay and skill-based insults."
       : "Use authentic, raw street rap language with explicit profanity (fuck, shit, bitch, damn, pussy, ass), aggressive insults, sexual references, violence metaphors, and hardcore street terminology for maximum battle impact. Don't hold back - this is uncensored battle rap.";
 
     const prompt = `You are a legendary rap battle MC with mastery of every rap technique. The challenger just delivered:
