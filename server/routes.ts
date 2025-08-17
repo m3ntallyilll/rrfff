@@ -385,13 +385,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userText = transcription.status === 'fulfilled' ? transcription.value : "Voice input";
       const aiResponseText = aiResponse.status === 'fulfilled' ? aiResponse.value : "System response ready!";
 
-      // 3. Generate TTS with actual AI response (separate from parallel processing to avoid dependency issues)
+      // 3. Generate TTS with actual AI response using correct character ID
+      const characterId = battle.aiCharacterId || battle.aiCharacterName?.toLowerCase() || "venom";
+      console.log(`🎵 Generating TTS for character: ${characterId}`);
+      
       const ttsResult = await Promise.race([
-        typecastService.generateSpeech(aiResponseText, battle.aiCharacterId || "venom"),
+        typecastService.generateSpeech(aiResponseText, characterId),
         new Promise<any>((resolve) => 
           setTimeout(() => resolve({ audioUrl: "", duration: 0 }), 3000) // 3 second timeout for TTS
         )
-      ]).catch(() => ({ audioUrl: "", duration: 0 }));
+      ]).catch((error) => {
+        console.error(`TTS generation failed for character ${characterId}:`, error);
+        return { audioUrl: "", duration: 0 };
+      });
 
       const audioResult = ttsResult;
 
