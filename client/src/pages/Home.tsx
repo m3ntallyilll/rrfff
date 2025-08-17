@@ -108,7 +108,7 @@ export default function Home() {
               </div>
               {subscriptionStatus?.tier !== 'pro' && (
                 <Progress 
-                  value={(subscriptionStatus?.battlesRemaining / (subscriptionStatus?.tier === 'premium' ? 25 : 3)) * 100} 
+                  value={((subscriptionStatus?.battlesRemaining || 0) / (subscriptionStatus?.tier === 'premium' ? 25 : 3)) * 100} 
                   className="h-2" 
                 />
               )}
