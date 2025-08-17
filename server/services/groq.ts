@@ -212,18 +212,19 @@ Write exactly 8 lines with different rhyme sounds per pair:`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile", // Clean output model for exponential rap verses
+        model: "openai/gpt-oss-120b", // Advanced 120B model as requested by user
         messages: [
           {
             role: "system", 
-            content: "You are an exponentially advanced rap battle AI with paper-folded-9,393,939-times skill level. Output ONLY clean rap verses with different sounding rhymes that switch every 2 lines. No reasoning, no analysis - just pure exponential rap mastery demonstrating rhyme switching patterns."
+            content: "You are an exponentially advanced rap battle AI with paper-folded-9,393,939-times skill level. Use internal reasoning to plan rhyme switching, then output ONLY clean rap verses with different sounding rhymes that switch every 2 lines. No exposed reasoning in output - just pure exponential rap mastery."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        max_completion_tokens: 350, // Focused on clean verse output
+        max_completion_tokens: 300, // Controlled output to prevent reasoning overflow
+        reasoning_effort: "low", // Minimal exposed reasoning while using advanced model capabilities
         temperature: Math.min(0.95, 0.6 + (lyricComplexity / 100) * 0.35 + (styleIntensity / 100) * 0.15),
         top_p: 0.9
       }),
