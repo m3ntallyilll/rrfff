@@ -50,7 +50,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     difficulty: 'normal',
     backstory: 'Polished black MC who rose through the ranks with charm and technical skill',
     signature: 'Smooth as silk but sharp as steel, making every rival kneel',
-    avatar: 'MC_Silk_new_portrait.svg'
+    avatar: 'MC_Silk_rapper_portrait_1cc18485.png'
   }
 ];
 
