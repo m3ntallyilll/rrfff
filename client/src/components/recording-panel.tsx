@@ -147,12 +147,17 @@ export function RecordingPanel({
         </div>
         
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-400">Profanity Filter</span>
-          <Switch
-            checked={profanityFilter}
-            onCheckedChange={onProfanityFilterChange}
-            data-testid="switch-profanity-filter"
-          />
+          <span className="text-sm text-gray-400">Content Safety</span>
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-gray-500">
+              {profanityFilter ? "Family" : "Battle"}
+            </span>
+            <Switch
+              checked={profanityFilter}
+              onCheckedChange={onProfanityFilterChange}
+              data-testid="switch-content-safety"
+            />
+          </div>
         </div>
 
         {/* Lyric Complexity Slider */}

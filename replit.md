@@ -47,14 +47,15 @@ Required API keys:
 
 ## Recent Changes
 
-### 2025-08-17 - Profanity Filter System Fixed + Audio Playback Optimized  
-- ✅ **PROFANITY FILTER**: Fixed profanity filter to strictly enforce clean language when enabled
-- ✅ **SMART FILTERING**: Added post-processing filter that replaces profanity with clean alternatives  
-- ✅ **AUDIO SUCCESS**: TTS system generating large audio files (1.3MB+, 11+ seconds) with correct female voice for MC Razor
-- ✅ **ERROR HANDLING**: Enhanced network error handling with better user messages for "Failed to fetch" errors
-- ✅ **BATTLE SYSTEM**: Profanity toggle working - ON = family-friendly language, OFF = uncensored street rap
-- ✅ **TYPESCRIPT**: Fixed compilation errors in groq service and improved error handling
-- ✅ **DEFAULT STATE**: Set profanity filter to OFF by default for authentic battle rap experience
+### 2025-08-17 - AI Content Moderation + Lyric Complexity Sliders Implemented
+- ✅ **AI CONTENT MODERATION**: Integrated Llama Guard 4 for professional-grade content safety
+- ✅ **SMART SAFETY LEVELS**: Strict (family-friendly) vs Moderate (battle rap appropriate) filtering
+- ✅ **LYRIC COMPLEXITY SLIDERS**: 0-100% complexity and style intensity controls
+- ✅ **DYNAMIC AI RESPONSES**: Sliders directly influence vocabulary, wordplay, and aggression levels  
+- ✅ **ENHANCED PROMPTING**: AI now adapts complexity from Basic to Expert based on user settings
+- ✅ **TEMPERATURE SCALING**: AI creativity scales with complexity and intensity parameters
+- ✅ **DATABASE INTEGRATION**: Schema updated to store complexity preferences per battle
+- ✅ **PROFESSIONAL MODERATION**: Replaced basic word filtering with ML-powered safety classification
 
 ### 2025-08-14 - Account Upgraded to Pro + Authentication Fixes
 - ✅ **ACCOUNT UPGRADE**: User account upgraded to Pro tier with unlimited battles

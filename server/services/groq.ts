@@ -1,4 +1,5 @@
 import { AdvancedRhymeEngine } from './advancedRhymeEngine';
+import { contentModerationService } from './contentModeration';
 
 export class GroqService {
   private apiKey: string;
@@ -75,22 +76,26 @@ export class GroqService {
       hard: "Master: INTERNAL RHYMING (rhymes within each line), RHYME STACKING (multiple rhymes in sequence), RHYME JUGGLING (overlapping rhyme patterns across lines), complex multi-syllabic rhymes, extended metaphors, alliterative patterns, sophisticated battle tactics, technical rhyme schemes."
     };
 
-    // Profanity Filter Setting - STRICT ENFORCEMENT
-    console.log("Profanity filter status:", profanityFilter ? "ENABLED (clean)" : "DISABLED (uncensored)");
+    // Content Safety Level - AI-Powered Moderation
+    console.log("Content safety level:", profanityFilter ? "STRICT (family-friendly)" : "MODERATE (battle rap appropriate)");
     
-    const profanityNote = profanityFilter 
-      ? `CRITICAL REQUIREMENT: ABSOLUTELY NO PROFANITY OR OFFENSIVE LANGUAGE ALLOWED. You MUST keep ALL language completely clean and family-friendly. 
+    const safetyNote = profanityFilter 
+      ? `CONTENT SAFETY: Keep ALL language family-friendly and clean. Use creative wordplay, clever metaphors, and skill-based competitive insults without any offensive content. Focus on technical rap mastery and lyrical creativity.
 
-STRICTLY FORBIDDEN: Do NOT use any of these words or similar variations: fuck, shit, bitch, damn, pussy, ass, hell, crap, slut, whore, bastard, piss, or any sexual/offensive terms.
-
-REQUIRED: Use only clean, creative wordplay, clever metaphors, and skill-based competitive insults. Example clean battle lines:
+Example clean battle techniques:
 - "Your flow's weak, I'm bringing the heat"  
 - "Step to me? You're out of your league"
-- "My rhymes are fire, yours are just weak"
+- "My rhymes are sharp, yours fall flat"
 - "I'm the champion, you're just a wannabe"
 
-Focus on technical rap skills without ANY offensive content.`
-      : "Use authentic, raw street rap language with explicit profanity (fuck, shit, bitch, damn, pussy, ass), aggressive insults, sexual references, violence metaphors, and hardcore street terminology for maximum battle impact. Don't hold back - this is uncensored battle rap.";
+Emphasize technical skill over aggressive language.`
+      : `BATTLE RAP MODE: Use authentic street rap language including competitive aggression, strong language, and battle rap terminology. Focus on lyrical dominance, wordplay mastery, and devastating punchlines. Avoid content that promotes violence, hate, or harm - keep it competitive but within battle rap conventions.
+
+Battle rap techniques encouraged:
+- Aggressive competitive language and insults
+- Street terminology and authentic expressions  
+- Devastating wordplay and punchlines
+- Technical lyrical superiority demonstrations`;
 
     // Map complexity levels to descriptive terms
     const complexityLevel = lyricComplexity <= 25 ? 'Basic' : lyricComplexity <= 50 ? 'Intermediate' : lyricComplexity <= 75 ? 'Advanced' : 'Expert';
@@ -163,7 +168,7 @@ CONTENT REQUIREMENTS:
 - Counter their specific claims with evidence of your dominance  
 - Reference their weaknesses implied in their verse
 - Showcase your lyrical superiority through demonstration
-- ${profanityNote}
+- ${safetyNote}
 
 Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes, no commentary - just the rap lines.`;
 
@@ -222,32 +227,21 @@ Return ONLY 4 lines of raw rap verses with line breaks. No reasoning, no quotes,
     if (choice?.message?.content) {
       let response = choice.message.content.trim();
       
-      // Apply profanity filter post-processing if enabled
-      if (profanityFilter) {
-        console.log("Applying profanity filter to response:", response.substring(0, 50) + "...");
-        
-        const badWords = ['fuck', 'shit', 'bitch', 'damn', 'pussy', 'ass', 'hell', 'crap', 'fuckin', 'fucking', 'fucked'];
-        let filtered = response;
-        
-        badWords.forEach(word => {
-          const regex = new RegExp(`\\b${word}\\b`, 'gi');
-          filtered = filtered.replace(regex, (match: string) => {
-            // Replace with clean alternatives
-            const replacements: { [key: string]: string } = {
-              'fuck': 'dang', 'fucking': 'dang', 'fuckin': 'dang', 'fucked': 'beat',
-              'shit': 'trash', 'bitch': 'player', 'damn': 'dang',
-              'pussy': 'weak', 'ass': 'self', 'hell': 'dang', 'crap': 'trash'
-            };
-            const lowerWord = word.toLowerCase();
-            return replacements[lowerWord] || 'weak';
-          });
-        });
-        
-        console.log("Filtered response:", filtered.substring(0, 50) + "...");
-        return filtered;
+      // Apply AI-powered content moderation
+      const safetyLevel = profanityFilter ? 'strict' : 'moderate';
+      const moderationResult = await contentModerationService.filterContent(
+        response, 
+        safetyLevel, 
+        'response'
+      );
+      
+      if (moderationResult.wasFlagged) {
+        console.log(`Content filtered: ${moderationResult.reason}`);
+        console.log(`Original: ${response.substring(0, 50)}...`);
+        console.log(`Filtered: ${moderationResult.content.substring(0, 50)}...`);
       }
       
-      return response;
+      return moderationResult.content;
     }
 
     // If we got reasoning instead of content, extract clean rap verses
