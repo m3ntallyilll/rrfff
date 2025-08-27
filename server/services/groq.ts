@@ -64,6 +64,9 @@ export class GroqService {
     lyricComplexity: number = 50,
     styleIntensity: number = 50
   ): Promise<string> {
+    // SECURITY: Validate and sanitize user input
+    const validatedUserVerse = this.validateInput(userVerse, 5000);
+    const sanitizedUserVerse = this.sanitizeContent(validatedUserVerse);
     const difficultyPrompts = {
       easy: "Use simple AABB or ABAB rhyme schemes, basic wordplay, straightforward punchlines, and clear syllable patterns that flow naturally.",
       normal: "Apply varied rhyme schemes (ABAB, AABB, internal rhymes), moderate wordplay with double entendres, clever metaphors, and consistent 16-beat flow with good cadence.",
@@ -201,7 +204,7 @@ Lines 7-8: Switch to "bluntly/funky" (UH-EE different pattern)
 
 CRITICAL: Each pair must use DIFFERENT sounding rhymes. No repetitive sounds.
 
-Counter "${userVerse}" with exponential mastery and mandatory rhyme switching. ${safetyNote}
+Counter "${sanitizedUserVerse}" with exponential mastery and mandatory rhyme switching. ${safetyNote}
 
 Write exactly 8 lines with different rhyme sounds per pair:`;
 
@@ -249,7 +252,8 @@ OUTPUT REQUIREMENTS (what user sees):
     }
 
     const result = await apiResponse.json();
-    console.log("Groq API Response:", JSON.stringify(result, null, 2));
+    // SECURITY: Only log essential info, never expose reasoning or full content
+    console.log("Groq API Status:", result.choices?.[0]?.finish_reason || "unknown", "Model:", result.model || "unknown");
     
     if (!result.choices || result.choices.length === 0) {
       throw new Error(`Groq API returned no choices: ${JSON.stringify(result)}`);
@@ -309,11 +313,11 @@ OUTPUT REQUIREMENTS (what user sees):
         }
       }
       
-      // If we extracted good rap lines, validate rhyme switching
+      // If we extracted good rap lines, validate rhyme switching and sanitize
       if (rapLines.length >= 4) {
         const validatedLines = this.validateRhymeSwitching(rapLines.slice(0, 8));
-        rapResponse = validatedLines.join('\n');
-        console.log(`Extracted ${rapLines.length} clean rap lines with validated rhyme switching`);
+        rapResponse = this.sanitizeContent(validatedLines.join('\n'));
+        console.log(`Extracted ${rapLines.length} clean rap lines with security validation`);
       } else {
         // Fallback: use all non-reasoning content
         const cleanLines = lines.filter((line: string) => {
@@ -338,6 +342,8 @@ OUTPUT REQUIREMENTS (what user sees):
     }
     
     if (rapResponse) {
+      // SECURITY: Apply additional reasoning filtering before moderation
+      rapResponse = this.filterReasoningFromContent(rapResponse);
       
       // Apply AI-powered content moderation
       const safetyLevel = profanityFilter ? 'strict' : 'moderate';
@@ -348,12 +354,13 @@ OUTPUT REQUIREMENTS (what user sees):
       );
       
       if (moderationResult.wasFlagged) {
-        console.log(`Content filtered: ${moderationResult.reason}`);
-        console.log(`Original: ${rapResponse.substring(0, 50)}...`);
-        console.log(`Filtered: ${moderationResult.content.substring(0, 50)}...`);
+        console.log(`Security: Content filtered for ${moderationResult.reason}`);
+        // SECURITY: Don't log actual content in production
+        console.log(`Content filtered - length: ${rapResponse.length} chars`);
       }
       
-      return moderationResult.content;
+      // SECURITY: Final sanitization pass
+      return this.sanitizeContent(moderationResult.content);
     }
 
     // If we got reasoning instead of content, extract clean rap verses
@@ -437,6 +444,88 @@ OUTPUT REQUIREMENTS (what user sees):
     // Simple extraction - can be enhanced with phonetic analysis
     const words = line.toLowerCase().match(/\b\w+\b/g) || [];
     return words.filter(word => word.length > 2);
+  }
+
+  /**
+   * SECURITY: Sanitize content to remove formatting markers and prevent injection
+   */
+  private sanitizeContent(content: string): string {
+    if (!content) return "";
+    
+    // Remove bold/italic markdown markers around profanity (security fix)
+    content = content.replace(/\*\*([^*]+)\*\*/g, '$1');
+    content = content.replace(/\*([^*]+)\*/g, '$1');
+    
+    // Remove any HTML tags (security)
+    content = content.replace(/<[^>]*>/g, '');
+    
+    // Remove control characters except newlines and tabs
+    content = content.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+    
+    // Limit line length to prevent buffer overflow attacks
+    const lines = content.split('\n').map(line => 
+      line.length > 500 ? line.substring(0, 500) + '...' : line
+    );
+    
+    return lines.join('\n').trim();
+  }
+
+  /**
+   * SECURITY: Enhanced reasoning filter to prevent internal AI reasoning exposure
+   */
+  private filterReasoningFromContent(content: string): string {
+    if (!content) return "";
+    
+    // Remove reasoning patterns that might leak internal AI processes
+    const reasoningPatterns = [
+      /We need to.*?lines/gi,
+      /Must (ensure|provide|match|include).*?\.?/gi,
+      /Lines?\s*\d+(-\d+)?:.*?(\n|$)/gi,
+      /Provide exactly.*?lines/gi,
+      /Reasoning:.*?(?=\n\n|\n$|$)/gi,
+      /Analysis:.*?(?=\n\n|\n$|$)/gi,
+      /Internal process:.*?(?=\n\n|\n$|$)/gi
+    ];
+    
+    let filtered = content;
+    for (const pattern of reasoningPatterns) {
+      filtered = filtered.replace(pattern, '');
+    }
+    
+    // Remove empty lines created by filtering
+    filtered = filtered.replace(/\n\s*\n/g, '\n').trim();
+    
+    return filtered;
+  }
+
+  /**
+   * SECURITY: Input validation for user-provided content
+   */
+  private validateInput(input: string, maxLength: number = 10000): string {
+    if (!input || typeof input !== 'string') {
+      throw new Error('Invalid input: must be a non-empty string');
+    }
+    
+    if (input.length > maxLength) {
+      throw new Error(`Input too long: maximum ${maxLength} characters allowed`);
+    }
+    
+    // Check for common injection patterns
+    const suspiciousPatterns = [
+      /<script[^>]*>.*?<\/script>/gi,
+      /javascript:/gi,
+      /data:text\/html/gi,
+      /vbscript:/gi,
+      /on\w+\s*=/gi
+    ];
+    
+    for (const pattern of suspiciousPatterns) {
+      if (pattern.test(input)) {
+        throw new Error('Security violation: suspicious content detected');
+      }
+    }
+    
+    return input.trim();
   }
 
   /**

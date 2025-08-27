@@ -104,6 +104,40 @@ export class ContentModerationService {
   }
 
   /**
+   * SECURITY: Sanitize explicit content for family-friendly mode
+   */
+  private sanitizeExplicitContent(content: string): string {
+    if (!content) return "";
+
+    // Replace explicit words with family-friendly alternatives
+    const profanityReplacements: Record<string, string> = {
+      'fuck': 'mess',
+      'shit': 'stuff',
+      'damn': 'darn',
+      'bitch': 'person',
+      'ass': 'butt',
+      'hell': 'heck',
+      // Remove more offensive terms entirely
+      'cunt': '***',
+      'nigger': '***',
+      'faggot': '***'
+    };
+
+    let sanitized = content;
+    
+    // Remove markdown bold markers around profanity first
+    sanitized = sanitized.replace(/\*\*\s*([^*]+)\s*\*\*/g, '$1');
+    
+    // Replace profanity with alternatives
+    for (const [profanity, replacement] of Object.entries(profanityReplacements)) {
+      const regex = new RegExp(`\\b${profanity}\\b`, 'gi');
+      sanitized = sanitized.replace(regex, replacement);
+    }
+    
+    return sanitized.trim();
+  }
+
+  /**
    * Apply content filtering with different safety levels
    * @param content - Content to filter
    * @param safetyLevel - 'strict' (family-friendly) or 'moderate' (battle rap appropriate)
@@ -115,8 +149,32 @@ export class ContentModerationService {
     type: 'prompt' | 'response' = 'response'
   ): Promise<{ content: string; wasFlagged: boolean; reason?: string }> {
     
+    // SECURITY: Pre-validation for basic profanity patterns
+    const explicitPatterns = [
+      /\b(fuck|shit|damn|bitch|ass|hell|cunt|nigger|faggot)\b/gi,
+      /\*\*\s*(fuck|shit|damn|bitch|ass|hell|cunt|nigger|faggot)\s*\*\*/gi
+    ];
+    
+    let hasExplicitContent = false;
+    for (const pattern of explicitPatterns) {
+      if (pattern.test(content)) {
+        hasExplicitContent = true;
+        break;
+      }
+    }
+    
     // For strict mode (family-friendly), check all content
     if (safetyLevel === 'strict') {
+      if (hasExplicitContent) {
+        // Immediate flagging for strict mode with explicit content
+        const cleanContent = this.sanitizeExplicitContent(content);
+        return {
+          content: cleanContent,
+          wasFlagged: true,
+          reason: 'Explicit language removed for family-friendly mode'
+        };
+      }
+      
       const moderation = await this.moderateContent(content, type);
       
       if (!moderation.isSafe) {
@@ -165,9 +223,9 @@ I'm the champion of this lyrical scene.`;
   private generateModerateAlternative(originalContent: string): string {
     // Generate battle-appropriate alternative without serious violations
     return `Your bars are trash, my flow's on fire,
-I'm spitting flames while you just tire,
-Step to the mic, I'll shut you down,
-Best battle rapper in this whole town.`;
+I'm spittin' heat, you should retire,
+My rhymes cut deep, your style's expired,
+Step up to me? That's not advised.`;
   }
 }
 

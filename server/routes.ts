@@ -192,6 +192,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       
+      // SECURITY: Input validation for battle creation parameters
+      const {
+        difficulty,
+        profanityFilter,
+        lyricComplexity,
+        styleIntensity,
+        aiCharacterName,
+        aiCharacterId
+      } = req.body;
+      
+      // SECURITY: Validate battle parameters
+      const validDifficulties = ['easy', 'normal', 'hard'];
+      if (difficulty && !validDifficulties.includes(difficulty)) {
+        return res.status(400).json({ message: "Invalid difficulty level" });
+      }
+      
+      if (typeof profanityFilter !== 'undefined' && typeof profanityFilter !== 'boolean') {
+        return res.status(400).json({ message: "Profanity filter must be boolean" });
+      }
+      
+      if (lyricComplexity && (typeof lyricComplexity !== 'number' || lyricComplexity < 0 || lyricComplexity > 100)) {
+        return res.status(400).json({ message: "Lyric complexity must be between 0-100" });
+      }
+      
+      if (styleIntensity && (typeof styleIntensity !== 'number' || styleIntensity < 0 || styleIntensity > 100)) {
+        return res.status(400).json({ message: "Style intensity must be between 0-100" });
+      }
+      
+      // SECURITY: Validate AI character selection
+      const validCharacters = ['razor', 'venom', 'silk'];
+      if (aiCharacterId && !validCharacters.includes(aiCharacterId)) {
+        return res.status(400).json({ message: "Invalid AI character" });
+      }
+      
+      // SECURITY: Sanitize character name input
+      const sanitizedCharacterName = aiCharacterName ? 
+        aiCharacterName.toString().substring(0, 50).trim() : null;
+      
       // Ensure user exists and has proper setup
       let user = await storage.getUser(userId);
       if (!user) {
@@ -214,9 +252,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // SECURITY: Only include validated and sanitized parameters
       const battleData = {
-        ...req.body,
         userId,
+        difficulty: difficulty || 'normal',
+        profanityFilter: profanityFilter !== undefined ? profanityFilter : false,
+        lyricComplexity: lyricComplexity || 50,
+        styleIntensity: styleIntensity || 50,
+        aiCharacterName: sanitizedCharacterName || 'MC Venom',
+        aiCharacterId: aiCharacterId || 'venom',
         userScore: 0,
         aiScore: 0,
         rounds: [],
@@ -340,22 +384,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // FAST Battle Round Processing - Optimized for Speed  
   app.post("/api/battles/:id/rounds", isAuthenticated, upload.single('audio'), async (req: any, res) => {
     const startTime = Date.now();
-    console.log(`🎤 Battle Round Processing Started - ${req.params.id}`);
+    const battleId = req.params.id;
     
     try {
-      const battleId = req.params.id;
+      // SECURITY: Input validation and sanitization
+      if (!battleId || typeof battleId !== 'string' || battleId.length > 50) {
+        return res.status(400).json({ message: "Invalid battle ID" });
+      }
+      
+      // SECURITY: Validate battle ID format (UUID)
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(battleId)) {
+        return res.status(400).json({ message: "Invalid battle ID format" });
+      }
+
+      console.log(`🎤 Battle Round Processing Started - ${battleId.substring(0, 8)}...`);
+      
       const battle = await storage.getBattle(battleId);
       
       if (!battle) {
         return res.status(404).json({ message: "Battle not found" });
       }
 
-      // Handle audio data from multer
+      // SECURITY: Enhanced audio file validation
       if (!req.file?.buffer) {
         return res.status(400).json({ message: "No audio file provided" });
       }
 
       const audioBuffer = req.file.buffer;
+      
+      // SECURITY: Audio file security checks
+      if (audioBuffer.length < 100) {
+        return res.status(400).json({ message: "Audio file too small" });
+      }
+      
+      if (audioBuffer.length > 15 * 1024 * 1024) { // 15MB absolute max
+        return res.status(400).json({ message: "Audio file too large" });
+      }
+      
+      // SECURITY: Basic audio format validation (check for common audio headers)
+      const audioHeader = audioBuffer.slice(0, 12).toString('hex');
+      const validAudioHeaders = [
+        '52494646', // RIFF (WAV)
+        '49443303', // ID3 (MP3)
+        'fffb', // MP3 frame sync
+        'fff3', // MP3 frame sync
+        '4f676753', // OggS (Ogg)
+      ];
+      
+      const isValidAudio = validAudioHeaders.some(header => 
+        audioHeader.toLowerCase().startsWith(header.toLowerCase())
+      );
+      
+      if (!isValidAudio) {
+        return res.status(400).json({ message: "Invalid audio format" });
+      }
 
       console.log(`🎵 Audio received: ${audioBuffer.length} bytes`);
 
@@ -424,8 +506,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(round);
       
     } catch (error: any) {
-      console.error("❌ Battle round error:", error);
-      res.status(500).json({ message: "Battle processing failed", error: error.message });
+      const processingTime = Date.now() - startTime;
+      // SECURITY: Don't expose internal error details to users
+      console.error(`❌ Battle round processing failed in ${processingTime}ms for battle ${battleId.substring(0, 8)}...`);
+      console.error("Error details (internal only):", error);
+      
+      // SECURITY: Generic error message to prevent information leakage
+      res.status(500).json({ 
+        message: "Battle processing temporarily unavailable. Please try again.",
+        processingTime 
+      });
     }
   });
 
@@ -435,12 +525,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const battleId = req.params.id;
       const updates = req.body;
       
-      // Quick state update - no authentication required for speed
-      await storage.updateBattleState(battleId, updates);
+      // SECURITY: Validate battle ID format (UUID)
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(battleId)) {
+        return res.status(400).json({ message: "Invalid battle ID format" });
+      }
+      
+      // SECURITY: Validate and sanitize state updates
+      const allowedFields = ['userScore', 'aiScore', 'isComplete', 'winner'];
+      const sanitizedUpdates: any = {};
+      
+      for (const [key, value] of Object.entries(updates)) {
+        if (allowedFields.includes(key)) {
+          if (key === 'userScore' || key === 'aiScore') {
+            // Validate score values
+            if (typeof value === 'number' && value >= 0 && value <= 100) {
+              sanitizedUpdates[key] = value;
+            }
+          } else if (key === 'isComplete') {
+            if (typeof value === 'boolean') {
+              sanitizedUpdates[key] = value;
+            }
+          } else if (key === 'winner') {
+            const validWinners = ['user', 'ai', 'tie'];
+            if (typeof value === 'string' && validWinners.includes(value)) {
+              sanitizedUpdates[key] = value;
+            }
+          }
+        }
+      }
+      
+      await storage.updateBattleState(battleId, sanitizedUpdates);
       res.json({ success: true });
     } catch (error) {
-      console.error("Error updating battle state:", error);
-      res.status(500).json({ message: "State update failed" });
+      // SECURITY: Don't expose internal error details
+      console.error("Error updating battle state (internal):", error);
+      res.status(500).json({ message: "State update temporarily unavailable" });
     }
   });
 
