@@ -15,26 +15,66 @@ export class GroqService {
   }
 
   async transcribeAudio(audioBuffer: Buffer): Promise<string> {
-    const formData = new FormData();
-    const audioBlob = new Blob([audioBuffer], { type: "audio/wav" });
-    formData.append("file", audioBlob, "audio.wav");
-    formData.append("model", "whisper-large-v3");
-    formData.append("response_format", "json");
+    console.log(`🎙️ Groq transcription starting: ${audioBuffer.length} bytes`);
+    
+    try {
+      const formData = new FormData();
+      // Try different audio formats that Groq accepts
+      const audioBlob = new Blob([audioBuffer], { type: "audio/webm" });
+      formData.append("file", audioBlob, "audio.webm");
+      formData.append("model", "whisper-large-v3");
+      formData.append("response_format", "json");
 
-    const response = await fetch(`${this.baseUrl}/audio/transcriptions`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${this.apiKey}`,
-      },
-      body: formData,
-    });
+      console.log(`📤 Sending to Groq transcription API...`);
+      
+      const response = await fetch(`${this.baseUrl}/audio/transcriptions`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${this.apiKey}`,
+        },
+        body: formData,
+      });
 
-    if (!response.ok) {
-      throw new Error(`Groq transcription failed: ${response.statusText}`);
+      console.log(`📥 Groq response status: ${response.status} ${response.statusText}`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log(`❌ Groq transcription error: ${errorText}`);
+        
+        // If webm fails, try as wav
+        console.log(`🔄 Retrying with WAV format...`);
+        const formData2 = new FormData();
+        const audioBlob2 = new Blob([audioBuffer], { type: "audio/wav" });
+        formData2.append("file", audioBlob2, "audio.wav");
+        formData2.append("model", "whisper-large-v3");
+        formData2.append("response_format", "json");
+
+        const response2 = await fetch(`${this.baseUrl}/audio/transcriptions`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${this.apiKey}`,
+          },
+          body: formData2,
+        });
+
+        if (!response2.ok) {
+          const errorText2 = await response2.text();
+          console.log(`❌ Second attempt failed: ${errorText2}`);
+          throw new Error(`Invalid audio format`);
+        }
+
+        const result2 = await response2.json();
+        console.log(`✅ Transcription successful (WAV): "${result2.text.substring(0, 50)}..."`);
+        return result2.text;
+      }
+
+      const result = await response.json();
+      console.log(`✅ Transcription successful (WebM): "${result.text.substring(0, 50)}..."`);
+      return result.text;
+    } catch (error) {
+      console.error(`💥 Transcription error:`, error);
+      throw new Error(`Invalid audio format`);
     }
-
-    const result = await response.json();
-    return result.text;
   }
 
   // Blend AI response with advanced rhyme techniques
