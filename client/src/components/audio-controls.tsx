@@ -35,8 +35,9 @@ export function AudioControls({
   useEffect(() => {
     if (audioUrl && audioUrl !== previousAudioUrl.current) {
       previousAudioUrl.current = audioUrl;
-      console.log('Loading new audio URL, size:', audioUrl.length, 'bytes');
-      console.log('Audio URL format:', audioUrl.substring(0, 50) + '...');
+      console.log('🎵 Loading new audio URL, size:', audioUrl.length, 'chars');
+      console.log('🎵 Audio URL format:', audioUrl.substring(0, 80) + '...');
+      console.log('🎵 Is base64 data URL:', audioUrl.startsWith('data:audio/'));
       
       // Clean up previous audio
       if (audioRef.current) {

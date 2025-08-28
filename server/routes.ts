@@ -433,20 +433,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Audio file is empty" });
       }
       
-      // SECURITY: Debug audio format - temporarily very permissive for debugging
+      // SECURITY: Proper audio format validation based on our findings
       const audioHeader = audioBuffer.slice(0, 16).toString('hex');
-      const first4Bytes = audioBuffer.slice(0, 4).toString('ascii');
-      const first8Bytes = audioBuffer.slice(0, 8).toString('hex');
       
-      console.log(`🔍 AUDIO DEBUG:`);
-      console.log(`  Size: ${audioBuffer.length} bytes`);
-      console.log(`  Header (hex): ${audioHeader}`);
-      console.log(`  First 4 ASCII: "${first4Bytes}"`);
-      console.log(`  First 8 hex: ${first8Bytes}`);
-      console.log(`  First 4 bytes: [${audioBuffer[0]}, ${audioBuffer[1]}, ${audioBuffer[2]}, ${audioBuffer[3]}]`);
+      console.log(`🔍 Audio validation: ${audioBuffer.length} bytes, header: ${audioHeader.substring(0, 16)}`);
       
-      // COMPLETELY BYPASS VALIDATION for now - just accept any non-empty file
-      console.log(`✅ Audio validation completely bypassed - proceeding with ${audioBuffer.length} bytes`);
+      // WebM format validation (what browsers actually send)
+      const isWebM = audioBuffer[0] === 0x1a && audioBuffer[1] === 0x45 && 
+                     audioBuffer[2] === 0xDF && audioBuffer[3] === 0xA3;
+      
+      // Other common formats
+      const isWAV = audioHeader.startsWith('52494646'); // RIFF
+      const isOgg = audioHeader.startsWith('4f676753'); // OggS
+      const isMP3 = audioHeader.startsWith('fffb') || audioHeader.startsWith('fff3');
+      
+      if (!isWebM && !isWAV && !isOgg && !isMP3) {
+        console.log(`❌ Unrecognized audio format, header: ${audioHeader.substring(0, 16)}`);
+        return res.status(400).json({ message: "Unsupported audio format" });
+      }
+      
+      console.log(`✅ Audio validation passed: ${isWebM ? 'WebM' : isWAV ? 'WAV' : isOgg ? 'Ogg' : 'MP3'} format`);
 
       console.log(`🎵 Audio received: ${audioBuffer.length} bytes`);
 
