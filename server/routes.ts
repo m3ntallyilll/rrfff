@@ -6,6 +6,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { SUBSCRIPTION_TIERS, insertTournamentSchema } from "@shared/schema";
 import { groqService } from "./services/groq";
 import { typecastService } from "./services/typecast";
+import { scoringService } from "./services/scoring";
 import multer from "multer";
 
 // Configure multer for audio uploads
@@ -502,14 +503,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`🤖 Processing complete (${Date.now() - startTime}ms)`);
 
-      // Create round immediately - no delays
+      // REALISTIC SCORING: Use actual battle analysis instead of random numbers
+      console.log(`📊 Analyzing battle performance...`);
+      const scores = scoringService.scoreRound(userText, aiResponseText);
+      
+      console.log(`📈 User analysis: Rhyme ${scores.rhymeDensity}/100, Flow ${scores.flowQuality}/100, Creativity ${scores.creativity}/100`);
+      console.log(`🎯 Final scores: User ${scores.userScore}/100, AI ${scores.aiScore}/100`);
+
+      // Create round with realistic scoring
       const round = {
         id: Date.now().toString(),
         battleId,
         userText,
         aiResponse: aiResponseText,
-        userScore: Math.floor(Math.random() * 20) + 70, // 70-90
-        aiScore: Math.floor(Math.random() * 20) + 75,   // 75-95
+        userScore: scores.userScore,
+        aiScore: scores.aiScore,
         audioUrl: audioResult.audioUrl,
         timestamp: Date.now()
       };

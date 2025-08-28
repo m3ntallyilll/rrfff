@@ -65,23 +65,52 @@ export class ScoringService {
   }
 
   calculateCreativity(text: string): number {
-    const words = text.toLowerCase().split(/\s+/);
+    const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+    
+    // COMPREHENSIVE ANALYSIS based on actual rap battle criteria
+    
+    // 1. BASIC REQUIREMENTS - severe penalties for minimal effort
+    if (words.length <= 3) {
+      console.log(`❌ Too few words (${words.length}) - major penalty`);
+      return 5; // Maximum 5/100 for lazy attempts
+    }
+    
+    const lines = text.split('\n').filter(line => line.trim());
+    if (lines.length <= 1) {
+      console.log(`❌ Only ${lines.length} line(s) - major penalty`);
+      return Math.max(5, words.length * 2); // Cap at very low score
+    }
+    
+    // 2. LEXICAL DIVERSITY (vocabulary richness)
     const uniqueWords = new Set(words);
-    const lexicalDiversity = Math.min(30, (uniqueWords.size / words.length) * 100);
+    const lexicalDiversity = Math.min(15, (uniqueWords.size / words.length) * 40);
     
-    // Advanced wordplay detection
-    const wordplayScore = this.detectWordplay(text);
+    // 3. ADVANCED WORDPLAY DETECTION
+    const wordplayScore = this.detectAdvancedWordplay(text);
     
-    // Metaphor and imagery detection
-    const metaphorScore = this.detectMetaphors(text);
+    // 4. METAPHORS & SIMILES
+    const figurativeScore = this.detectFigurativeLanguage(text);
     
-    // Battle tactics and aggression
-    const battleTacticsScore = this.detectBattleTactics(text);
+    // 5. PUNCHLINES & BATTLE TACTICS
+    const punchlineScore = this.detectPunchlines(text);
     
-    // Originality (avoiding clichés)
+    // 6. HOMONYMS & DOUBLE MEANINGS
+    const homonymScore = this.detectHomonyms(text);
+    
+    // 7. FLOW CONSISTENCY & RHYTHM
+    const rhythmScore = this.analyzeRhythm(text);
+    
+    // 8. ORIGINALITY (anti-cliché)
     const originalityScore = this.calculateOriginality(text);
     
-    return Math.round(wordplayScore + metaphorScore + battleTacticsScore + originalityScore + lexicalDiversity);
+    const totalScore = Math.round(
+      lexicalDiversity + wordplayScore + figurativeScore + 
+      punchlineScore + homonymScore + rhythmScore + originalityScore
+    );
+    
+    console.log(`🎭 Creativity breakdown: Vocab ${lexicalDiversity}/15, Wordplay ${wordplayScore}/20, Figurative ${figurativeScore}/15, Punchlines ${punchlineScore}/15, Homonyms ${homonymScore}/10, Rhythm ${rhythmScore}/10, Original ${originalityScore}/15`);
+    
+    return Math.min(100, totalScore);
   }
 
   private detectWordplay(text: string): number {
@@ -139,6 +168,159 @@ export class ScoringService {
     
     score = Math.min(15, (aggressiveCount * 3) + Math.min(5, calloutCount) + (confidenceCount * 2));
     return score;
+  }
+
+  // NEW ADVANCED DETECTION METHODS
+  
+  private detectAdvancedWordplay(text: string): number {
+    let score = 0;
+    const lower = text.toLowerCase();
+    const words = lower.split(/\s+/);
+    
+    // Multi-syllabic wordplay (like Eminem)
+    for (let i = 0; i < words.length - 1; i++) {
+      const word1 = words[i];
+      const word2 = words[i + 1];
+      
+      // Check for similar sounds/patterns
+      if (word1.length > 3 && word2.length > 3) {
+        if (this.soundSimilar(word1, word2)) {
+          score += 3;
+        }
+      }
+    }
+    
+    // Double/triple entendres
+    const entendrePatterns = [
+      /\b(bank|dough|bread|green|cash)\b.*\b(money|rich|broke|pay)\b/g,
+      /\b(fire|hot|burn|flame)\b.*\b(sick|ill|cold|freeze)\b/g,
+      /\b(crown|king|royal)\b.*\b(rule|reign|throne)\b/g
+    ];
+    
+    entendrePatterns.forEach(pattern => {
+      const matches = lower.match(pattern) || [];
+      score += matches.length * 5;
+    });
+    
+    return Math.min(20, score);
+  }
+  
+  private detectFigurativeLanguage(text: string): number {
+    let score = 0;
+    const lower = text.toLowerCase();
+    
+    // SIMILES (like, as comparisons)
+    const similePattern = /\b(like|as)\s+[a-z\s]{3,}/g;
+    const similes = lower.match(similePattern) || [];
+    score += similes.length * 4;
+    
+    // METAPHORS (is/are statements, direct comparisons)
+    const metaphorPatterns = [
+      /\bi\s+(am|was)\s+[a-z\s]{3,}/g,
+      /\byou\s+(are|were)\s+[a-z\s]{3,}/g,
+      /\b(fire|ice|lightning|thunder|storm|beast|king|queen|god)\b/g
+    ];
+    
+    metaphorPatterns.forEach(pattern => {
+      const matches = lower.match(pattern) || [];
+      score += matches.length * 3;
+    });
+    
+    return Math.min(15, score);
+  }
+  
+  private detectPunchlines(text: string): number {
+    let score = 0;
+    const lower = text.toLowerCase();
+    const lines = text.split('\n').filter(line => line.trim());
+    
+    // Punchline indicators
+    const punchlineWords = [
+      'destroy', 'kill', 'murder', 'slaughter', 'demolish', 'annihilate',
+      'weak', 'pathetic', 'trash', 'garbage', 'amateur', 'clown',
+      'better', 'supreme', 'greatest', 'legend', 'god', 'king'
+    ];
+    
+    // Check last line of each verse for strong endings
+    lines.forEach((line, index) => {
+      const lineWords = line.toLowerCase().split(/\s+/);
+      const hasPunchlineWord = lineWords.some(word => 
+        punchlineWords.includes(word.replace(/[^\w]/g, ''))
+      );
+      
+      if (hasPunchlineWord) {
+        score += (index === lines.length - 1) ? 5 : 3; // More points for closing lines
+      }
+    });
+    
+    // Aggressive direct attacks with "you"
+    const attackPattern = /\byou\s+(are|were|can't|won't|never|always)\s+[a-z\s]{3,}/g;
+    const attacks = lower.match(attackPattern) || [];
+    score += attacks.length * 3;
+    
+    return Math.min(15, score);
+  }
+  
+  private detectHomonyms(text: string): number {
+    let score = 0;
+    const words = text.toLowerCase().split(/\s+/);
+    
+    // Common homonyms and double meanings in rap
+    const homonymPairs = [
+      ['to', 'too', 'two'], ['there', 'their', 'they\'re'],
+      ['right', 'write'], ['peace', 'piece'], ['steal', 'steel'],
+      ['brake', 'break'], ['rain', 'reign', 'rein'], ['cent', 'sent', 'scent'],
+      ['bass', 'base'], ['beat', 'beet'], ['rap', 'wrap'],
+      ['flow', 'flo'], ['bars', 'bars'], ['dope', 'dope']
+    ];
+    
+    homonymPairs.forEach(group => {
+      const groupWords = group.filter(word => words.includes(word));
+      if (groupWords.length >= 2) {
+        score += 3;
+      }
+    });
+    
+    return Math.min(10, score);
+  }
+  
+  private analyzeRhythm(text: string): number {
+    const lines = text.split('\n').filter(line => line.trim());
+    if (lines.length < 2) return 2;
+    
+    let score = 0;
+    const syllableCounts = lines.map(line => this.countSyllables(line));
+    
+    // Check for consistent rhythm
+    const avgSyllables = syllableCounts.reduce((a, b) => a + b, 0) / syllableCounts.length;
+    const consistency = syllableCounts.filter(count => 
+      Math.abs(count - avgSyllables) <= 2
+    ).length / syllableCounts.length;
+    
+    score += consistency * 6;
+    
+    // Bonus for good rhythm range (8-16 syllables)
+    if (avgSyllables >= 8 && avgSyllables <= 16) {
+      score += 4;
+    }
+    
+    return Math.min(10, Math.round(score));
+  }
+  
+  private soundSimilar(word1: string, word2: string): boolean {
+    // Simple phonetic similarity check
+    const cleanWord1 = word1.replace(/[^\w]/g, '');
+    const cleanWord2 = word2.replace(/[^\w]/g, '');
+    
+    if (cleanWord1.length < 3 || cleanWord2.length < 3) return false;
+    
+    // Check for similar endings (rhyme)
+    const ending1 = cleanWord1.slice(-2);
+    const ending2 = cleanWord2.slice(-2);
+    
+    return ending1 === ending2 || 
+           cleanWord1.includes(cleanWord2.slice(0, 3)) ||
+           cleanWord2.includes(cleanWord1.slice(0, 3));
   }
 
   private calculateOriginality(text: string): number {
