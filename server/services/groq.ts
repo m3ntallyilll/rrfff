@@ -97,6 +97,61 @@ export class GroqService {
     }
   }
 
+  /**
+   * ADVANCED RHYME REASONING AGENT
+   * Uses a two-stage process: first analyze rhyme patterns, then generate enhanced response
+   */
+  private async analyzeRhymePatterns(userVerse: string): Promise<string> {
+    const analysisPrompt = `You are a RHYME PATTERN ANALYSIS AGENT specialized in rap battle techniques.
+
+ANALYZE the following verse for rhyme patterns and suggest advanced techniques:
+
+USER VERSE: "${userVerse}"
+
+PROVIDE a technical analysis focusing on:
+1. End rhyme schemes (ABAB, AABB, etc.)
+2. Internal rhyme opportunities 
+3. Multi-syllabic rhyme potential
+4. Suggested rhyme families to use in response
+5. Flow pattern recommendations
+
+Format your response as a technical brief for an AI rapper, maximum 3 sentences.`;
+
+    try {
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-oss-120b",
+          messages: [{ role: "user", content: analysisPrompt }],
+          max_tokens: 200,
+          temperature: 0.3, // Lower temperature for technical analysis
+          reasoning_effort: "low" // SECURITY: Prevent reasoning exposure
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Rhyme analysis failed: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      const choice = result.choices?.[0];
+      
+      if (choice?.message?.content) {
+        console.log("🎯 Rhyme analysis completed:", choice.message.content.substring(0, 100) + "...");
+        return choice.message.content;
+      }
+      
+      return "Standard battle response recommended with multi-syllabic focus.";
+    } catch (error) {
+      console.error("Rhyme analysis agent failed:", error);
+      return "Aggressive counter-attack with internal rhymes suggested.";
+    }
+  }
+
   async generateRapResponse(
     userVerse: string,
     difficulty: string = "normal",
@@ -107,6 +162,11 @@ export class GroqService {
     // SECURITY: Validate and sanitize user input
     const validatedUserVerse = this.validateInput(userVerse, 5000);
     const sanitizedUserVerse = this.sanitizeContent(validatedUserVerse);
+    
+    // STAGE 1: ADVANCED RHYME ANALYSIS
+    console.log("🎯 Stage 1: Analyzing user's rhyme patterns...");
+    const rhymeAnalysis = await this.analyzeRhymePatterns(sanitizedUserVerse);
+    
     const difficultyPrompts = {
       easy: "Use simple AABB or ABAB rhyme schemes, basic wordplay, straightforward punchlines, and clear syllable patterns that flow naturally.",
       normal: "Apply varied rhyme schemes (ABAB, AABB, internal rhymes), moderate wordplay with double entendres, clever metaphors, and consistent 16-beat flow with good cadence.",
@@ -161,11 +221,17 @@ Battle rap techniques encouraged:
       ? "High energy and aggressive delivery. Use intimidation tactics and harsh competitive language."
       : "Maximum intensity: Savage, ruthless, and devastating. Use the most aggressive battle rap tactics and brutal verbal attacks.";
 
+    // STAGE 2: ENHANCED RAP GENERATION using rhyme analysis
+    console.log("🎤 Stage 2: Generating enhanced response using rhyme intelligence...");
+    
     const prompt = `You are a legendary rap battle MC with mastery of every rap technique. The challenger just delivered:
 
-"${userVerse}"
+"${sanitizedUserVerse}"
 
-Create a devastating 4-line counter-attack with these specifications:
+RHYME ANALYSIS FROM YOUR RAP CONSULTANT:
+${rhymeAnalysis}
+
+Using this technical analysis, create a devastating 4-line counter-attack with these specifications:
 
 LYRIC COMPLEXITY (${complexityLevel} - ${lyricComplexity}%): ${complexityInstructions}
 
