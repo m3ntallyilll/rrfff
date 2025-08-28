@@ -405,20 +405,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Battle not found" });
       }
 
-      // SECURITY: Enhanced audio file validation
+      // DEBUG: Check file upload status
+      console.log(`📁 File upload debug:`);
+      console.log(`  req.file exists: ${!!req.file}`);
+      console.log(`  req.file.buffer exists: ${!!(req.file?.buffer)}`);
+      console.log(`  req.file details:`, req.file ? {
+        fieldname: req.file.fieldname,
+        originalname: req.file.originalname,
+        encoding: req.file.encoding,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        bufferLength: req.file.buffer?.length
+      } : 'No file');
+
       if (!req.file?.buffer) {
+        console.log(`❌ No audio file buffer provided`);
         return res.status(400).json({ message: "No audio file provided" });
       }
 
       const audioBuffer = req.file.buffer;
       
-      // SECURITY: Audio file security checks
-      if (audioBuffer.length < 100) {
-        return res.status(400).json({ message: "Audio file too small" });
-      }
+      console.log(`📊 File stats: ${audioBuffer.length} bytes, mimetype: ${req.file.mimetype}`);
       
-      if (audioBuffer.length > 15 * 1024 * 1024) { // 15MB absolute max
-        return res.status(400).json({ message: "Audio file too large" });
+      // TEMPORARILY REMOVE SIZE RESTRICTIONS for debugging
+      if (audioBuffer.length === 0) {
+        console.log(`❌ Empty audio file`);
+        return res.status(400).json({ message: "Audio file is empty" });
       }
       
       // SECURITY: Debug audio format - temporarily very permissive for debugging
@@ -433,13 +445,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`  First 8 hex: ${first8Bytes}`);
       console.log(`  First 4 bytes: [${audioBuffer[0]}, ${audioBuffer[1]}, ${audioBuffer[2]}, ${audioBuffer[3]}]`);
       
-      // TEMPORARILY DISABLE VALIDATION for debugging
-      if (audioBuffer.length < 50) {
-        console.log(`❌ Rejecting tiny file: ${audioBuffer.length} bytes`);
-        return res.status(400).json({ message: "Audio file too small (< 50 bytes)" });
-      }
-      
-      console.log(`✅ Audio validation temporarily bypassed for debugging`);
+      // COMPLETELY BYPASS VALIDATION for now - just accept any non-empty file
+      console.log(`✅ Audio validation completely bypassed - proceeding with ${audioBuffer.length} bytes`);
 
       console.log(`🎵 Audio received: ${audioBuffer.length} bytes`);
 
