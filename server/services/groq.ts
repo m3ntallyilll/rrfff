@@ -77,6 +77,40 @@ export class GroqService {
     }
   }
 
+  // SYLLABLE AND RHYME ANALYSIS HELPERS
+  private countSyllablesInLine(line: string): number {
+    const words = line.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 0);
+    let totalSyllables = 0;
+    
+    for (const word of words) {
+      // Basic syllable counting algorithm
+      let syllables = word.match(/[aeiouy]+/g)?.length || 1;
+      
+      // Adjustments for common patterns
+      if (word.endsWith('e')) syllables--;
+      if (word.endsWith('le')) syllables++;
+      if (syllables <= 0) syllables = 1;
+      
+      totalSyllables += syllables;
+    }
+    
+    return totalSyllables;
+  }
+  
+  private extractRhymeSound(word: string): string {
+    const cleanWord = word.toLowerCase().replace(/[^\w]/g, '');
+    if (cleanWord.length < 2) return cleanWord;
+    
+    // Extract the rhyming part (usually the last 2-3 characters)
+    const vowelMatch = cleanWord.match(/[aeiouy][^aeiouy]*$/);
+    if (vowelMatch) {
+      return vowelMatch[0];
+    }
+    
+    // Fallback to last 2 characters
+    return cleanWord.slice(-2);
+  }
+
   // Blend AI response with advanced rhyme techniques
   private blendResponses(aiResponse: string, enhancedVerse: string): string {
     // If AI response is too short or generic, use enhanced verse
@@ -102,20 +136,41 @@ export class GroqService {
    * Uses a two-stage process: first analyze rhyme patterns, then generate enhanced response
    */
   private async analyzeRhymePatterns(userVerse: string): Promise<string> {
+    // First, analyze the syllable structure like the user's example
+    const lines = userVerse.split('\n').filter(line => line.trim());
+    let syllableAnalysis = "";
+    
+    lines.forEach((line, index) => {
+      const syllables = this.countSyllablesInLine(line);
+      const words = line.trim().split(/\s+/);
+      const lastWord = words[words.length - 1];
+      const rhymeSound = this.extractRhymeSound(lastWord);
+      
+      syllableAnalysis += `Line ${index + 1}: ${syllables} syllables, rhyme sound: "${rhymeSound}"\n`;
+    });
+
     const analysisPrompt = `You are a RHYME PATTERN ANALYSIS AGENT specialized in rap battle techniques.
 
-ANALYZE the following verse for rhyme patterns and suggest advanced techniques:
+ANALYZE this verse using professional syllable mapping like: 
+"4AB....sinna hobo" (4 syllables, A rhyme, B rhyme)
+"4AB....beena broke ho" (4 syllables, A rhyme, B rhyme)  
+"4CB....plastic yoyo" (4 syllables, C rhyme, B rhyme)
+"4CB....ass kicked oh no" (4 syllables, C rhyme, B rhyme)
 
 USER VERSE: "${userVerse}"
 
-PROVIDE a technical analysis focusing on:
-1. End rhyme schemes (ABAB, AABB, etc.)
-2. Internal rhyme opportunities 
-3. Multi-syllabic rhyme potential
-4. Suggested rhyme families to use in response
-5. Flow pattern recommendations
+SYLLABLE ANALYSIS:
+${syllableAnalysis}
 
-Format your response as a technical brief for an AI rapper, maximum 3 sentences.`;
+PROVIDE technical analysis focusing on:
+1. Exact syllable count per line and consistency
+2. End rhyme scheme pattern (AABB, ABAB, ABCB, etc.)
+3. Internal rhyme opportunities within lines
+4. Multi-syllabic rhyme chains they used
+5. Suggested counter-rhyme families to dominate their pattern
+6. Flow recommendations to match/exceed their rhythm
+
+Format as technical brief: "User has [X syllables/line], [rhyme pattern], suggest [counter-strategy]" (max 4 sentences).`;
 
     try {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
