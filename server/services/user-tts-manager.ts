@@ -46,6 +46,26 @@ export class UserTTSManager {
       const preferredService = user.preferredTtsService || 'system';
       console.log(`🎯 User ${userId} prefers: ${preferredService} TTS`);
 
+      // FORCE CYPHER-9000 to use Groq for robotic voice
+      if (options.characterId === 'cypher') {
+        try {
+          const apiKey = user.groqApiKey || process.env.GROQ_API_KEY;
+          if (apiKey) {
+            console.log(`🤖 CYPHER-9000 VOICE PROTOCOL: Forcing Groq TTS (${user.groqApiKey ? "user's" : "system"} key)`);
+            const groqInstance = this.getGroqInstance(apiKey);
+            return await groqInstance.generateTTS(text, options.characterId, {
+              voiceStyle: options.voiceStyle,
+              characterName: options.characterName,
+              gender: options.gender
+            });
+          } else {
+            console.log(`⚠️ No Groq API key available for CYPHER-9000!`);
+          }
+        } catch (error: any) {
+          console.log(`❌ CYPHER-9000 Groq TTS failed: ${error.message}, falling back`);
+        }
+      }
+
       // Try user's preferred service first
       if (preferredService === 'openai' && user.openaiApiKey) {
         try {
