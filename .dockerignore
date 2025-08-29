@@ -95,6 +95,45 @@ tmp/
 .cache/
 .parcel-cache/
 
+# Large asset files that should not be in deployment
+*.wav
+*.mp3
+*.mp4
+*.avi
+*.mov
+*.mp2
+*.mkv
+*.webm
+*.flv
+
+# Additional development files
+*.test.*
+*.spec.*
+test/
+tests/
+__tests__/
+.nyc_output/
+coverage/
+
+# Additional build artifacts
+.vite/
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Environment files (keep production env handling)
+.env*
+!.env.example
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Large dependency caches
+.npm/
+.yarn/
+.pnpm-store/
+
 # Log files
 *.log
 logs/

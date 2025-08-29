@@ -29,7 +29,22 @@ rm -f battle_rap_training_data.json battle_rap_training_data.jsonl
 
 # Remove build artifacts
 echo "Removing build artifacts..."
-rm -rf dist/ build/ .tmp/
+rm -rf dist/ build/ .tmp/ .vite/ .next/
+
+# Remove additional large files and directories
+echo "Removing additional large files..."
+rm -rf .git/ .github/ .vscode/ .idea/
+rm -rf notebooks/ docs/ documentation/
+rm -rf coverage/ test-results/ playwright-report/
+
+# Remove source maps and development assets
+echo "Removing source maps and development assets..."
+find . -name "*.map" -delete
+find . -name "*.d.ts" -delete 2>/dev/null || true
+
+# Remove TypeScript cache and config
+echo "Removing TypeScript build cache..."
+rm -f tsconfig.tsbuildinfo *.tsbuildinfo
 
 # Remove logs
 echo "Removing log files..."
@@ -38,8 +53,21 @@ rm -f *.log
 # Clean node_modules and reinstall production only
 echo "Cleaning node_modules..."
 rm -rf node_modules/
-echo "Installing production dependencies..."
-npm ci --only=production
+
+# Use production package.json if it exists
+if [ -f "package.prod.json" ]; then
+  echo "Using production package.json..."
+  mv package.json package.dev.json
+  mv package.prod.json package.json
+  echo "Installing production dependencies..."
+  npm ci --only=production --no-audit --no-fund
+  # Keep both files for reference
+  mv package.json package.prod.json
+  mv package.dev.json package.json
+else
+  echo "Installing production dependencies..."
+  npm ci --only=production --no-audit --no-fund
+fi
 
 echo "✅ Deployment cleanup complete!"
 echo "📊 Current project size:"

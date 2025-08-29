@@ -1,0 +1,48 @@
+{
+  "deployment": {
+    "name": "rap-battle-game",
+    "platform": "cloud-run",
+    "maxImageSize": "8GiB",
+    "optimization": {
+      "enabled": true,
+      "cleanupScript": "./cleanup-deployment.sh",
+      "buildScript": "./build-production.sh"
+    }
+  },
+  "exclude": {
+    "mlModels": [
+      "ARTalk/",
+      "bark/",
+      "MuseTalk/"
+    ],
+    "development": [
+      "node_modules/",
+      ".vscode/",
+      ".idea/",
+      "test/",
+      "tests/",
+      "__tests__/",
+      "*.test.*",
+      "*.spec.*"
+    ],
+    "assets": [
+      "attached_assets/",
+      "temp_audio/",
+      "*.wav",
+      "*.mp3",
+      "*.mp4"
+    ],
+    "cache": [
+      ".cache/",
+      ".npm/",
+      ".yarn/",
+      ".pythonlibs/",
+      ".uv/"
+    ]
+  },
+  "production": {
+    "packageFile": "package.prod.json",
+    "nodeVersion": "18",
+    "dependencies": "production-only"
+  }
+}
