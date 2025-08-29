@@ -4,7 +4,7 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["antlr", "ffmpeg", "ffmpeg-full", "imagemagickBig", "jq", "jre", "libGL", "libGLU", "libjpeg_turbo", "libpng", "libsndfile", "libxcrypt", "pkg-config", "which", "xsimd"]
+packages = ["antlr", "ffmpeg", "ffmpeg-full", "imagemagickBig", "jq", "jre", "libGL", "libGLU", "libjpeg_turbo", "libpng", "libsndfile", "libxcrypt", "pkg-config", "which", "xsimd", "python311Packages.numpy", "python311Packages.scipy", "python311Packages.torch", "python311Packages.torchaudio", "python311Packages.transformers", "python311Packages.huggingface-hub", "gcc-unwrapped", "glibc"]
 
 [deployment]
 deploymentTarget = "autoscale"
