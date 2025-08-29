@@ -1,0 +1,53 @@
+# Multi-stage build for minimal production image
+FROM node:18-alpine AS base
+
+# Install system dependencies
+RUN apk add --no-cache bash
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+FROM base AS deps
+RUN npm ci --only=production --no-optional && npm cache clean --force
+
+# Build stage
+FROM base AS builder
+COPY package*.json ./
+RUN npm ci && npm cache clean --force
+COPY . .
+RUN npm run build
+
+# Production stage - minimal image
+FROM node:18-alpine AS runner
+
+# Install system dependencies
+RUN apk add --no-cache bash
+
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy production dependencies
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+
+# Copy build output
+COPY --from=builder --chown=nextjs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nextjs:nodejs /app/client/dist ./client/dist
+
+# Copy necessary runtime files
+COPY --chown=nextjs:nodejs package*.json ./
+COPY --chown=nextjs:nodejs shared ./shared
+
+USER nextjs
+
+EXPOSE 5000
+
+ENV NODE_ENV=production
+ENV PORT=5000
+
+CMD ["node", "dist/index.js"]
