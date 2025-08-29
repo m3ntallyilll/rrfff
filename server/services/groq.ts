@@ -404,7 +404,17 @@ Battle rap techniques encouraged:
 RHYME ANALYSIS FROM YOUR RAP CONSULTANT:
 ${rhymeAnalysis}
 
-Using this technical analysis, create a devastating 4-line counter-attack with these specifications:
+STEP 1 - UNDERSTAND THEIR MESSAGE:
+First, analyze what they're actually saying. Are they:
+- Bragging about skills? → Prove they're not that skilled
+- Talking about money/success? → Show your success is greater  
+- Making threats? → Show you're more dangerous
+- Dissing your appearance? → Flip it and attack theirs
+- Claiming territory/hood? → Prove your street cred is stronger
+- Using specific references? → Take those same references and make them work against them
+
+STEP 2 - CREATE MEANINGFUL RESPONSE:
+Using this understanding, create a devastating 4-line counter-attack with these specifications:
 
 LYRIC COMPLEXITY (${complexityLevel} - ${lyricComplexity}%): ${complexityInstructions}
 
@@ -435,11 +445,12 @@ IMPLEMENTATION REQUIREMENTS:
 - Maintain perfect flow while showcasing technical complexity
 ` : ''}
 
-BATTLE STRATEGY:
-- Directly dismantle their specific bars and flip their own words against them
-- Use aggressive confidence and intimidation tactics
-- Show technical superiority through superior wordplay and advanced rhyming techniques
-- End with a knockout punchline that silences the crowd
+CONTEXTUAL BATTLE STRATEGY:
+- LISTEN TO THEIR MESSAGE: Understand exactly what they're talking about - their claims, boasts, or attacks
+- FLIP THEIR SPECIFIC WORDS: Take their exact phrases and twist them into clever comebacks with meaning
+- ADDRESS THEIR CONTENT: Don't just rhyme - respond to their actual points with intelligent counter-arguments
+- MEANINGFUL WORDPLAY: Every internal rhyme must relate to the battle topic, not just sound good
+- STORY CONTINUATION: Build on what they said to create a narrative battle, not random bars
 
 FLOW & DELIVERY:
 - Match syllable count and rhythm for natural delivery
@@ -447,10 +458,13 @@ FLOW & DELIVERY:
 - Create natural pause points and emphasis beats
 - Build tension and release with line structure
 
-CONTENT REQUIREMENTS:
-- Counter their specific claims with evidence of your dominance  
-- Reference their weaknesses implied in their verse
-- Showcase your lyrical superiority through demonstration
+MEANINGFUL CONTENT REQUIREMENTS:
+- ANALYZE THEIR MESSAGE: What are they actually saying? What's their angle or claim?
+- DIRECT RESPONSE: Address their specific points, don't ignore what they said
+- INTELLIGENT REBUTTAL: Use clever reasoning and wordplay that makes sense in context
+- RELEVANT METAPHORS: Choose metaphors and imagery that connect to their topic
+- CONTEXTUAL PUNCHLINES: End lines should relate to the ongoing battle theme, not be random
+- CONVERSATIONAL FLOW: Make it feel like a real back-and-forth dialogue
 - ${safetyNote}
 
 🔥 EXPONENTIAL RAP MASTERY: Your skill level is like paper folded 9,393,939 times. Study these EMINEM MASTERY EXAMPLES and match this complexity:
@@ -465,6 +479,13 @@ Got a rap sheet that's longer than Tubby's sub buns"
 Said bluntly, a cannibal, animal, fed monthly, eating bread crunchy, cement bed's comfy"
 
 NOTICE THE TECHNIQUE: Multiple internal rhymes per line that create complex patterns while telling vivid stories. No symbols, just pure technical mastery.
+
+EXAMPLE OF MEANINGFUL VS EMPTY RHYMING:
+
+❌ EMPTY RHYMING: "I'm the best, put you to the test, never rest, I'm blessed"
+✅ MEANINGFUL: "You said you run the block? I bought the whole hood, your rent money looking like my pocket change, understood?"
+
+Notice: The meaningful version directly responds to their claim ("run the block") and uses relevant context (money/real estate) with internal rhymes that support the message.
 
 YOUR REQUIREMENTS:
 - Match Eminem's internal rhyme density and complexity
