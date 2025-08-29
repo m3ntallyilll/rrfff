@@ -161,6 +161,32 @@ export class GroqService {
     return false;
   }
 
+  // Generate user battle map for display (not used in TTS)
+  generateUserBattleMap(userVerse: string): string {
+    const lines = userVerse.split('\n').filter(line => line.trim());
+    if (lines.length === 0) return "No verse detected";
+    
+    let battleMap = "USER'S PROFESSIONAL BATTLE MAP:\n";
+    const rhymeScheme = this.analyzeRhymeScheme(lines);
+    
+    lines.forEach((line, index) => {
+      const syllables = this.countSyllablesInLine(line);
+      const scheme = rhymeScheme[index] || 'X';
+      const dots = '.'.repeat(Math.max(1, Math.floor(syllables / 2)));
+      const endWords = line.trim().split(/\s+/).slice(-2).join(' ').toLowerCase();
+      
+      battleMap += `${syllables}${scheme}${dots}${endWords}\n`;
+    });
+    
+    // Add analysis summary
+    const avgSyllables = lines.reduce((sum, line) => sum + this.countSyllablesInLine(line), 0) / lines.length;
+    const schemePattern = rhymeScheme.join('');
+    
+    battleMap += `\nANALYSIS: ${lines.length} lines, ${avgSyllables.toFixed(1)} avg syllables, ${schemePattern} rhyme scheme`;
+    
+    return battleMap;
+  }
+
   // Blend AI response with advanced rhyme techniques
   private blendResponses(aiResponse: string, enhancedVerse: string): string {
     // If AI response is too short or generic, use enhanced verse

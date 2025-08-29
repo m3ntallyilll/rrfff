@@ -507,10 +507,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`📊 Analyzing battle performance...`);
       const scores = scoringService.scoreRound(userText, aiResponseText);
       
+      // GENERATE USER'S BATTLE RAP MAP for display
+      const userBattleMap = groqService.generateUserBattleMap(userText);
+      console.log(`🗺️ USER'S BATTLE MAP:\n${userBattleMap}`);
+      
       console.log(`📈 User analysis: Rhyme ${scores.rhymeDensity}/100, Flow ${scores.flowQuality}/100, Creativity ${scores.creativity}/100`);
       console.log(`🎯 Final scores: User ${scores.userScore}/100, AI ${scores.aiScore}/100`);
 
-      // Create round with realistic scoring
+      // Create round with realistic scoring and battle map
       const round = {
         id: Date.now().toString(),
         battleId,
@@ -519,6 +523,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userScore: scores.userScore,
         aiScore: scores.aiScore,
         audioUrl: audioResult.audioUrl,
+        userBattleMap: userBattleMap, // Add battle map for frontend display
         timestamp: Date.now()
       };
 

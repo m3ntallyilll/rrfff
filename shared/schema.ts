@@ -51,6 +51,7 @@ export const battleRounds = pgTable("battle_rounds", {
   aiVerse: text("ai_verse").notNull(),
   userAudioUrl: text("user_audio_url"),
   aiAudioUrl: text("ai_audio_url"),
+  userBattleMap: text("user_battle_map"), // Professional battle rap mapping for display
   scores: jsonb("scores").$type<RoundScores>().notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
