@@ -11,14 +11,29 @@ sys.path.insert(0, '/home/runner/workspace/bark')
 def generate_bark_audio(text, output_path, voice_prompt="v2/en_speaker_6", temperature=0.7):
     try:
         import numpy as np
+        import torch
         from bark import generate_audio, SAMPLE_RATE
         from scipy.io.wavfile import write as write_wav
+        
+        # Optimize for available hardware
+        if torch.cuda.is_available():
+            print(f"🚀 Using GPU: {torch.cuda.get_device_name(0)}")
+            device = "cuda"
+            torch.cuda.empty_cache()  # Clear GPU cache
+        else:
+            print("⚡ Using CPU with optimizations")
+            device = "cpu"
+            # CPU optimizations
+            torch.set_num_threads(4)
+            os.environ["OMP_NUM_THREADS"] = "4"
+            os.environ["MKL_NUM_THREADS"] = "4"
         
         print(f"Generating audio with voice: {voice_prompt}")
         print(f"Text: {text[:50]}...")
         print(f"Temperature: {temperature}")
+        print(f"Device: {device}")
         
-        # Generate audio
+        # Generate audio with GPU acceleration
         audio_array = generate_audio(
             text,
             history_prompt=voice_prompt,

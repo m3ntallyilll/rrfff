@@ -124,10 +124,10 @@ export class BarkTTS {
       // Clean text for rap battle context
       const cleanText = this.prepareRapText(text);
       
-      // Use dedicated generation script to avoid Python string escaping issues
+      // Use dedicated generation script with CPU optimization
       const { stdout, stderr } = await execAsync(
-        `export LD_LIBRARY_PATH="/nix/store/*/lib:$LD_LIBRARY_PATH" && python3 bark_generate.py "${cleanText.replace(/"/g, '\\"')}" "${outputPath}" --voice "${voiceConfig.historyPrompt}" --temp ${voiceConfig.temperature}`,
-        { timeout: 180000 } // 3 minute timeout for generation
+        `export LD_LIBRARY_PATH="/nix/store/*/lib:$LD_LIBRARY_PATH" && export OMP_NUM_THREADS=4 && export MKL_NUM_THREADS=4 && python3 bark_generate.py "${cleanText.replace(/"/g, '\\"')}" "${outputPath}" --voice "${voiceConfig.historyPrompt}" --temp ${voiceConfig.temperature}`,
+        { timeout: 120000 } // 2 minute timeout with CPU optimization
       );
 
       if (stderr && !stderr.includes('Warning') && !stderr.includes('UserWarning')) {
