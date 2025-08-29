@@ -69,10 +69,10 @@ export default function BattleArena() {
 
   // Initialize new battle on component mount
   useEffect(() => {
-    if (!currentBattleId && !showCharacterSelector) {
+    if (!currentBattleId && !showCharacterSelector && !selectedCharacter) {
       setShowCharacterSelector(true);
     }
-  }, [currentBattleId, showCharacterSelector]);
+  }, [currentBattleId, showCharacterSelector, selectedCharacter]);
 
   const handleRecordingComplete = async (recording: { blob: Blob; duration: number; url: string }) => {
     try {
@@ -158,10 +158,12 @@ export default function BattleArena() {
     setAiResponse("");
     setCurrentAiAudio(undefined);
     setBattleTimer(120);
+    setSelectedCharacter(null);
     setShowCharacterSelector(true);
   };
 
   const handleCharacterSelect = (character: BattleCharacter) => {
+    console.log('🎯 Character selected:', character.displayName);
     setSelectedCharacter(character);
     setShowCharacterSelector(false);
     // Start battle with selected character and complexity settings

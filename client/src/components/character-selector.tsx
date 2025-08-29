@@ -38,8 +38,10 @@ export function CharacterSelector({ onCharacterSelect, selectedCharacter }: Char
                       onError={(e) => {
                         console.warn(`Failed to load image: ${character.avatar}`);
                         // Fallback to character initial
-                        (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).nextElementSibling!.style.display = 'block';
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const fallback = target.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'block';
                       }}
                     />
                   ) : null}
