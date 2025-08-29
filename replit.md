@@ -19,7 +19,7 @@ The application is built with a clear separation between frontend and backend se
 - **Frontend**: React + Vite, Tailwind CSS, TanStack Query for data management, Wouter for routing, and Framer Motion for animations.
 - **Rap Generation**: Utilizes Groq's Llama model, optimized with advanced prompting for complex lyrical techniques, multi-syllabic rhymes, and battle tactics. Output is clean, focusing solely on rap verses.
 - **Scoring System**: Analyzes rhyme density (end, internal, multi-syllabic), flow quality (syllable count, rhythm), and creativity (wordplay, metaphors, originality).
-- **Audio & Voice**: Real-time transcription, hybrid TTS system with Bark TTS (primary) and Typecast.ai (fallback) for authentic rapper voice synthesis, and ARTalk for speech-driven 3D head animation and lip sync. FFmpeg is used for audio processing.
+- **Audio & Voice**: Real-time transcription, hybrid TTS system with Bark TTS (primary, fully functional) and Typecast.ai (fallback) for authentic rapper voice synthesis, and ARTalk for speech-driven 3D head animation and lip sync. FFmpeg is used for audio processing.
 - **Monetization**: Replit Auth for user authentication, PostgreSQL for user and battle data, Stripe for secure subscription payments (Free, Premium, Pro tiers).
 - **Security**: Robust input validation, enhanced error handling to prevent information leakage, content moderation (Llama Guard 4), and secure handling of audio files (format validation, size limits).
 

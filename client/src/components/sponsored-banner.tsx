@@ -23,9 +23,9 @@ const SPONSORED_BANNERS: SponsoredBanner[] = [
     duration: 5000
   },
   {
-    id: 'typecast',
-    text: 'Voice by Typecast - AI Voices',
-    url: 'https://typecast.ai',
+    id: 'mentally-ill',
+    text: 'M3ntally-iLL YouTube Channel',
+    url: 'https://www.youtube.com/@M3ntally-iLL',
     duration: 5000
   },
   {
