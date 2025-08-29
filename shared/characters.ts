@@ -24,7 +24,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     difficulty: 'hard',
     backstory: 'Street-bred MC from the underground scene, known for cutting down opponents with surgical precision',
     signature: 'My bars cut deep like a razor blade, your career about to fade',
-    avatar: 'Evil_robot_MC_Razor_f12359f9.png'
+    avatar: 'Female_evil_robot_MC_Razor_400cdfa6.png'
   },
   {
     id: 'venom',
@@ -50,7 +50,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     difficulty: 'normal',
     backstory: 'Polished black MC who rose through the ranks with charm and technical skill',
     signature: 'Smooth as silk but sharp as steel, making every rival kneel',
-    avatar: 'Evil_robot_MC_Silk_ef8f7ba3.png'
+    avatar: 'Evil_robot_MC_Razor_f12359f9.png'
   }
 ];
 
