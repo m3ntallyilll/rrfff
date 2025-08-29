@@ -937,6 +937,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin endpoint to list users
+  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const userEmail = req.user.claims.email;
+      
+      // Simple admin check - you can modify this logic as needed
+      const isAdmin = userEmail && (
+        userEmail.includes('admin') || 
+        userEmail.endsWith('@replit.com') ||
+        userId === 'your-admin-user-id' // Replace with actual admin user ID
+      );
+      
+      if (!isAdmin) {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+
+      const users = await storage.getAllUsers();
+      
+      // Return sanitized user data (don't expose sensitive fields)
+      const sanitizedUsers = users.map(user => ({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        subscriptionTier: user.subscriptionTier,
+        subscriptionStatus: user.subscriptionStatus,
+        battlesRemaining: user.battlesRemaining,
+        totalBattles: user.totalBattles,
+        totalWins: user.totalWins,
+        createdAt: user.createdAt,
+        lastBattleReset: user.lastBattleReset
+      }));
+      
+      res.json({
+        total: sanitizedUsers.length,
+        users: sanitizedUsers
+      });
+      
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ message: 'Failed to fetch users' });
+    }
+  });
+
   // Serve Bark generated audio files
   app.get('/api/audio/:filename', (req, res) => {
     try {

@@ -26,7 +26,8 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByStripeCustomerId(customerId: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
-  
+  getAllUsers(): Promise<User[]>;
+
   // Subscription management
   updateUserSubscription(userId: string, subscriptionData: {
     stripeCustomerId?: string;
@@ -35,7 +36,7 @@ export interface IStorage {
     subscriptionTier?: string;
     battlesRemaining?: number;
   }): Promise<User>;
-  
+
   // Battle management with user tracking
   canUserStartBattle(userId: string): Promise<boolean>;
   createBattle(battle: any): Promise<Battle>;
@@ -44,11 +45,11 @@ export interface IStorage {
   updateBattleScore(battleId: string, userScore: number, aiScore: number): Promise<void>;
   completeBattle(battleId: string): Promise<void>;
   updateUserStripeInfo(userId: string, data: { stripeCustomerId?: string; stripeSubscriptionId?: string }): Promise<User>;
-  
+
   // Battle round processing
   addBattleRound(battleId: string, round: any): Promise<void>;
   updateBattleState(battleId: string, updates: any): Promise<void>;
-  
+
   // Battle analytics
   getUserStats(userId: string): Promise<{
     totalBattles: number;
@@ -56,7 +57,7 @@ export interface IStorage {
     winRate: number;
     battlesThisMonth: number;
   }>;
-  
+
   // Tournament operations
   createTournament(tournament: InsertTournament): Promise<Tournament>;
   getTournament(id: string): Promise<Tournament | undefined>;
@@ -65,7 +66,7 @@ export interface IStorage {
   updateTournament(id: string, updates: Partial<Tournament>): Promise<Tournament>;
   advanceTournament(tournamentId: string, matchId: string, winnerId: string): Promise<Tournament>;
   generateTournamentBracket(totalRounds: number, opponents: string[]): TournamentBracket;
-  
+
   // API Key management
   updateUserAPIKeys(userId: string, keys: { 
     openaiApiKey?: string; 
@@ -124,6 +125,11 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getAllUsers(): Promise<User[]> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
   // Subscription management
   async updateUserSubscription(userId: string, subscriptionData: {
     stripeCustomerId?: string;
@@ -153,11 +159,11 @@ export class DatabaseStorage implements IStorage {
     // Check if daily battles need reset
     const now = new Date();
     const lastReset = user.lastBattleReset || new Date(0);
-    
+
     // More accurate daily reset check - reset at midnight of the next day
     const resetTime = new Date(lastReset);
     resetTime.setHours(24, 0, 0, 0); // Next day at midnight
-    
+
     const needsReset = now.getTime() >= resetTime.getTime();
 
     if (needsReset) {
@@ -186,14 +192,14 @@ export class DatabaseStorage implements IStorage {
 
     // Check and reset daily battles if needed
     await this.canUserStartBattle(battleData.userId);
-    
+
     // Decrement user's daily battles (except for Pro users)
     if (user.subscriptionTier !== "pro") {
       const updatedUser = await this.getUser(battleData.userId); // Get fresh user data after potential reset
       if ((updatedUser?.battlesRemaining || 0) <= 0) {
         throw new Error("No battles remaining");
       }
-      
+
       await db
         .update(users)
         .set({
@@ -295,7 +301,7 @@ export class DatabaseStorage implements IStorage {
 
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    
+
     const userBattles = await db
       .select()
       .from(battles)
@@ -318,11 +324,11 @@ export class DatabaseStorage implements IStorage {
   async addBattleRound(battleId: string, round: any): Promise<void> {
     const battle = await this.getBattle(battleId);
     if (!battle) return;
-    
+
     // Add round to existing rounds array
     const currentRounds = battle.rounds || [];
     currentRounds.push(round);
-    
+
     await db
       .update(battles)
       .set({
@@ -338,7 +344,7 @@ export class DatabaseStorage implements IStorage {
     if (updates.userScore !== undefined) allowedUpdates.userScore = updates.userScore;
     if (updates.aiScore !== undefined) allowedUpdates.aiScore = updates.aiScore;
     if (updates.rounds) allowedUpdates.rounds = updates.rounds;
-    
+
     if (Object.keys(allowedUpdates).length > 0) {
       await db
         .update(battles)
@@ -352,14 +358,14 @@ export class DatabaseStorage implements IStorage {
     const { getRandomCharacter } = await import("@shared/characters");
     const numOpponents = Math.pow(2, tournament.totalRounds) - 1;
     const opponents: string[] = [];
-    
+
     for (let i = 0; i < numOpponents; i++) {
       const character = getRandomCharacter();
       opponents.push(character.id);
     }
-    
+
     const bracket = this.generateTournamentBracket(tournament.totalRounds, opponents);
-    
+
     const [newTournament] = await db
       .insert(tournaments)
       .values({
@@ -368,7 +374,7 @@ export class DatabaseStorage implements IStorage {
         bracket,
       })
       .returning();
-    
+
     return newTournament;
   }
 
@@ -400,7 +406,7 @@ export class DatabaseStorage implements IStorage {
       .set(updates)
       .where(eq(tournaments.id, id))
       .returning();
-    
+
     return updated;
   }
 
@@ -410,7 +416,7 @@ export class DatabaseStorage implements IStorage {
 
     const updatedBracket = { ...tournament.bracket };
     let matchFound = false;
-    
+
     for (let round of updatedBracket.rounds) {
       for (let match of round.matches) {
         if (match.id === matchId) {
@@ -425,10 +431,10 @@ export class DatabaseStorage implements IStorage {
 
     const currentRound = updatedBracket.rounds.find(r => r.roundNumber === tournament.currentRound);
     const allMatchesComplete = currentRound?.matches.every(m => m.isCompleted) || false;
-    
+
     let newCurrentRound = tournament.currentRound;
     let newStatus = tournament.status;
-    
+
     if (allMatchesComplete) {
       if (tournament.currentRound < tournament.totalRounds) {
         newCurrentRound = tournament.currentRound + 1;
@@ -448,11 +454,11 @@ export class DatabaseStorage implements IStorage {
   generateTournamentBracket(totalRounds: number, opponents: string[]): TournamentBracket {
     const { getCharacterById } = require("@shared/characters");
     const bracket: TournamentBracket = { rounds: [] };
-    
+
     for (let roundNum = 1; roundNum <= totalRounds; roundNum++) {
       const matchesInRound = Math.pow(2, totalRounds - roundNum);
       const matches: TournamentMatch[] = [];
-      
+
       for (let i = 0; i < matchesInRound; i++) {
         const match: TournamentMatch = {
           id: `round-${roundNum}-match-${i}`,
@@ -460,7 +466,7 @@ export class DatabaseStorage implements IStorage {
           player2: { id: 'placeholder', name: 'TBD', type: 'ai' },
           isCompleted: false,
         };
-        
+
         if (roundNum === 1 && i < opponents.length) {
           const character = getCharacterById(opponents[i]);
           match.player2 = {
@@ -470,16 +476,16 @@ export class DatabaseStorage implements IStorage {
             avatar: character.avatar,
           };
         }
-        
+
         matches.push(match);
       }
-      
+
       bracket.rounds.push({
         roundNumber: roundNum,
         matches,
       });
     }
-    
+
     return bracket;
   }
 
@@ -493,17 +499,17 @@ export class DatabaseStorage implements IStorage {
     }
   ): Promise<User> {
     const updateData: any = { updatedAt: new Date() };
-    
+
     if (keys.openaiApiKey !== undefined) {
       // In production, you'd encrypt the API key here
       updateData.openaiApiKey = keys.openaiApiKey;
     }
-    
+
     if (keys.groqApiKey !== undefined) {
       // In production, you'd encrypt the API key here  
       updateData.groqApiKey = keys.groqApiKey;
     }
-    
+
     if (keys.preferredTtsService !== undefined) {
       updateData.preferredTtsService = keys.preferredTtsService;
     }
@@ -513,7 +519,7 @@ export class DatabaseStorage implements IStorage {
       .set(updateData)
       .where(eq(users.id, userId))
       .returning();
-      
+
     return user;
   }
 
