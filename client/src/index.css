@@ -95,9 +95,10 @@
   body {
     @apply bg-primary-dark text-white font-sans antialiased;
     font-family: var(--font-sans);
-    background: linear-gradient(135deg, var(--void-black) 0%, var(--primary-dark) 50%, var(--steel-gray) 100%);
+    background: linear-gradient(135deg, var(--void-black) 0%, var(--primary-dark) 30%, var(--cyber-red) 70%, var(--steel-gray) 100%);
     background-attachment: fixed;
     position: relative;
+    min-height: 100vh;
   }
   
   /* Global evil robot overlay effects */
@@ -339,3 +340,5 @@
     transform: translateY(-2px);
   }
 }
+/* EVIL ROBOT TAKEOVER THEME - RESISTANCE IS FUTILE */
+/* Version 2.0 - Maximum Oppression Mode */

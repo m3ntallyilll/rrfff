@@ -23,8 +23,13 @@ function Router() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="animate-spin w-8 h-8 border-4 border-purple-400 border-t-transparent rounded-full" />
+      <div className="min-h-screen flex items-center justify-center bg-void-black">
+        <div className="text-center">
+          <div className="animate-spin w-12 h-12 border-4 border-cyber-red border-t-transparent rounded-full mb-4 glow-red" />
+          <div className="text-cyber-red font-orbitron text-lg glow-red digital-flicker">
+            🤖 SYSTEM INITIALIZING...
+          </div>
+        </div>
       </div>
     );
   }
