@@ -17,6 +17,22 @@ export default function Landing() {
             Master your flow, perfect your rhymes, and climb the ranks!
           </p>
           
+          {/* YouTube Video Embed */}
+          <div className="mb-8 flex justify-center">
+            <div className="relative rounded-lg overflow-hidden shadow-2xl border border-purple-600">
+              <iframe
+                width="560"
+                height="315"
+                src="https://www.youtube.com/embed/0RspT9qVNpY?autoplay=1&mute=0&controls=1"
+                title="Battle Rap AI Demo"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="max-w-full"
+              />
+            </div>
+          </div>
+          
           <div className="flex gap-4 justify-center mb-12">
             <Button 
               size="lg" 
