@@ -26,8 +26,10 @@ export class GroqService {
       // Try different audio formats that Groq accepts
       const audioBlob = new Blob([audioBuffer], { type: "audio/webm" });
       formData.append("file", audioBlob, "audio.webm");
-      formData.append("model", "whisper-large-v3");
+      formData.append("model", "whisper-large-v3-turbo"); // Faster turbo model
       formData.append("response_format", "json");
+      formData.append("language", "en"); // Skip language detection for speed
+      formData.append("prompt", "rap battle verse lyrics"); // Guide recognition
 
       console.log(`📤 Sending to Groq transcription API...`);
       
@@ -50,7 +52,7 @@ export class GroqService {
         const formData2 = new FormData();
         const audioBlob2 = new Blob([audioBuffer], { type: "audio/wav" });
         formData2.append("file", audioBlob2, "audio.wav");
-        formData2.append("model", "whisper-large-v3");
+        formData2.append("model", "whisper-large-v3-turbo"); // Faster turbo model
         formData2.append("response_format", "json");
 
         const response2 = await fetch(`${this.baseUrl}/audio/transcriptions`, {
@@ -274,7 +276,7 @@ OUTPUT: Technical brief for AI rapper in format: "User: [syllables/line], [schem
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "llama3-70b-8192",
+          model: "openai/gpt-oss-120b",
           messages: [{ role: "user", content: analysisPrompt }],
           max_tokens: 200,
           temperature: 0.3, // Lower temperature for technical analysis
@@ -519,7 +521,7 @@ Write exactly 8 lines with mandatory rhyme density matching reaction level:`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama3-70b-8192", // Fast model for instant response (was 120B)
+        model: "openai/gpt-oss-120b", // Advanced 120B model as requested by user
         messages: [
           {
             role: "system", 

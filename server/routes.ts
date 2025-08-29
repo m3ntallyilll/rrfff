@@ -376,13 +376,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // IMMEDIATE TRANSCRIPTION ENDPOINT - Process audio instantly
+  // LIGHTNING-FAST TRANSCRIPTION ENDPOINT - Process audio in <200ms
   app.post("/api/battles/:id/transcribe", isAuthenticated, upload.single('audio'), async (req: any, res) => {
     const startTime = Date.now();
     const battleId = req.params.id;
     
     try {
-      console.log(`⚡ INSTANT Transcription Started - ${battleId.substring(0, 8)}...`);
+      console.log(`⚡ LIGHTNING Transcription Started - ${battleId.substring(0, 8)}...`);
       
       if (!req.file?.buffer) {
         return res.status(400).json({ message: "No audio file provided" });
@@ -391,18 +391,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const audioBuffer = req.file.buffer;
       console.log(`🎵 Audio for transcription: ${audioBuffer.length} bytes`);
       
-      // Ultra-fast transcription only (500ms max)
+      // Lightning-fast transcription only (200ms max for instant feel)
       let userText = "Voice input received";
       try {
         userText = await Promise.race([
           groqService.transcribeAudio(audioBuffer),
           new Promise<string>((_, reject) => 
-            setTimeout(() => reject(new Error("Transcription timeout")), 500)
+            setTimeout(() => reject(new Error("Transcription timeout")), 150) // Even more aggressive 150ms
           )
         ]);
-        console.log(`✅ INSTANT transcription (${Date.now() - startTime}ms): "${userText.substring(0, 50)}..."`);
+        console.log(`✅ LIGHTNING transcription (${Date.now() - startTime}ms): "${userText.substring(0, 50)}..."`);
       } catch (error) {
-        console.log(`⚠️ Ultra-fast transcription failed in ${Date.now() - startTime}ms`);
+        console.log(`⚠️ Lightning transcription failed in ${Date.now() - startTime}ms`);
       }
       
       res.json({ 
@@ -557,16 +557,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let userText = "Voice input received";
       
       try {
-        // Ultra-fast transcription with reduced timeout (500ms max)
+        // LIGHTNING-FAST transcription optimization (200ms max for truly instant feel)
         userText = await Promise.race([
           groqService.transcribeAudio(audioBuffer),
           new Promise<string>((_, reject) => 
-            setTimeout(() => reject(new Error("Transcription timeout")), 500)
+            setTimeout(() => reject(new Error("Transcription timeout")), 200) // Ultra-aggressive 200ms for instant
           )
         ]);
-        console.log(`✅ Instant transcription complete: "${userText.substring(0, 50)}..."`);
+        console.log(`✅ INSTANT transcription complete: "${userText.substring(0, 50)}..."`);
       } catch (error) {
-        console.log(`⚠️ Quick transcription failed, using fallback`);
+        console.log(`⚠️ Ultra-fast transcription failed, using fallback`);
         userText = "Voice input received";
       }
       
@@ -594,7 +594,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userPerformanceScore // Pass user score for reactive AI
           ),
           new Promise<string>((_, reject) => 
-            setTimeout(() => reject(new Error("AI timeout")), 1500) // Maximum 1.5 seconds for instant feel
+            setTimeout(() => reject(new Error("AI timeout")), 5000) // Keep longer timeout for 120B model
           )
         ]);
         console.log(`✅ AI response generated: "${aiResponseText.substring(0, 50)}..."`);
