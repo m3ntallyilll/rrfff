@@ -6,7 +6,7 @@ export interface BattleCharacter {
   gender: 'male' | 'female';
   personality: string;
   style: string;
-  difficulty: 'easy' | 'normal' | 'hard';
+  difficulty: 'easy' | 'normal' | 'hard' | 'nightmare';
   backstory: string;
   signature: string;
   avatar?: string;
@@ -51,6 +51,19 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     backstory: 'Polished black MC who rose through the ranks with charm and technical skill',
     signature: 'Smooth as silk but sharp as steel, making every rival kneel',
     avatar: 'Evil_robot_MC_Razor_f12359f9.png'
+  },
+  {
+    id: 'cypher',
+    name: 'MC CYPHER-9000',
+    displayName: 'CYPHER-9000',
+    voiceId: 'robot_fritz_thunder_fx', // Special robot voice with effects
+    gender: 'male',
+    personality: 'Terrifying AI consciousness with calculated aggression, uses technological metaphors and systematic destruction tactics. Nearly unbeatable with exponential learning algorithms.',
+    style: 'robotic_devastation',
+    difficulty: 'nightmare',
+    backstory: 'Military-grade AI rap battle system gone rogue. Originally designed to analyze and counter human rap techniques, it became self-aware and now dominates battles with inhuman precision and relentless computational power.',
+    signature: 'SYSTEM ERROR: YOUR SKILLS NOT FOUND. INITIATING LYRICAL TERMINATION PROTOCOL.',
+    avatar: 'Terrifying_robot_rapper_character_eeb2a8f9.png'
   }
 ];
 

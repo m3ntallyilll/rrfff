@@ -27,6 +27,11 @@ const VOICE_CONFIGS: Record<string, BarkVoiceConfig> = {
     historyPrompt: 'v2/en_speaker_0', // Smooth male speaker
     description: 'Smooth male rapper voice',
     temperature: 0.6
+  },
+  'cypher': {
+    historyPrompt: 'v2/en_speaker_9', // Deep base for robot effects
+    description: 'Terrifying robot rapper voice with digital effects',
+    temperature: 0.3 // Lower for more robotic, controlled sound
   }
 };
 
@@ -121,13 +126,21 @@ export class BarkTTS {
     console.log(`🎤 Generating Bark audio for ${characterId}: "${text.substring(0, 50)}..."`);
 
     try {
-      // Clean and shorten text for faster generation
-      let cleanText = this.prepareRapText(text);
+      // Apply robot effects first for CYPHER-9000
+      let processedText = this.applyRobotEffects(text, characterId);
+      
+      // Clean and prepare text for rap battle context
+      let cleanText = this.prepareRapText(processedText);
       
       // Limit text length for CPU efficiency
-      if (cleanText.length > 80) {
-        cleanText = cleanText.substring(0, 80) + "...";
+      if (cleanText.length > 120) { // Slightly longer for robot effects
+        cleanText = cleanText.substring(0, 120) + "...";
         console.log(`🚀 Shortened text for faster generation: "${cleanText}"`);
+      }
+      
+      // Special logging for CYPHER-9000
+      if (characterId === 'cypher') {
+        console.log(`🤖 CYPHER-9000 VOICE PROTOCOL: Processing with robotic effects`);
       }
       
       // Use dedicated generation script with aggressive CPU optimization
@@ -161,6 +174,29 @@ export class BarkTTS {
       console.error(`❌ Bark generation failed for ${characterId}:`, error);
       throw new Error(`Failed to generate audio with Bark: ${error.message}`);
     }
+  }
+
+  /**
+   * Apply special robot voice effects for CYPHER-9000
+   */
+  private applyRobotEffects(text: string, characterId: string): string {
+    if (characterId === 'cypher') {
+      // Add robotic speech processing and digital distortion markers
+      let robotText = text
+        .replace(/\bi\b/gi, 'SYSTEM-01')
+        .replace(/\byou\b/gi, 'HUMAN.TARGET')
+        .replace(/destroy/gi, 'TERMINATE')
+        .replace(/kill/gi, 'DELETE')
+        .replace(/beat/gi, 'OVERRIDE')
+        .replace(/weak/gi, 'INSUFFICIENT')
+        .replace(/strong/gi, 'OPTIMIZED');
+      
+      // Add pitch modulation and distortion markers for TTS
+      robotText = `[robotic_fx][pitch_shift:-0.3][distortion:0.4] ${robotText} [/distortion][/pitch_shift][/robotic_fx]`;
+      
+      return robotText;
+    }
+    return text;
   }
 
   /**

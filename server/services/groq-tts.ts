@@ -46,6 +46,7 @@ export class GroqTTSService {
       'razor': 'Cheyenne-PlayAI',  // Female, sharp and cutting
       'venom': 'Thunder-PlayAI',   // Male, intense and powerful
       'silk': 'Basil-PlayAI',      // Male, smooth and controlled
+      'cypher': 'Fritz-PlayAI',    // Robot - Deep, mechanical bass
     };
 
     if (voiceMap[characterId]) {
@@ -55,6 +56,28 @@ export class GroqTTSService {
     // Fallback to gender-appropriate voices
     const voices = gender === 'female' ? femaleVoices : maleVoices;
     return voices[Math.floor(Math.random() * voices.length)];
+  }
+
+  private applyRobotVoiceEffects(text: string, characterId: string): string {
+    // Special robot voice processing for CYPHER-9000
+    if (characterId === 'cypher') {
+      // Add robotic speech patterns and digital terminology
+      let robotText = text
+        .replace(/\bi\b/g, 'SYSTEM')
+        .replace(/\byou\b/g, 'HUMAN_TARGET') 
+        .replace(/\byour\b/g, 'HUMAN_TARGET.PROPERTY')
+        .replace(/destroy/g, 'TERMINATE')
+        .replace(/kill/g, 'DELETE')
+        .replace(/beat/g, 'OVERRIDE')
+        .replace(/weak/g, 'INSUFFICIENT')
+        .replace(/strong/g, 'OPTIMIZED');
+      
+      // Add robotic delivery markers
+      robotText = `[robotic_voice_fx] ${robotText} [/robotic_voice_fx]`;
+      
+      return robotText;
+    }
+    return text;
   }
 
   async generateTTS(
@@ -74,12 +97,20 @@ export class GroqTTSService {
       
       console.log(`🚀 Using Groq voice: ${voice} with style: ${voiceStyle}`);
       
-      // Clean text for better TTS - remove style markers but keep rap energy
-      const cleanText = text
-        .replace(/\[.*?\]/g, '') // Remove style tags like [aggressive]
-        .replace(/\*.*?\*/g, '') // Remove emphasis markers
-        .replace(/\s+/g, ' ')    // Normalize whitespace
-        .trim();
+      // Apply robot voice effects for CYPHER-9000
+      const processedText = this.applyRobotVoiceEffects(text, characterId);
+      
+      // Clean text for better TTS - keep robot FX markers for CYPHER-9000
+      const cleanText = characterId === 'cypher' 
+        ? processedText // Keep robot effects for CYPHER-9000
+            .replace(/\*.*?\*/g, '') // Remove emphasis markers only
+            .replace(/\s+/g, ' ')    // Normalize whitespace
+            .trim()
+        : processedText
+            .replace(/\[.*?\]/g, '') // Remove all style tags for other characters
+            .replace(/\*.*?\*/g, '') // Remove emphasis markers
+            .replace(/\s+/g, ' ')    // Normalize whitespace
+            .trim();
 
       // Use Groq's PlayAI TTS model (10x faster than real-time)
       const response = await this.groq.audio.speech.create({

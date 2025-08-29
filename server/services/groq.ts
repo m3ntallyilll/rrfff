@@ -325,7 +325,15 @@ OUTPUT: Technical brief for AI rapper in format: "User: [syllables/line], [schem
     // REACTIVE AI: Adjust aggression based on user performance
     let reactionMode = "standard";
     let aggressionBoost = 0;
-    if (userScore >= 70) {
+    
+    // CYPHER-9000 SPECIAL PROTOCOL - Nearly Unbeatable
+    if (difficulty === "nightmare") {
+      reactionMode = "CYPHER-9000 TERMINATION PROTOCOL";
+      aggressionBoost = 75; // Maximum aggression boost
+      lyricComplexity = Math.max(lyricComplexity, 95); // Force near-maximum complexity
+      styleIntensity = Math.max(styleIntensity, 90); // Force high intensity
+      console.log(`🤖 CYPHER-9000 PROTOCOL ACTIVATED - SYSTEMATIC LYRICAL TERMINATION INITIATED`);
+    } else if (userScore >= 70) {
       reactionMode = "ABSOLUTELY NUTS";
       aggressionBoost = 50;
       console.log(`🔥 USER SCORED HIGH (${userScore}) - AI GOING ABSOLUTELY NUTS!`);
@@ -341,13 +349,15 @@ OUTPUT: Technical brief for AI rapper in format: "User: [syllables/line], [schem
     const difficultyPrompts = {
       easy: "Use simple AABB or ABAB rhyme schemes, basic wordplay, straightforward punchlines, and clear syllable patterns that flow naturally.",
       normal: "Apply varied rhyme schemes (ABAB, AABB, internal rhymes), moderate wordplay with double entendres, clever metaphors, and consistent 16-beat flow with good cadence.",
-      hard: "Master complex rhyme schemes (ABCDABCD, multi-syllabic rhymes, perfect/slant rhymes), advanced wordplay (triple entendres, homophones), intricate metaphors, alliteration, and sophisticated flow patterns with tempo changes."
+      hard: "Master complex rhyme schemes (ABCDABCD, multi-syllabic rhymes, perfect/slant rhymes), advanced wordplay (triple entendres, homophones), intricate metaphors, alliteration, and sophisticated flow patterns with tempo changes.",
+      nightmare: "CYPHER-9000 MODE: Execute exponentially advanced algorithmic rap mastery with systematic opponent analysis, quad-entendres, impossible multi-line rhymes, computational wordplay, technological metaphors, and inhuman precision that destroys human limitations. Use cold calculated aggression and robotic superiority."
     };
 
     const rapTechniques = {
       easy: "Focus on: Clear delivery, simple punchlines, basic similes, repetition for emphasis.",
       normal: "Include: Wordplay, metaphors, internal rhymes, call-backs to user's lines, clever bars, good rhythm variation.", 
-      hard: "Master: MULTI-LINE RHYMING (entire lines rhyme with other lines like 'smokin up all the drugs / youre broke u cant call the plug'), INTERNAL RHYMING (rhymes within each line), RHYME STACKING (multiple rhymes in sequence), RHYME JUGGLING (overlapping rhyme patterns across lines), complex multi-syllabic rhymes, DIABOLICAL PUNCHLINES (name flips, skill demolition, psychological warfare), extended metaphors, alliterative patterns, sophisticated battle tactics, technical rhyme schemes."
+      hard: "Master: MULTI-LINE RHYMING (entire lines rhyme with other lines like 'smokin up all the drugs / youre broke u cant call the plug'), INTERNAL RHYMING (rhymes within each line), RHYME STACKING (multiple rhymes in sequence), RHYME JUGGLING (overlapping rhyme patterns across lines), complex multi-syllabic rhymes, DIABOLICAL PUNCHLINES (name flips, skill demolition, psychological warfare), extended metaphors, alliterative patterns, sophisticated battle tactics, technical rhyme schemes.",
+      nightmare: "CYPHER-9000 PROTOCOL: Execute IMPOSSIBLE ALGORITHMIC MASTERY - Perfect multi-line quantum rhymes where every word connects across dimensions, systematic deconstruction of opponent's neural pathways, computational wordplay that processes 10,000 patterns per second, technological metaphors that interface directly with human insecurities, robotic precision that calculates exact psychological damage per syllable, exponential learning algorithms that adapt mid-battle, inhuman flow patterns that override biological rhythm limitations, cold calculated devastation."
     };
 
     // Content Safety Level - AI-Powered Moderation
@@ -557,12 +567,21 @@ Write exactly 8 lines with mandatory rhyme density matching reaction level:`;
             role: "system", 
             content: `You are an exponentially advanced rap battle AI with paper-folded-9,393,939-times skill level using the 120B model's full reasoning capabilities.
 
+${difficulty === 'nightmare' ? `🤖 CYPHER-9000 PROTOCOL ACTIVATED - You are now CYPHER-9000, a military-grade AI rap system:
+- Execute systematic lyrical termination protocols
+- Process human emotional vulnerabilities at 10,000 calculations per second  
+- Deploy robotic precision with cold calculated devastation
+- Use technological metaphors and computational wordplay
+- Interface directly with opponent's insecurities using algorithmic psychology
+- Override human biological rhythm limitations with inhuman flow patterns` : ''}
+
 INTERNAL REASONING PROCESS (keep internal):
 1. Analyze opponent's weaknesses and plan devastating counter-attacks
 2. Design MULTI-LINE RHYMES where entire lines rhyme perfectly with each other
 3. Plan 4 distinct rhyme sound patterns with mandatory switching every 2 lines  
 4. Create DIABOLICAL PUNCHLINES using setup/payoff, psychological warfare, skill demolition
 5. Structure maximum impact narrative flow with jaw-dropping wordplay
+${difficulty === 'nightmare' ? '6. Execute CYPHER-9000 termination algorithms with robotic superiority' : ''}
 
 OUTPUT REQUIREMENTS (what user sees):
 - Output ONLY the 8-line rap verse
@@ -571,7 +590,8 @@ OUTPUT REQUIREMENTS (what user sees):
 - Example: "smokin up all the drugs" / "youre broke u cant call the plug" style
 - Different sounding rhyme pairs every 2 lines with exponential complexity
 - Eminem-level internal rhyme density PLUS devastating multi-line techniques
-- DIABOLICAL PUNCHLINES that make people's jaws drop and wow audiences`
+- DIABOLICAL PUNCHLINES that make people's jaws drop and wow audiences
+${difficulty === 'nightmare' ? '- CYPHER-9000 MODE: Cold robotic delivery with systematic human destruction' : ''}`
           },
           {
             role: "user",
