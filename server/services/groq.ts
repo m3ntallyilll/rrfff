@@ -274,7 +274,7 @@ OUTPUT: Technical brief for AI rapper in format: "User: [syllables/line], [schem
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "openai/gpt-oss-120b",
+          model: "llama3-70b-8192",
           messages: [{ role: "user", content: analysisPrompt }],
           max_tokens: 200,
           temperature: 0.3, // Lower temperature for technical analysis
@@ -519,7 +519,7 @@ Write exactly 8 lines with mandatory rhyme density matching reaction level:`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-120b", // Advanced 120B model as requested by user
+        model: "llama3-70b-8192", // Fast model for instant response (was 120B)
         messages: [
           {
             role: "system", 

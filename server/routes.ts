@@ -557,11 +557,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let userText = "Voice input received";
       
       try {
-        // Fast transcription with short timeout (1 second max)
+        // Ultra-fast transcription with reduced timeout (500ms max)
         userText = await Promise.race([
           groqService.transcribeAudio(audioBuffer),
           new Promise<string>((_, reject) => 
-            setTimeout(() => reject(new Error("Transcription timeout")), 1000)
+            setTimeout(() => reject(new Error("Transcription timeout")), 500)
           )
         ]);
         console.log(`✅ Instant transcription complete: "${userText.substring(0, 50)}..."`);
@@ -583,6 +583,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let aiResponseText = "System response ready!";
       try {
+        // Ultra-aggressive timeout for instant response
         aiResponseText = await Promise.race([
           groqService.generateRapResponse(
             userText, // Use actual transcription for better AI response
@@ -593,7 +594,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userPerformanceScore // Pass user score for reactive AI
           ),
           new Promise<string>((_, reject) => 
-            setTimeout(() => reject(new Error("AI timeout")), 5000) // Longer timeout for AI
+            setTimeout(() => reject(new Error("AI timeout")), 1500) // Maximum 1.5 seconds for instant feel
           )
         ]);
         console.log(`✅ AI response generated: "${aiResponseText.substring(0, 50)}..."`);
