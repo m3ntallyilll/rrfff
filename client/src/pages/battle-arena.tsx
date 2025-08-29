@@ -127,8 +127,13 @@ export default function BattleArena() {
         
         // Auto-play TTS immediately when available
         if (result.audioUrl) {
+          console.log('🔥 Battle round complete - triggering auto-play');
           updateBattleState({ isPlayingAudio: true });
-          // The BattleAvatar component will handle the actual playback
+          
+          // Force avatar to start speaking immediately
+          setTimeout(() => {
+            updateBattleState({ isPlayingAudio: true });
+          }, 100);
         }
         
         toast({

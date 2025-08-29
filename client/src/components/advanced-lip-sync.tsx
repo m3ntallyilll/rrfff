@@ -102,10 +102,22 @@ export function AdvancedLipSync({
       return;
     }
     
-    // Only initialize once per audio session
-    if (!audioRef.current && audioUrl) {
+    // Initialize audio and auto-play when needed
+    if (!audioRef.current && audioUrl && isPlaying) {
+      console.log('🎵 Initializing new audio element for auto-play');
       audioRef.current = new Audio(audioUrl);
       audioRef.current.crossOrigin = 'anonymous';
+      audioRef.current.volume = 1.0;
+      
+      // Auto-play as soon as audio is ready
+      audioRef.current.addEventListener('loadeddata', () => {
+        console.log('🔥 Audio ready - auto-playing immediately');
+        audioRef.current?.play().catch(error => {
+          console.error('🔊 Auto-play failed:', error);
+        });
+      });
+      
+      audioRef.current.load();
     }
   }, [audioUrl, isPlaying]);
   
@@ -149,9 +161,11 @@ export function AdvancedLipSync({
         }
 
         // Original audio analysis code (only used if disableAudioPlayback is false)
-        audioRef.current = new Audio(audioUrl);
-        audioRef.current.volume = 0.1;
-        audioRef.current.preload = 'auto';
+        if (!audioRef.current) {
+          audioRef.current = new Audio(audioUrl);
+          audioRef.current.volume = 1.0; // Full volume for auto-play
+          audioRef.current.preload = 'auto';
+        }
         
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
         

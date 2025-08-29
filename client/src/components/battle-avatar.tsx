@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { BattleCharacter } from "@shared/characters";
 import { AdvancedLipSync } from "./advanced-lip-sync";
+import { SimpleAudioPlayer } from "./simple-audio-player";
 
 interface BattleAvatarProps {
   isAISpeaking: boolean;
@@ -163,9 +164,18 @@ export function BattleAvatar({
                 else setMouthShape("closed");
                 setLipSyncLevel(data.intensity / 100);
               }}
-              disableAudioPlayback={false}
+              disableAudioPlayback={true}
             />
           )}
+          
+          {/* Dedicated Audio Player for TTS */}
+          <SimpleAudioPlayer 
+            audioUrl={audioUrl}
+            autoPlay={isAISpeaking}
+            volume={1.0}
+            onPlay={() => console.log('🔊 TTS Audio started')}
+            onEnded={() => console.log('🔇 TTS Audio ended')}
+          />
           
           {/* Subtle visual feedback when speaking */}
           {isAISpeaking && (
