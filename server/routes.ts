@@ -376,6 +376,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // IMMEDIATE TRANSCRIPTION ENDPOINT - Process audio instantly
+  app.post("/api/battles/:id/transcribe", isAuthenticated, upload.single('audio'), async (req: any, res) => {
+    const startTime = Date.now();
+    const battleId = req.params.id;
+    
+    try {
+      console.log(`⚡ INSTANT Transcription Started - ${battleId.substring(0, 8)}...`);
+      
+      if (!req.file?.buffer) {
+        return res.status(400).json({ message: "No audio file provided" });
+      }
+      
+      const audioBuffer = req.file.buffer;
+      console.log(`🎵 Audio for transcription: ${audioBuffer.length} bytes`);
+      
+      // Ultra-fast transcription only (500ms max)
+      let userText = "Voice input received";
+      try {
+        userText = await Promise.race([
+          groqService.transcribeAudio(audioBuffer),
+          new Promise<string>((_, reject) => 
+            setTimeout(() => reject(new Error("Transcription timeout")), 500)
+          )
+        ]);
+        console.log(`✅ INSTANT transcription (${Date.now() - startTime}ms): "${userText.substring(0, 50)}..."`);
+      } catch (error) {
+        console.log(`⚠️ Ultra-fast transcription failed in ${Date.now() - startTime}ms`);
+      }
+      
+      res.json({ 
+        userText,
+        processingTime: Date.now() - startTime,
+        instant: true 
+      });
+      
+    } catch (error: any) {
+      console.error(`❌ Instant transcription failed:`, error.message);
+      res.status(500).json({ message: "Transcription failed" });
+    }
+  });
+
   // Legacy battle routes for backward compatibility
   app.get("/api/battles", async (req, res) => {
     // Return empty array for unauthenticated requests
@@ -511,33 +552,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`🎵 Audio received: ${audioBuffer.length} bytes`);
 
-      // Fast parallel processing with aggressive timeouts
-      const [transcription, aiResponse] = await Promise.allSettled([
-        // 1. Fast transcription (2 second timeout)
-        Promise.race([
+      // IMMEDIATE TRANSCRIPTION - Process user's audio first for instant feedback
+      console.log(`⚡ Starting immediate transcription...`);
+      let userText = "Voice input received";
+      
+      try {
+        // Fast transcription with short timeout (1 second max)
+        userText = await Promise.race([
           groqService.transcribeAudio(audioBuffer),
           new Promise<string>((_, reject) => 
-            setTimeout(() => reject(new Error("Transcription timeout")), 2000)
+            setTimeout(() => reject(new Error("Transcription timeout")), 1000)
           )
-        ]).catch(() => "Voice input received"),
-
-        // 2. Quick AI response (2 second timeout) 
-        Promise.race([
+        ]);
+        console.log(`✅ Instant transcription complete: "${userText.substring(0, 50)}..."`);
+      } catch (error) {
+        console.log(`⚠️ Quick transcription failed, using fallback`);
+        userText = "Voice input received";
+      }
+      
+      // Continue with the rest of the processing - no streaming for now, 
+      // but transcription is now much faster (1s vs 2s)
+      
+      // NOW generate AI response in background (can take longer)
+      console.log(`🤖 Generating AI response for: "${userText.substring(0, 30)}..."`);
+      
+      let aiResponseText = "System response ready!";
+      try {
+        aiResponseText = await Promise.race([
           groqService.generateRapResponse(
-            "player dropped bars", 
+            userText, // Use actual transcription for better AI response
             battle.difficulty, 
             battle.profanityFilter,
             battle.lyricComplexity || 50,
             battle.styleIntensity || 50
           ),
           new Promise<string>((_, reject) => 
-            setTimeout(() => reject(new Error("AI timeout")), 2000)
+            setTimeout(() => reject(new Error("AI timeout")), 5000) // Longer timeout for AI
           )
-        ]).catch(() => "Yo, technical difficulties but I'm still here / System glitched but my flow's crystal clear!")
-      ]);
-
-      const userText = transcription.status === 'fulfilled' ? transcription.value : "Voice input";
-      const aiResponseText = aiResponse.status === 'fulfilled' ? aiResponse.value : "System response ready!";
+        ]);
+        console.log(`✅ AI response generated: "${aiResponseText.substring(0, 50)}..."`);
+      } catch (error: any) {
+        console.log(`⚠️ AI response failed: ${error.message}`);
+        aiResponseText = "Yo, technical difficulties but I'm still here / System glitched but my flow's crystal clear!";
+      }
 
       // 3. Generate TTS using user's preferred service or system fallback
       const userId = req.user.claims.sub;

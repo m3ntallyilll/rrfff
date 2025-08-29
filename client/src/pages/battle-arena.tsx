@@ -77,12 +77,49 @@ export default function BattleArena() {
   const handleRecordingComplete = async (recording: { blob: Blob; duration: number; url: string }) => {
     try {
       setIsTranscribing(true);
+      
+      // INSTANT TRANSCRIPTION: Get transcription immediately when recording stops
+      console.log('🔥 Starting instant transcription...');
+      
+      if (currentBattleId) {
+        try {
+          const formData = new FormData();
+          formData.append('audio', recording.blob);
+          
+          const transcriptionResponse = await fetch(`/api/battles/${currentBattleId}/transcribe`, {
+            method: 'POST',
+            body: formData,
+          });
+          
+          if (transcriptionResponse.ok) {
+            const transcriptionData = await transcriptionResponse.json();
+            console.log(`✅ Instant transcription received (${transcriptionData.processingTime}ms): "${transcriptionData.userText}"`);
+            
+            // Show transcription immediately
+            setLiveTranscription(transcriptionData.userText || "Voice input processed");
+            
+            toast({
+              title: "Transcription Complete!",
+              description: "Processing AI response...",
+            });
+          }
+        } catch (transcriptionError) {
+          console.log('⚠️ Instant transcription failed, falling back to full processing');
+        }
+      }
+      
+      // Now start full battle processing (AI response, scoring, etc.)
+      setIsTranscribing(false);
       updateBattleState({ isAIResponding: true });
 
       const result = await submitRound({ audio: recording.blob });
       
       if (result) {
-        setLiveTranscription(result.userText || "Voice input processed");
+        // Update transcription if we got a better one from full processing
+        if (result.userText && result.userText !== liveTranscription) {
+          setLiveTranscription(result.userText);
+        }
+        
         setAiResponse(result.aiResponse || "AI response generated");
         
         console.log('Setting current AI audio URL:', result.audioUrl?.substring(0, 100) + '...');
