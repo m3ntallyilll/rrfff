@@ -50,7 +50,7 @@ export class TypecastService {
       if (!response.ok) {
         const errorText = await response.text();
         console.log("TTS generation failed:", response.status, errorText);
-        throw new Error(`TTS generation failed: ${response.status}`);
+        throw new Error(`TTS generation failed: ${response.status} ${errorText}`);
       }
 
       // According to the docs, this should return binary audio data
@@ -67,12 +67,11 @@ export class TypecastService {
       };
 
     } catch (error) {
-      console.log("Typecast TTS completely failed:", error instanceof Error ? error.message : error);
+      console.error("Typecast TTS completely failed:", error instanceof Error ? error.message : error);
       
-      // For now, gracefully continue without audio rather than breaking the battle
-      // This allows the user to experience the text-based battle while TTS issues are resolved
+      // Return empty audio URL so battle continues without breaking
       return {
-        audioUrl: "", // No audio - the frontend should handle this gracefully
+        audioUrl: "", // No audio - frontend handles this gracefully
         duration: Math.floor(text.length / 15),
       };
     }
