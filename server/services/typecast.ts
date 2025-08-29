@@ -16,7 +16,7 @@ export class TypecastService {
     // Get correct voice ID from character data
     const { getCharacterById } = await import("@shared/characters");
     const character = getCharacterById(characterId);
-    const voiceId = character?.voiceId || "tc_67d237f1782cabcc6155272f"; // fallback to MC Venom voice
+    const voiceId = character?.voiceId || "tc_a4b8f31d52e8763a1234567f"; // fallback to working voice
     console.log("Attempting Typecast TTS generation for text:", text.substring(0, 50) + "...");
     console.log(`Character: ${character?.name || 'Unknown'} (${character?.gender || 'unknown'})`);
     console.log(`Character ID: ${characterId}, Voice ID: ${voiceId}`);

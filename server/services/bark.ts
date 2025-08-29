@@ -121,13 +121,19 @@ export class BarkTTS {
     console.log(`🎤 Generating Bark audio for ${characterId}: "${text.substring(0, 50)}..."`);
 
     try {
-      // Clean text for rap battle context
-      const cleanText = this.prepareRapText(text);
+      // Clean and shorten text for faster generation
+      let cleanText = this.prepareRapText(text);
       
-      // Use dedicated generation script with CPU optimization
+      // Limit text length for CPU efficiency
+      if (cleanText.length > 80) {
+        cleanText = cleanText.substring(0, 80) + "...";
+        console.log(`🚀 Shortened text for faster generation: "${cleanText}"`);
+      }
+      
+      // Use dedicated generation script with aggressive CPU optimization
       const { stdout, stderr } = await execAsync(
-        `export LD_LIBRARY_PATH="/nix/store/*/lib:$LD_LIBRARY_PATH" && export OMP_NUM_THREADS=4 && export MKL_NUM_THREADS=4 && python3 bark_generate.py "${cleanText.replace(/"/g, '\\"')}" "${outputPath}" --voice "${voiceConfig.historyPrompt}" --temp ${voiceConfig.temperature}`,
-        { timeout: 120000 } // 2 minute timeout with CPU optimization
+        `export LD_LIBRARY_PATH="/nix/store/*/lib:$LD_LIBRARY_PATH" && export OMP_NUM_THREADS=2 && export MKL_NUM_THREADS=2 && python3 bark_generate.py "${cleanText.replace(/"/g, '\\"')}" "${outputPath}" --voice "${voiceConfig.historyPrompt}" --temp ${voiceConfig.temperature}`,
+        { timeout: 30000 } // 30 second timeout for faster fallback
       );
 
       if (stderr && !stderr.includes('Warning') && !stderr.includes('UserWarning')) {

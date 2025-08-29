@@ -33,13 +33,20 @@ def generate_bark_audio(text, output_path, voice_prompt="v2/en_speaker_6", tempe
         print(f"Temperature: {temperature}")
         print(f"Device: {device}")
         
-        # Generate audio with GPU acceleration
+        # Generate shorter audio for faster processing
+        # Split long text into shorter segments for CPU efficiency
+        if len(text) > 100:
+            # Truncate very long text for faster generation
+            text = text[:100] + "..."
+            print(f"Truncated text for faster generation: {text}")
+        
+        # Generate audio with optimized settings
         audio_array = generate_audio(
             text,
             history_prompt=voice_prompt,
             text_temp=temperature,
-            waveform_temp=0.7,
-            silent=False
+            waveform_temp=0.6,  # Lower for faster generation
+            silent=True  # Reduce console output
         )
         
         # Save to file
