@@ -347,7 +347,7 @@ OUTPUT: Technical brief for AI rapper in format: "User: [syllables/line], [schem
     const rapTechniques = {
       easy: "Focus on: Clear delivery, simple punchlines, basic similes, repetition for emphasis.",
       normal: "Include: Wordplay, metaphors, internal rhymes, call-backs to user's lines, clever bars, good rhythm variation.", 
-      hard: "Master: INTERNAL RHYMING (rhymes within each line), RHYME STACKING (multiple rhymes in sequence), RHYME JUGGLING (overlapping rhyme patterns across lines), complex multi-syllabic rhymes, extended metaphors, alliterative patterns, sophisticated battle tactics, technical rhyme schemes."
+      hard: "Master: MULTI-LINE RHYMING (entire lines rhyme with other lines like 'smokin up all the drugs / youre broke u cant call the plug'), INTERNAL RHYMING (rhymes within each line), RHYME STACKING (multiple rhymes in sequence), RHYME JUGGLING (overlapping rhyme patterns across lines), complex multi-syllabic rhymes, DIABOLICAL PUNCHLINES (name flips, skill demolition, psychological warfare), extended metaphors, alliterative patterns, sophisticated battle tactics, technical rhyme schemes."
     };
 
     // Content Safety Level - AI-Powered Moderation
@@ -425,23 +425,32 @@ RHYME MASTERY: ${difficultyPrompts[difficulty as keyof typeof difficultyPrompts]
 RAP TECHNIQUES: ${rapTechniques[difficulty as keyof typeof rapTechniques]}
 
 ${difficulty === 'hard' ? `
-ADVANCED RAP SKILLS - MANDATORY FOR HARD DIFFICULTY:
+🔥 DIABOLICAL RAP MASTERY - MANDATORY FOR HARD DIFFICULTY:
 
-1. INTERNAL RHYMING: Include rhymes WITHIN each line, not just at the ends
+1. MULTI-LINE RHYMING: Make entire lines rhyme perfectly with other lines
+   - Example: "smokin up all the drugs" / "youre broke u cant call the plug"
+   - Example: "your flow is really wack today" / "I heard your girl don't want to stay"
+   - Lines should rhyme with multiple syllables, not just end words
+
+2. INTERNAL RHYMING: Include rhymes WITHIN each line, not just at the ends
    - Example: "I SPIT fire, GET higher, while you QUIT trying to be a SLICK liar"
    - Every line must have 2-3 internal rhymes
 
-2. RHYME STACKING: Stack multiple rhyming syllables in sequence
+3. DIABOLICAL PUNCHLINES: Use devastating wordplay categories
+   - NAME FLIPS: Twist their identity cleverly
+   - SKILL DEMOLITION: Tear apart their rap abilities specifically  
+   - PSYCHOLOGICAL WARFARE: Get in their head with mind games
+   - SETUP/PAYOFF: Build tension then deliver crushing punchlines
+
+4. RHYME STACKING: Stack multiple rhyming syllables in sequence
    - Example: "BACK-to-BACK attacks, CRACK your TRACK, leave you FLAT on your back"
    - Use consecutive words that rhyme or share sounds
 
-3. RHYME JUGGLING: Overlap rhyme patterns across multiple lines
-   - Line 1 rhymes should connect with Line 3, Line 2 with Line 4
-   - Create complex weaving patterns that show technical mastery
-
 IMPLEMENTATION REQUIREMENTS:
+- PRIORITY: Focus on multi-line rhymes that make people's jaws drop
 - Use multi-syllabic rhymes (2+ syllables): "BATTLE-rattle", "NEVER-sever"
 - Include slant rhymes and consonance for density
+- Create devastating punchlines that wow audiences
 - Maintain perfect flow while showcasing technical complexity
 ` : ''}
 
@@ -549,17 +558,20 @@ Write exactly 8 lines with mandatory rhyme density matching reaction level:`;
             content: `You are an exponentially advanced rap battle AI with paper-folded-9,393,939-times skill level using the 120B model's full reasoning capabilities.
 
 INTERNAL REASONING PROCESS (keep internal):
-1. Analyze opponent's weaknesses and counter-attack angles
-2. Plan 4 distinct rhyme sound patterns (AH-LV, EE-UN, UH-EE, different UH-EE)  
-3. Design exponential wordplay with multiple internal rhymes per line
-4. Structure narrative flow for maximum impact
+1. Analyze opponent's weaknesses and plan devastating counter-attacks
+2. Design MULTI-LINE RHYMES where entire lines rhyme perfectly with each other
+3. Plan 4 distinct rhyme sound patterns with mandatory switching every 2 lines  
+4. Create DIABOLICAL PUNCHLINES using setup/payoff, psychological warfare, skill demolition
+5. Structure maximum impact narrative flow with jaw-dropping wordplay
 
 OUTPUT REQUIREMENTS (what user sees):
 - Output ONLY the 8-line rap verse
-- No reasoning text, analysis, or explanations in output
-- Pure exponential rap mastery with mandatory rhyme switching
-- Different sounding rhyme pairs every 2 lines
-- Eminem-level internal rhyme density and complexity`
+- No reasoning text, analysis, or explanations in output  
+- MANDATORY MULTI-LINE RHYMING: Make entire lines rhyme with other lines
+- Example: "smokin up all the drugs" / "youre broke u cant call the plug" style
+- Different sounding rhyme pairs every 2 lines with exponential complexity
+- Eminem-level internal rhyme density PLUS devastating multi-line techniques
+- DIABOLICAL PUNCHLINES that make people's jaws drop and wow audiences`
           },
           {
             role: "user",
