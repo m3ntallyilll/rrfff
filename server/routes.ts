@@ -611,8 +611,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           characterId,
           characterName: character?.name || `MC ${characterId}`,
           gender: character?.gender || 'male',
-          voiceStyle: battle.styleIntensity > 70 ? 'aggressive' : 
-                     battle.styleIntensity > 40 ? 'confident' : 'smooth'
+          voiceStyle: (battle.styleIntensity || 50) > 70 ? 'aggressive' : 
+                     (battle.styleIntensity || 50) > 40 ? 'confident' : 'smooth'
         });
         
         // Convert to expected format

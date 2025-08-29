@@ -1,299 +1,355 @@
 import React, { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { Eye, EyeOff, Key, Mic, Zap } from 'lucide-react';
+import { Eye, EyeOff, Key, CheckCircle, AlertCircle, Zap, Settings2, TestTube } from 'lucide-react';
 
-interface APIKeysData {
-  openaiApiKey?: string;
-  groqApiKey?: string;
-  preferredTtsService: string;
+interface APIKeyStatus {
   hasValidOpenAI: boolean;
   hasValidGroq: boolean;
+  preferredTtsService: string;
 }
 
 export function APIKeyManager() {
+  const [openaiKey, setOpenaiKey] = useState('');
+  const [groqKey, setGroqKey] = useState('');
+  const [preferredService, setPreferredService] = useState('system');
+  const [showOpenaiKey, setShowOpenaiKey] = useState(false);
+  const [showGroqKey, setShowGroqKey] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [showKeys, setShowKeys] = useState({ openai: false, groq: false });
-  const [newKeys, setNewKeys] = useState({ openai: '', groq: '' });
 
-  const { data: apiKeysData, isLoading } = useQuery<APIKeysData>({
+  // Fetch current API key status
+  const { data: keyStatus, isLoading } = useQuery<APIKeyStatus>({
     queryKey: ['/api/user/api-keys'],
-    retry: false,
+    retry: 1,
   });
 
+  // Update API keys mutation
   const updateKeysMutation = useMutation({
     mutationFn: async (data: { 
       openaiApiKey?: string; 
       groqApiKey?: string; 
-      preferredTtsService?: string 
+      preferredTtsService?: string;
     }) => {
-      return await apiRequest('PUT', '/api/user/api-keys', data);
+      const response = await apiRequest('PUT', '/api/user/api-keys', data);
+      return response.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/user/api-keys'] });
       toast({
         title: "API Keys Updated",
-        description: "Your API keys have been saved securely.",
+        description: "Your API keys have been saved successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/user/api-keys'] });
-      setNewKeys({ openai: '', groq: '' });
+      // Clear input fields
+      setOpenaiKey('');
+      setGroqKey('');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Update Failed",
-        description: error.message,
+        description: error.message || "Failed to update API keys",
         variant: "destructive",
       });
     },
   });
 
+  // Test API key mutation
   const testKeyMutation = useMutation({
     mutationFn: async (service: 'openai' | 'groq') => {
-      return await apiRequest('POST', '/api/user/test-api-key', { service });
+      const response = await apiRequest('POST', '/api/user/test-api-key', { service });
+      return response.json();
     },
     onSuccess: (data, service) => {
       toast({
-        title: `${service === 'openai' ? 'OpenAI' : 'Groq'} Key Valid`,
-        description: `Your ${service === 'openai' ? 'OpenAI' : 'Groq'} API key is working correctly.`,
+        title: `${service.toUpperCase()} API Key Test`,
+        description: data.valid ? "API key is valid and working!" : "API key test failed",
+        variant: data.valid ? "default" : "destructive",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/user/api-keys'] });
     },
-    onError: (error, service) => {
+    onError: (error: any, service) => {
       toast({
-        title: `${service === 'openai' ? 'OpenAI' : 'Groq'} Key Invalid`,
-        description: error.message,
+        title: `${service.toUpperCase()} Test Failed`,
+        description: error.message || "Failed to test API key",
         variant: "destructive",
       });
     },
   });
 
-  const handleUpdateKeys = () => {
-    const updateData: any = {};
-    if (newKeys.openai) updateData.openaiApiKey = newKeys.openai;
-    if (newKeys.groq) updateData.groqApiKey = newKeys.groq;
+  const handleSaveKeys = () => {
+    const updates: any = {};
     
-    updateKeysMutation.mutate(updateData);
+    if (openaiKey.trim()) {
+      updates.openaiApiKey = openaiKey.trim();
+    }
+    
+    if (groqKey.trim()) {
+      updates.groqApiKey = groqKey.trim();
+    }
+    
+    if (preferredService !== keyStatus?.preferredTtsService) {
+      updates.preferredTtsService = preferredService;
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      updateKeysMutation.mutate(updates);
+    } else {
+      toast({
+        title: "No Changes",
+        description: "No new API keys or preference changes to save.",
+      });
+    }
   };
 
-  const handlePreferenceChange = (service: string) => {
-    updateKeysMutation.mutate({ preferredTtsService: service });
+  const handleTestKey = (service: 'openai' | 'groq') => {
+    testKeyMutation.mutate(service);
   };
+
+  React.useEffect(() => {
+    if (keyStatus) {
+      setPreferredService(keyStatus.preferredTtsService || 'system');
+    }
+  }, [keyStatus]);
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-300 rounded w-1/3"></div>
-            <div className="h-10 bg-gray-300 rounded"></div>
-            <div className="h-10 bg-gray-300 rounded"></div>
-          </div>
+      <Card className="bg-gray-800 border-gray-700">
+        <CardContent className="p-6 text-center">
+          <div className="animate-spin w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full mx-auto mb-2" />
+          <p className="text-gray-400">Loading API key status...</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="w-full max-w-4xl" data-testid="api-key-manager">
+    <Card className="bg-gray-800 border-gray-700">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="text-white flex items-center gap-2">
           <Key className="w-5 h-5" />
           API Key Management
         </CardTitle>
-        <CardDescription>
-          Manage your personal API keys for enhanced TTS services. Your keys are encrypted and stored securely.
+        <CardDescription className="text-gray-300">
+          Add your own API keys for enhanced TTS services and better voice quality
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="keys" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="keys">API Keys</TabsTrigger>
-            <TabsTrigger value="preferences">TTS Preferences</TabsTrigger>
-          </TabsList>
+      
+      <CardContent className="space-y-6">
+        {/* Current Status */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-400">OpenAI:</span>
+            {keyStatus?.hasValidOpenAI ? (
+              <Badge className="bg-green-600 text-white">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Active
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="border-gray-600 text-gray-400">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                Not Set
+              </Badge>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-400">Groq:</span>
+            {keyStatus?.hasValidGroq ? (
+              <Badge className="bg-green-600 text-white">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Active
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="border-gray-600 text-gray-400">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                Not Set
+              </Badge>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-400">Preferred:</span>
+            <Badge className="bg-purple-600 text-white">
+              <Settings2 className="w-3 h-3 mr-1" />
+              {keyStatus?.preferredTtsService || 'system'}
+            </Badge>
+          </div>
+        </div>
 
-          <TabsContent value="keys" className="space-y-6">
-            {/* OpenAI API Key */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="openai-key" className="text-base font-medium">
-                  OpenAI API Key
-                </Label>
-                <div className="flex items-center gap-2">
-                  {apiKeysData?.hasValidOpenAI ? (
-                    <Badge variant="default" className="bg-green-100 text-green-800">
-                      <Zap className="w-3 h-3 mr-1" />
-                      Active
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary">Not Set</Badge>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => testKeyMutation.mutate('openai')}
-                    disabled={!apiKeysData?.hasValidOpenAI || testKeyMutation.isPending}
-                    data-testid="test-openai-key"
-                  >
-                    Test
-                  </Button>
-                </div>
-              </div>
-              
+        {/* API Key Input Tabs */}
+        <Tabs defaultValue="openai" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-700">
+            <TabsTrigger value="openai" className="data-[state=active]:bg-blue-600">
+              OpenAI gpt-4o-mini-tts
+            </TabsTrigger>
+            <TabsTrigger value="groq" className="data-[state=active]:bg-green-600">
+              Groq PlayAI TTS
+            </TabsTrigger>
+          </TabsList>
+          
+          {/* OpenAI API Key */}
+          <TabsContent value="openai" className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="openai-key" className="text-white">
+                OpenAI API Key
+              </Label>
               <div className="relative">
                 <Input
                   id="openai-key"
-                  type={showKeys.openai ? "text" : "password"}
+                  type={showOpenaiKey ? "text" : "password"}
+                  value={openaiKey}
+                  onChange={(e) => setOpenaiKey(e.target.value)}
                   placeholder="sk-..."
-                  value={newKeys.openai}
-                  onChange={(e) => setNewKeys({ ...newKeys, openai: e.target.value })}
+                  className="bg-gray-700 border-gray-600 text-white pr-20"
                   data-testid="input-openai-key"
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
-                  onClick={() => setShowKeys({ ...showKeys, openai: !showKeys.openai })}
-                >
-                  {showKeys.openai ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </Button>
-              </div>
-              
-              <div className="text-sm text-muted-foreground">
-                <p><strong>Features:</strong> Latest gpt-4o-mini-tts model with "steerability" - create authentic rapper voices</p>
-                <p><strong>Get Key:</strong> <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" className="text-blue-600 hover:underline">platform.openai.com/api-keys</a></p>
-              </div>
-            </div>
-
-            {/* Groq API Key */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="groq-key" className="text-base font-medium">
-                  Groq API Key
-                </Label>
-                <div className="flex items-center gap-2">
-                  {apiKeysData?.hasValidGroq ? (
-                    <Badge variant="default" className="bg-green-100 text-green-800">
-                      <Zap className="w-3 h-3 mr-1" />
-                      Active
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary">Not Set</Badge>
-                  )}
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
                   <Button
-                    variant="outline"
+                    type="button"
+                    variant="ghost"
                     size="sm"
-                    onClick={() => testKeyMutation.mutate('groq')}
-                    disabled={!apiKeysData?.hasValidGroq || testKeyMutation.isPending}
-                    data-testid="test-groq-key"
+                    onClick={() => setShowOpenaiKey(!showOpenaiKey)}
+                    className="h-6 w-6 p-0"
                   >
-                    Test
+                    {showOpenaiKey ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                   </Button>
+                  {keyStatus?.hasValidOpenAI && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleTestKey('openai')}
+                      disabled={testKeyMutation.isPending}
+                      className="h-6 w-6 p-0"
+                      data-testid="button-test-openai"
+                    >
+                      <TestTube className="h-3 w-3" />
+                    </Button>
+                  )}
                 </div>
               </div>
-              
+              <p className="text-xs text-gray-400">
+                Get your API key from{' '}
+                <a
+                  href="https://platform.openai.com/api-keys"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:underline"
+                >
+                  OpenAI Platform
+                </a>
+              </p>
+            </div>
+          </TabsContent>
+          
+          {/* Groq API Key */}
+          <TabsContent value="groq" className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="groq-key" className="text-white">
+                Groq API Key
+              </Label>
               <div className="relative">
                 <Input
                   id="groq-key"
-                  type={showKeys.groq ? "text" : "password"}
+                  type={showGroqKey ? "text" : "password"}
+                  value={groqKey}
+                  onChange={(e) => setGroqKey(e.target.value)}
                   placeholder="gsk_..."
-                  value={newKeys.groq}
-                  onChange={(e) => setNewKeys({ ...newKeys, groq: e.target.value })}
+                  className="bg-gray-700 border-gray-600 text-white pr-20"
                   data-testid="input-groq-key"
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
-                  onClick={() => setShowKeys({ ...showKeys, groq: !showKeys.groq })}
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowGroqKey(!showGroqKey)}
+                    className="h-6 w-6 p-0"
+                  >
+                    {showGroqKey ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                  </Button>
+                  {keyStatus?.hasValidGroq && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleTestKey('groq')}
+                      disabled={testKeyMutation.isPending}
+                      className="h-6 w-6 p-0"
+                      data-testid="button-test-groq"
+                    >
+                      <TestTube className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <p className="text-xs text-gray-400">
+                Get your API key from{' '}
+                <a
+                  href="https://console.groq.com/keys"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-green-400 hover:underline"
                 >
-                  {showKeys.groq ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </Button>
-              </div>
-              
-              <div className="text-sm text-muted-foreground">
-                <p><strong>Features:</strong> PlayAI TTS models - 10x faster than real-time, perfect for rap battles</p>
-                <p><strong>Get Key:</strong> <a href="https://console.groq.com/keys" target="_blank" rel="noopener" className="text-blue-600 hover:underline">console.groq.com/keys</a></p>
-              </div>
-            </div>
-
-            <Button 
-              onClick={handleUpdateKeys}
-              disabled={updateKeysMutation.isPending || (!newKeys.openai && !newKeys.groq)}
-              className="w-full"
-              data-testid="button-save-keys"
-            >
-              {updateKeysMutation.isPending ? "Saving..." : "Save API Keys"}
-            </Button>
-          </TabsContent>
-
-          <TabsContent value="preferences" className="space-y-6">
-            <div className="space-y-4">
-              <Label className="text-base font-medium">Preferred TTS Service</Label>
-              
-              <Select 
-                value={apiKeysData?.preferredTtsService || "system"} 
-                onValueChange={handlePreferenceChange}
-              >
-                <SelectTrigger data-testid="select-tts-preference">
-                  <SelectValue placeholder="Choose your preferred TTS service" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="system">
-                    <div className="flex items-center gap-2">
-                      <Mic className="w-4 h-4" />
-                      System (Bark + Typecast Fallback)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="openai" disabled={!apiKeysData?.hasValidOpenAI}>
-                    <div className="flex items-center gap-2">
-                      <Zap className="w-4 h-4" />
-                      OpenAI gpt-4o-mini-tts (Steerability)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="groq" disabled={!apiKeysData?.hasValidGroq}>
-                    <div className="flex items-center gap-2">
-                      <Zap className="w-4 h-4" />
-                      Groq PlayAI (10x Faster)
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                <Card>
-                  <CardContent className="p-4">
-                    <h4 className="font-medium mb-2">System (Default)</h4>
-                    <p className="text-sm text-muted-foreground">Uses admin keys, slower but always available</p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="p-4">
-                    <h4 className="font-medium mb-2">OpenAI TTS</h4>
-                    <p className="text-sm text-muted-foreground">Latest model with authentic rapper voice control</p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="p-4">
-                    <h4 className="font-medium mb-2">Groq TTS</h4>
-                    <p className="text-sm text-muted-foreground">Ultra-fast PlayAI models for instant battles</p>
-                  </CardContent>
-                </Card>
-              </div>
+                  Groq Console
+                </a>
+              </p>
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* TTS Service Preference */}
+        <div className="space-y-2">
+          <Label htmlFor="preferred-service" className="text-white">
+            Preferred TTS Service
+          </Label>
+          <Select value={preferredService} onValueChange={setPreferredService}>
+            <SelectTrigger className="bg-gray-700 border-gray-600 text-white" data-testid="select-preferred-tts">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-gray-700 border-gray-600">
+              <SelectItem value="system" className="text-white">
+                System (Bark + Typecast)
+              </SelectItem>
+              <SelectItem value="openai" className="text-white">
+                OpenAI (gpt-4o-mini-tts with steerability)
+              </SelectItem>
+              <SelectItem value="groq" className="text-white">
+                Groq (PlayAI - 10x faster)
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-gray-400">
+            System services are always available as fallback
+          </p>
+        </div>
+
+        {/* Save Button */}
+        <Button
+          onClick={handleSaveKeys}
+          disabled={updateKeysMutation.isPending}
+          className="w-full bg-purple-600 hover:bg-purple-700"
+          data-testid="button-save-api-keys"
+        >
+          {updateKeysMutation.isPending ? (
+            <>
+              <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Zap className="w-4 h-4 mr-2" />
+              Save API Keys & Preferences
+            </>
+          )}
+        </Button>
       </CardContent>
     </Card>
   );

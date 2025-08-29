@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Mic, Trophy, Zap, Crown, TrendingUp } from "lucide-react";
+import { Mic, Trophy, Zap, Crown, TrendingUp, Settings } from "lucide-react";
 import { Link } from "wouter";
 
 interface SubscriptionStatus {
@@ -152,7 +152,7 @@ export default function Home() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card className="bg-gradient-to-r from-purple-800 to-purple-600 border-purple-500 text-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -204,6 +204,25 @@ export default function Home() {
               <Link href="/tournaments">
                 <Button className="w-full bg-white text-amber-600 hover:bg-gray-100 font-semibold" data-testid="button-tournament-mode">
                   Enter Tournament
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-slate-800 to-slate-600 border-slate-500 text-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                API Settings
+              </CardTitle>
+              <CardDescription className="text-slate-100">
+                Manage your OpenAI & Groq API keys for enhanced voice quality
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/settings">
+                <Button className="w-full bg-white text-slate-600 hover:bg-gray-100 font-semibold" data-testid="button-settings">
+                  Configure Settings
                 </Button>
               </Link>
             </CardContent>
