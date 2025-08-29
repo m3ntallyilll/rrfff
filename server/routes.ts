@@ -413,10 +413,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      const finalProcessingTime = Date.now() - startTime;
+      console.log(`🎯 Final transcription result: "${userText}" (${finalProcessingTime}ms)`);
+      
       res.json({ 
         userText,
-        processingTime: Date.now() - startTime,
-        instant: true 
+        processingTime: finalProcessingTime,
+        instant: finalProcessingTime <= 200 // Mark as instant only if truly fast
       });
       
     } catch (error: any) {
