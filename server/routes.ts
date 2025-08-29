@@ -763,6 +763,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Analyze lyrics endpoint for frontend
+  app.post('/api/analyze-lyrics', isAuthenticated, async (req: any, res) => {
+    try {
+      const { text } = req.body;
+      
+      if (!text || typeof text !== 'string') {
+        return res.status(400).json({ message: 'Text is required' });
+      }
+      
+      // Use the scoring service to analyze the lyrics
+      const dummyAiText = "Sample AI response for analysis";
+      const analysis = scoringService.scoreRound(text, dummyAiText);
+      
+      const result = {
+        rhymeDensity: analysis.rhymeDensity,
+        flowQuality: analysis.flowQuality,
+        creativity: analysis.creativity,
+        overallScore: analysis.userScore,
+        breakdown: {
+          vocabulary: Math.floor(analysis.creativity * 0.3),
+          wordplay: Math.floor(analysis.creativity * 0.4),
+          rhythm: Math.floor(analysis.flowQuality * 0.8),
+          originality: Math.floor(analysis.creativity * 0.6)
+        },
+        suggestions: [
+          analysis.userScore < 50 ? "Try adding more complex rhyme schemes" : "Great rhyme complexity!",
+          analysis.flowQuality < 60 ? "Work on syllable timing and rhythm" : "Excellent flow!",
+          analysis.creativity < 40 ? "Add more metaphors and wordplay" : "Creative wordplay detected!"
+        ]
+      };
+      
+      res.json(result);
+      
+    } catch (error: any) {
+      console.error('Lyrics analysis error:', error);
+      res.status(500).json({ message: 'Analysis failed' });
+    }
+  });
+
   // Serve Bark generated audio files
   app.get('/api/audio/:filename', (req, res) => {
     try {

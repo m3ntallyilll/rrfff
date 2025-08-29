@@ -17,7 +17,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     id: 'razor',
     name: 'MC Razor',
     displayName: 'Razor',
-    voiceId: 'tc_6178a6758972cb5bb66f1295', // MC Razor - Female rapper voice
+    voiceId: 'tc_67d237f1782cabcc6155272f', // MC Razor - Using working voice ID
     gender: 'female',
     personality: 'Fierce, aggressive, no-nonsense attitude with razor-sharp wit',
     style: 'hardcore',
