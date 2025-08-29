@@ -402,7 +402,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ]);
         console.log(`✅ LIGHTNING transcription (${Date.now() - startTime}ms): "${userText.substring(0, 50)}..."`);
       } catch (error) {
-        console.log(`⚠️ Lightning transcription failed in ${Date.now() - startTime}ms`);
+        console.log(`⚠️ Lightning transcription failed, getting actual transcription...`);
+        // If ultra-fast fails, get the actual transcription without timeout
+        try {
+          userText = await groqService.transcribeAudio(audioBuffer);
+          console.log(`✅ Fallback transcription complete: "${userText.substring(0, 50)}..."`);
+        } catch (fallbackError) {
+          console.log(`❌ All transcription failed, using placeholder`);
+          userText = "Voice input received";
+        }
       }
       
       res.json({ 
@@ -566,8 +574,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ]);
         console.log(`✅ INSTANT transcription complete: "${userText.substring(0, 50)}..."`);
       } catch (error) {
-        console.log(`⚠️ Ultra-fast transcription failed, using fallback`);
-        userText = "Voice input received";
+        console.log(`⚠️ Ultra-fast transcription failed, getting actual transcription...`);
+        // If ultra-fast fails, get the actual transcription without timeout
+        try {
+          userText = await groqService.transcribeAudio(audioBuffer);
+          console.log(`✅ Fallback transcription complete: "${userText.substring(0, 50)}..."`);
+        } catch (fallbackError) {
+          console.log(`❌ All transcription failed, using placeholder`);
+          userText = "Voice input received";
+        }
       }
       
       // Continue with the rest of the processing - no streaming for now, 
