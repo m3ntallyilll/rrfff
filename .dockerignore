@@ -48,24 +48,52 @@ README*
 docs/
 documentation/
 
-# Large ML/AI model directories (if not needed in production)
+# Large ML/AI model directories (exclude from production)
 ARTalk/
 bark/
 MuseTalk/
+models/
+*.pth
+*.bin
+*.safetensors
 
-# Temporary and cached files
-attached_assets/
-*.tmp
-*.temp
-.cache/
-.parcel-cache/
-
-# Python cache files (if any)
+# Python packages and cache (not needed for Node.js app)
+.pythonlibs/
+.uv/
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.py[cod]
+*$py.class
+*.so
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+PIPFILE.lock
+
+# Temporary and cached files
+attached_assets/
+temp_audio/
+tmp/
+*.tmp
+*.temp
+.cache/
+.parcel-cache/
 
 # Log files
 *.log
