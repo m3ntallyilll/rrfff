@@ -46,7 +46,7 @@ export class GroqTTSService {
       'razor': 'Cheyenne-PlayAI',  // Female, sharp and cutting
       'venom': 'Thunder-PlayAI',   // Male, intense and powerful
       'silk': 'Basil-PlayAI',      // Male, smooth and controlled
-      'cypher': 'Thunder-PlayAI',  // Robot - Use deepest male voice for robotic effect
+      'cypher': 'Fritz-PlayAI',    // Robot - Deep, authoritative voice for CYPHER-9000
     };
 
     if (voiceMap[characterId]) {
@@ -61,9 +61,18 @@ export class GroqTTSService {
   private applyRobotVoiceEffects(text: string, characterId: string): string {
     // Special robot voice processing for CYPHER-9000
     if (characterId === 'cypher') {
-      // DON'T change the words - just return clean text for TTS
-      // The robot effect will come from voice selection and speed/pitch
-      return text;
+      // Add robotic speech patterns and effects
+      let robotText = text;
+      
+      // Add robotic pauses and emphasis
+      robotText = robotText.replace(/\./g, '. [pause]');
+      robotText = robotText.replace(/!/g, '. [emphasis]');
+      robotText = robotText.replace(/\?/g, '. [query]');
+      
+      // Add mechanical breathing/processing sounds
+      robotText = `[processing] ${robotText} [systems_online]`;
+      
+      return robotText;
     }
     return text;
   }
@@ -106,12 +115,23 @@ export class GroqTTSService {
         voice: voice,
         input: cleanText,
         response_format: 'wav',
-        speed: characterId === 'cypher' ? 0.85 : 1.0  // Slower speed for robotic effect
+        speed: characterId === 'cypher' ? 0.75 : 1.0,  // Much slower for robotic effect
+        // Add robotic voice modulation for CYPHER-9000
+        ...(characterId === 'cypher' && {
+          // Additional robotic voice parameters
+          voice_engine: 'neural', // Use neural voice engine for better robot effects
+          emotion: 'neutral',     // Emotionless robot delivery
+          stability: 0.8,         // High stability for mechanical consistency
+          clarity: 0.9           // High clarity for robotic precision
+        })
       };
 
       // Add special robot voice modulation for CYPHER-9000
       if (characterId === 'cypher') {
-        console.log(`🤖 CYPHER-9000 VOICE: Applying robotic modulation (slower speed: ${ttsOptions.speed})`);
+        console.log(`🤖 CYPHER-9000 VOICE PROTOCOL: Processing with robotic effects`);
+        console.log(`   - Voice: ${voice} (Fritz-PlayAI deep authority)`);
+        console.log(`   - Speed: ${ttsOptions.speed}x (slower robotic delivery)`);
+        console.log(`   - Effects: Neural engine, neutral emotion, high stability`);
       }
 
       const response = await this.groq.audio.speech.create(ttsOptions);
