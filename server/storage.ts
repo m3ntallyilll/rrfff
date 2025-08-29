@@ -153,9 +153,14 @@ export class DatabaseStorage implements IStorage {
     // Check if daily battles need reset
     const now = new Date();
     const lastReset = user.lastBattleReset || new Date(0);
-    const daysSinceReset = Math.floor((now.getTime() - lastReset.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // More accurate daily reset check - reset at midnight of the next day
+    const resetTime = new Date(lastReset);
+    resetTime.setHours(24, 0, 0, 0); // Next day at midnight
+    
+    const needsReset = now.getTime() >= resetTime.getTime();
 
-    if (daysSinceReset > 0) {
+    if (needsReset) {
       // Reset daily battles
       const tier = SUBSCRIPTION_TIERS[user.subscriptionTier as keyof typeof SUBSCRIPTION_TIERS];
       await db

@@ -61,17 +61,23 @@ export class UserTTSManager {
         }
       }
 
-      if (preferredService === 'groq' && user.groqApiKey) {
+      if (preferredService === 'groq') {
         try {
-          console.log(`🚀 Using user's Groq TTS service`);
-          const groqInstance = this.getGroqInstance(user.groqApiKey);
-          return await groqInstance.generateTTS(text, options.characterId, {
-            voiceStyle: options.voiceStyle,
-            characterName: options.characterName,
-            gender: options.gender
-          });
+          // Try user's Groq API key first, then fallback to system key
+          const apiKey = user.groqApiKey || process.env.GROQ_API_KEY;
+          if (apiKey) {
+            console.log(`🚀 Using ${user.groqApiKey ? "user's" : "system"} Groq TTS service`);
+            const groqInstance = this.getGroqInstance(apiKey);
+            return await groqInstance.generateTTS(text, options.characterId, {
+              voiceStyle: options.voiceStyle,
+              characterName: options.characterName,
+              gender: options.gender
+            });
+          } else {
+            console.log(`⚠️ No Groq API key available (user or system)`);
+          }
         } catch (error: any) {
-          console.log(`❌ User's Groq TTS failed: ${error.message}, falling back`);
+          console.log(`❌ Groq TTS failed: ${error.message}, falling back`);
         }
       }
 
@@ -99,7 +105,12 @@ export class UserTTSManager {
     try {
       // Try Bark TTS first
       console.log(`🐶 Attempting system Bark TTS...`);
-      return await barkTTS.generateAudio(text, options.characterId);
+      const barkResult = await barkTTS.generateAudio(text, options.characterId);
+      // Convert bark response to expected format
+      return {
+        audioUrl: barkResult.audioPath,
+        duration: Math.floor(text.length / 15)
+      };
     } catch (barkError: any) {
       console.log(`📢 Bark failed, trying Typecast fallback: ${barkError.message}`);
       

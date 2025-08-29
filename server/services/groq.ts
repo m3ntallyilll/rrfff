@@ -6,15 +6,19 @@ export class GroqService {
   private baseUrl = "https://api.groq.com/openai/v1";
   private rhymeEngine: AdvancedRhymeEngine;
 
-  constructor() {
-    this.apiKey = process.env.GROQ_API_KEY || process.env.GROQ_API_KEY_ENV_VAR || "";
+  constructor(apiKey?: string) {
+    this.apiKey = apiKey || process.env.GROQ_API_KEY || process.env.GROQ_API_KEY_ENV_VAR || "";
     if (!this.apiKey) {
-      throw new Error("GROQ_API_KEY environment variable is required");
+      console.warn("⚠️ GROQ_API_KEY not provided - Groq services will be unavailable");
     }
     this.rhymeEngine = new AdvancedRhymeEngine();
   }
 
   async transcribeAudio(audioBuffer: Buffer): Promise<string> {
+    if (!this.apiKey) {
+      throw new Error("Groq API key not available");
+    }
+    
     console.log(`🎙️ Groq transcription starting: ${audioBuffer.length} bytes`);
     
     try {
@@ -304,6 +308,9 @@ OUTPUT: Technical brief for AI rapper in format: "User: [syllables/line], [schem
     lyricComplexity: number = 50,
     styleIntensity: number = 50
   ): Promise<string> {
+    if (!this.apiKey) {
+      throw new Error("Groq API key not available for rap generation");
+    }
     // SECURITY: Validate and sanitize user input
     const validatedUserVerse = this.validateInput(userVerse, 5000);
     const sanitizedUserVerse = this.sanitizeContent(validatedUserVerse);
