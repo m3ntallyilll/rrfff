@@ -163,7 +163,7 @@ export function BattleAvatar({
                 else setMouthShape("closed");
                 setLipSyncLevel(data.intensity / 100);
               }}
-              disableAudioPlayback={true}
+              disableAudioPlayback={false}
             />
           )}
           

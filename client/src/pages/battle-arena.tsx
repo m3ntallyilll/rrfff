@@ -125,6 +125,12 @@ export default function BattleArena() {
         console.log('Setting current AI audio URL:', result.audioUrl?.substring(0, 100) + '...');
         setCurrentAiAudio(result.audioUrl);
         
+        // Auto-play TTS immediately when available
+        if (result.audioUrl) {
+          updateBattleState({ isPlayingAudio: true });
+          // The BattleAvatar component will handle the actual playback
+        }
+        
         toast({
           title: "Round Complete!",
           description: `Score: You ${result.userScore || 0} - AI ${result.aiScore || 0}`,

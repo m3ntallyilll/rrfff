@@ -188,8 +188,10 @@ export function AdvancedLipSync({
         };
         
         if (!disableAudioPlayback && audioRef.current) {
-          audioRef.current.play().catch(() => {
-            // Ignore autoplay policy errors
+          // AUTO-PLAY as soon as audio is ready
+          console.log(`🔥 Auto-playing TTS audio immediately`);
+          audioRef.current.play().catch((error) => {
+            console.error('🔊 Auto-play failed:', error);
           });
           processAudio();
         }
