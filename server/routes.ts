@@ -208,7 +208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } = req.body;
       
       // SECURITY: Validate battle parameters
-      const validDifficulties = ['easy', 'normal', 'hard'];
+      const validDifficulties = ['easy', 'normal', 'hard', 'nightmare'];
       if (difficulty && !validDifficulties.includes(difficulty)) {
         return res.status(400).json({ message: "Invalid difficulty level" });
       }
@@ -226,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // SECURITY: Validate AI character selection
-      const validCharacters = ['razor', 'venom', 'silk'];
+      const validCharacters = ['razor', 'venom', 'silk', 'cypher'];
       if (aiCharacterId && !validCharacters.includes(aiCharacterId)) {
         return res.status(400).json({ message: "Invalid AI character" });
       }
