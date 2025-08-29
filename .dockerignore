@@ -141,15 +141,6 @@ logs/
 # Development scripts
 setup_*.sh
 build_resources.sh
-test_*.py
-test_*.js
-*_test.py
-*_test.js
-install_*.py
-optimize_*.py
-generate_*.py
-emergency_*.ts
-final_*.js
 
 # Source maps (if not needed in production)
 *.map
@@ -159,50 +150,8 @@ final_*.js
 docker-compose.dev.yml
 .dockerignore
 Dockerfile.dev
-components.json
-tsconfig.json
-vite.config.ts
-tailwind.config.ts
-postcss.config.js
 
 # Package manager files (keep package.json and package-lock.json)
 .npm/
 .yarn/
 yarn.lock.bak
-
-# Additional large files and directories
-*.jsonl
-battle_rap_training_data.*
-deployment-guide.md
-replit.md
-Dockerfile.production
-pyproject.toml
-
-# Python environments and installations
-.pythonlibs/
-.uv/
-venv/
-env/
-.venv/
-.env/
-python_modules/
-
-# Additional ML and AI model files
-*.model
-*.checkpoint
-*.ckpt
-*.pb
-*.onnx
-*.tflite
-
-# Development build scripts and configs
-build-production.sh
-optimize-for-cloud.sh
-setup_*.sh
-cleanup-*.sh
-deploy.config.json
-
-# Temporary audio and media files
-temp_audio.wav
-*.audio
-test_audio_*

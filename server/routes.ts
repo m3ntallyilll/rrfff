@@ -29,15 +29,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Health check endpoint for deployment monitoring - must be first
-  app.get('/', (req, res) => {
-    res.status(200).json({ 
-      status: 'ok', 
-      message: 'Voice Rap Battle API is running',
-      timestamp: new Date().toISOString() 
-    });
-  });
-
   // Auth middleware
   await setupAuth(app);
 

@@ -1,0 +1,366 @@
+Create response
+POST
+https://api.groq.com/openai/v1/responses
+
+Creates a model response for the given input.
+
+Request Body
+input
+string / array
+Required
+Text input to the model, used to generate a response.
+
+Show possible types
+model
+string
+Required
+ID of the model to use. For details on which models are compatible with the Responses API, see available models
+
+instructions
+string or null
+Optional
+Inserts a system (or developer) message as the first item in the model's context.
+
+max_output_tokens
+integer or null
+Optional
+An upper bound for the number of tokens that can be generated for a response, including visible output tokens and reasoning tokens.
+
+metadata
+object or null
+Optional
+Custom key-value pairs for storing additional information. Maximum of 16 pairs.
+
+parallel_tool_calls
+boolean or null
+Optional
+Defaults to true
+Enable parallel execution of multiple tool calls.
+
+reasoning
+object or null
+Optional
+Configuration for reasoning capabilities when using compatible models.
+
+Show properties
+service_tier
+string or null
+Optional
+Defaults to auto
+Allowed values: auto, default, flex
+Specifies the latency tier to use for processing the request.
+
+store
+boolean or null
+Optional
+Defaults to false
+Response storage flag. Note: Currently only supports false or null values.
+
+stream
+boolean or null
+Optional
+Defaults to false
+Enable streaming mode to receive response data as server-sent events.
+
+temperature
+number or null
+Optional
+Defaults to 1
+Range: 0 - 2
+Controls randomness in the response generation. Range: 0 to 2. Lower values produce more deterministic outputs, higher values increase variety and creativity.
+
+text
+object
+Optional
+Response format configuration. Supports plain text or structured JSON output.
+
+Show properties
+tool_choice
+string / object or null
+Optional
+Controls which (if any) tool is called by the model. none means the model will not call any tool and instead generates a message. auto means the model can pick between generating a message or calling one or more tools. required means the model must call one or more tools. Specifying a particular tool via {"type": "function", "function": {"name": "my_function"}} forces the model to call that tool.
+
+none is the default when no tools are present. auto is the default if tools are present.
+
+Show possible types
+tools
+array or null
+Optional
+List of tools available to the model. Currently supports function definitions only. Maximum of 128 functions.
+
+Show properties
+top_p
+number or null
+Optional
+Defaults to 1
+Range: 0 - 1
+Nucleus sampling parameter that controls the cumulative probability cutoff. Range: 0 to 1. A value of 0.1 restricts sampling to tokens within the top 10% probability mass.
+
+truncation
+string or null
+Optional
+Defaults to disabled
+Allowed values: auto, disabled
+Context truncation strategy. Supported values: auto or disabled.
+
+user
+string
+Optional
+Optional identifier for tracking end-user requests. Useful for usage monitoring and compliance.
+
+Returns
+Returns a response object, or a streamed sequence of response events if the request is streamed.
+
+curl
+
+curl https://api.groq.com/openai/v1/responses -s \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer $GROQ_API_KEY" \
+-d '{
+  "model": "gpt-oss",
+  "input": "Tell me a three sentence bedtime story about a unicorn."
+}'
+JSON
+
+{
+  "id": "resp_01k1x6w9ane6d8rfxm05cb45yk",
+  "object": "response",
+  "status": "completed",
+  "created_at": 1754400695,
+  "output": [
+    {
+      "type": "message",
+      "id": "msg_01k1x6w9ane6eb0650crhawwyy",
+      "status": "completed",
+      "role": "assistant",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "When the stars blinked awake, Luna the unicorn curled her mane and whispered wishes to the sleeping pine trees. She galloped through a field of moonlit daisies, gathering dew like tiny silver pearls. With a gentle sigh, she tucked her hooves beneath a silver cloud so the world slept softly, dreaming of her gentle hooves until the morning.",
+          "annotations": []
+        }
+      ]
+    }
+  ],
+  "previous_response_id": null,
+  "model": "llama-3.3-70b-versatile",
+  "reasoning": {
+    "effort": null,
+    "summary": null
+  },
+  "max_output_tokens": null,
+  "instructions": null,
+  "text": {
+    "format": {
+      "type": "text"
+    }
+  },
+  "tools": [],
+  "tool_choice": "auto",
+  "truncation": "disabled",
+  "metadata": {},
+  "temperature": 1,
+  "top_p": 1,
+  "user": null,
+  "service_tier": "default",
+  "error": null,
+  "incomplete_details": null,
+  "usage": {
+    "input_tokens": 82,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 266,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 348
+  },
+  "parallel_tool_calls": true,
+  "store": false
+}
+Audio
+Create transcription
+POST
+https://api.groq.com/openai/v1/audio/transcriptions
+
+Transcribes audio into the input language.
+
+Request Body
+model
+string
+Required
+ID of the model to use. whisper-large-v3 and whisper-large-v3-turbo are currently available.
+
+file
+string
+Optional
+The audio file object (not file name) to transcribe, in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm. Either a file or a URL must be provided. Note that the file field is not supported in Batch API requests.
+
+language
+string
+Optional
+The language of the input audio. Supplying the input language in ISO-639-1 format will improve accuracy and latency.
+
+prompt
+string
+Optional
+An optional text to guide the model's style or continue a previous audio segment. The prompt should match the audio language.
+
+response_format
+string
+Optional
+Defaults to json
+Allowed values: json, text, verbose_json
+The format of the transcript output, in one of these options: json, text, or verbose_json.
+
+temperature
+number
+Optional
+Defaults to 0
+The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use log probability to automatically increase the temperature until certain thresholds are hit.
+
+timestamp_granularities[]
+array
+Optional
+Defaults to segment
+The timestamp granularities to populate for this transcription. response_format must be set verbose_json to use timestamp granularities. Either or both of these options are supported: word, or segment. Note: There is no additional latency for segment timestamps, but generating word timestamps incurs additional latency.
+
+url
+string
+Optional
+The audio URL to translate/transcribe (supports Base64URL). Either a file or a URL must be provided. For Batch API requests, the URL field is required since the file field is not supported.
+
+Returns
+Returns an audio transcription object.
+
+curl
+
+curl https://api.groq.com/openai/v1/audio/transcriptions \
+  -H "Authorization: Bearer $GROQ_API_KEY" \
+  -H "Content-Type: multipart/form-data" \
+  -F file="@./sample_audio.m4a" \
+  -F model="whisper-large-v3"
+JSON
+
+{
+  "text": "Your transcribed text appears here...",
+  "x_groq": {
+    "id": "req_unique_id"
+  }
+}
+Create translation
+POST
+https://api.groq.com/openai/v1/audio/translations
+
+Translates audio into English.
+
+Request Body
+model
+string
+Required
+ID of the model to use. whisper-large-v3 and whisper-large-v3-turbo are currently available.
+
+file
+string
+Optional
+The audio file object (not file name) translate, in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.
+
+prompt
+string
+Optional
+An optional text to guide the model's style or continue a previous audio segment. The prompt should be in English.
+
+response_format
+string
+Optional
+Defaults to json
+Allowed values: json, text, verbose_json
+The format of the transcript output, in one of these options: json, text, or verbose_json.
+
+temperature
+number
+Optional
+Defaults to 0
+The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use log probability to automatically increase the temperature until certain thresholds are hit.
+
+url
+string
+Optional
+The audio URL to translate/transcribe (supports Base64URL). Either file or url must be provided. When using the Batch API only url is supported.
+
+Returns
+Returns an audio translation object.
+
+curl
+
+curl https://api.groq.com/openai/v1/audio/translations \
+  -H "Authorization: Bearer $GROQ_API_KEY" \
+  -H "Content-Type: multipart/form-data" \
+  -F file="@./sample_audio.m4a" \
+  -F model="whisper-large-v3"
+JSON
+
+{
+  "text": "Your translated text appears here...",
+  "x_groq": {
+    "id": "req_unique_id"
+  }
+}
+Create speech
+POST
+https://api.groq.com/openai/v1/audio/speech
+
+Generates audio from the input text.
+
+Request Body
+input
+string
+Required
+The text to generate audio for.
+
+model
+string
+Required
+One of the available TTS models.
+
+voice
+string
+Required
+The voice to use when generating the audio. List of voices can be found here.
+
+response_format
+string
+Optional
+Defaults to mp3
+Allowed values: flac, mp3, mulaw, ogg, wav
+The format of the generated audio. Supported formats are flac, mp3, mulaw, ogg, wav.
+
+sample_rate
+integer
+Optional
+Defaults to 48000
+Allowed values: 8000, 16000, 22050, 24000, 32000, 44100, 48000
+The sample rate for generated audio
+
+speed
+number
+Optional
+Defaults to 1
+Range: 0.5 - 5
+The speed of the generated audio.
+
+Returns
+Returns an audio file in wav format.
+
+curl
+
+curl https://api.groq.com/openai/v1/audio/speech \
+  -H "Authorization: Bearer $GROQ_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "playai-tts",
+    "input": "I love building and shipping new features for our users!",
+    "voice": "Fritz-PlayAI",
+    "response_format": "wav"
+  }'

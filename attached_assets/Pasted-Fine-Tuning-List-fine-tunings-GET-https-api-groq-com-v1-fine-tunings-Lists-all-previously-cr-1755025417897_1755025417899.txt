@@ -1,0 +1,137 @@
+Fine Tuning
+List fine tunings
+GET
+https://api.groq.com/v1/fine_tunings
+
+Lists all previously created fine tunings. This endpoint is in closed beta. Contact us for more information.
+
+Returns
+The list of fine tunes
+
+curl
+
+curl https://api.groq.com/v1/fine_tunings -s \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $GROQ_API_KEY"
+JSON
+
+{
+    "object": "list",
+    "data": [
+        {
+            "id": "string",
+            "name": "string",
+            "base_model": "string",
+            "type": "string",
+            "input_file_id": "string",
+            "created_at": 0,
+            "fine_tuned_model": "string"
+        }
+    ]
+}
+Create fine tuning
+POST
+https://api.groq.com/v1/fine_tunings
+
+Creates a new fine tuning for the already uploaded files This endpoint is in closed beta. Contact us for more information.
+
+Request Body
+base_model
+string
+Optional
+BaseModel is the model that the fine tune was originally trained on.
+
+input_file_id
+string
+Optional
+InputFileID is the id of the file that was uploaded via the /files api.
+
+name
+string
+Optional
+Name is the given name to a fine tuned model.
+
+type
+string
+Optional
+Type is the type of fine tuning format such as "lora".
+
+Returns
+The newly created fine tune
+
+curl
+
+curl https://api.groq.com/v1/fine_tunings -s \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $GROQ_API_KEY" \
+    -d '{
+        "input_file_id": "<file-id>",
+        "name": "test-1",
+        "type": "lora",
+        "base_model": "llama-3.1-8b-instant"
+    }'
+JSON
+
+{
+    "id": "string",
+    "object": "object",
+    "data": {
+        "id": "string",
+        "name": "string",
+        "base_model": "string",
+        "type": "string",
+        "input_file_id": "string",
+        "created_at": 0,
+        "fine_tuned_model": "string"
+    }
+}
+Get fine tuning
+GET
+https://api.groq.com/v1/fine_tunings/{id}
+
+Retrieves an existing fine tuning by id This endpoint is in closed beta. Contact us for more information.
+
+Returns
+A fine tune metadata object
+
+curl
+
+curl https://api.groq.com/v1/fine_tunings/:id -s \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $GROQ_API_KEY"
+JSON
+
+{
+    "id": "string",
+    "object": "object",
+    "data": {
+        "id": "string",
+        "name": "string",
+        "base_model": "string",
+        "type": "string",
+        "input_file_id": "string",
+        "created_at": 0,
+        "fine_tuned_model": "string"
+    }
+}
+Delete fine tuning
+DELETE
+https://api.groq.com/v1/fine_tunings/{id}
+
+Deletes an existing fine tuning by id This endpoint is in closed beta. Contact us for more information.
+
+Returns
+A confirmation of the deleted fine tune
+
+curl
+
+curl -X DELETE https://api.groq.com/v1/fine_tunings/:id -s \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $GROQ_API_KEY"
+JSON
+
+{
+    "id": "string",
+    "object": "fine_tuning",
+    "deleted": true
+}

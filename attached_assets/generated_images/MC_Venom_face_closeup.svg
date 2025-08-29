@@ -1,0 +1,82 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="skinGradV" cx="0.5" cy="0.3" r="0.7">
+      <stop offset="0%" stop-color="#E6C2A6"/>
+      <stop offset="100%" stop-color="#D4A574"/>
+    </radialGradient>
+    <linearGradient id="hairGradV" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A1A1A"/>
+      <stop offset="50%" stop-color="#2D2D2D"/>
+      <stop offset="100%" stop-color="#0A0A0A"/>
+    </linearGradient>
+    <radialGradient id="eyeGradV" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#2F5233"/>
+      <stop offset="100%" stop-color="#1A3B1F"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="400" fill="#1A1A1A"/>
+  
+  <!-- Face shadow -->
+  <ellipse cx="200" cy="220" rx="100" ry="115" fill="#C49B7B" opacity="0.3"/>
+  
+  <!-- Main face (more angular/masculine) -->
+  <path d="M 110 180 Q 200 100 290 180 L 285 250 Q 250 310 200 315 Q 150 310 115 250 Z" fill="url(#skinGradV)" stroke="#B8956A" stroke-width="2"/>
+  
+  <!-- Strong jawline -->
+  <path d="M 125 270 Q 200 320 275 270 Q 240 300 200 305 Q 160 300 125 270" fill="#C49B7B" opacity="0.8"/>
+  
+  <!-- Hair (slicked back style) -->
+  <path d="M 105 170 Q 200 70 295 170 Q 285 90 200 85 Q 115 90 105 170" fill="url(#hairGradV)"/>
+  <path d="M 120 160 Q 200 95 280 160 Q 240 120 200 115 Q 160 120 120 160" fill="url(#hairGradV)" opacity="0.7"/>
+  
+  <!-- Left eyebrow (more angular) -->
+  <path d="M 155 175 Q 175 165 195 175 Q 180 180 155 175" fill="#1A1A1A" opacity="0.9"/>
+  
+  <!-- Right eyebrow -->
+  <path d="M 205 175 Q 225 165 245 175 Q 220 180 205 175" fill="#1A1A1A" opacity="0.9"/>
+  
+  <!-- Left eye (more intense) -->
+  <ellipse cx="175" cy="190" rx="18" ry="12" fill="#D4A574" opacity="0.5"/>
+  <ellipse cx="175" cy="190" rx="16" ry="11" fill="white"/>
+  <ellipse cx="175" cy="190" rx="9" ry="11" fill="url(#eyeGradV)"/>
+  <ellipse cx="175" cy="190" rx="4" ry="4" fill="black"/>
+  <ellipse cx="177" cy="188" rx="1.5" ry="1.5" fill="white" opacity="0.9"/>
+  
+  <!-- Right eye -->
+  <ellipse cx="225" cy="190" rx="18" ry="12" fill="#D4A574" opacity="0.5"/>
+  <ellipse cx="225" cy="190" rx="16" ry="11" fill="white"/>
+  <ellipse cx="225" cy="190" rx="9" ry="11" fill="url(#eyeGradV)"/>
+  <ellipse cx="225" cy="190" rx="4" ry="4" fill="black"/>
+  <ellipse cx="227" cy="188" rx="1.5" ry="1.5" fill="white" opacity="0.9"/>
+  
+  <!-- Nose (more prominent) -->
+  <path d="M 192 200 Q 200 225 208 200 Q 200 220 192 200" fill="#C49B7B"/>
+  <ellipse cx="196" cy="222" rx="2.5" ry="2" fill="#B8956A"/>
+  <ellipse cx="204" cy="222" rx="2.5" ry="2" fill="#B8956A"/>
+  
+  <!-- Mouth area -->
+  <ellipse cx="200" cy="250" rx="22" ry="14" fill="#D4A574"/>
+  
+  <!-- Lips (slightly smirking) -->
+  <path id="lips" d="M 183 250 Q 200 255 217 250 Q 210 253 200 254 Q 190 253 183 250" fill="#6B4E3D" stroke="#5A3F2F" stroke-width="1"/>
+  
+  <!-- Cheek definition -->
+  <ellipse cx="145" cy="225" rx="15" ry="25" fill="#E6C2A6" opacity="0.4"/>
+  <ellipse cx="255" cy="225" rx="15" ry="25" fill="#E6C2A6" opacity="0.4"/>
+  
+  <!-- Strong chin -->
+  <ellipse cx="200" cy="290" rx="30" ry="18" fill="#C49B7B" opacity="0.5"/>
+  
+  <!-- Scar detail -->
+  <path d="M 240 200 Q 245 210 250 220" stroke="#B8956A" stroke-width="2" opacity="0.6" fill="none"/>
+  
+  <!-- Intense stare lines -->
+  <path d="M 165 182 L 185 185" stroke="#1A1A1A" stroke-width="2" opacity="0.7"/>
+  <path d="M 215 185 L 235 182" stroke="#1A1A1A" stroke-width="2" opacity="0.7"/>
+  
+  <!-- Character name label -->
+  <text x="200" y="350" text-anchor="middle" fill="#44FF44" font-family="Arial, sans-serif" font-size="24" font-weight="bold">MC VENOM</text>
+  <text x="200" y="375" text-anchor="middle" fill="#CCCCCC" font-family="Arial, sans-serif" font-size="14">AGGRESSIVE BATTLE MC</text>
+</svg>

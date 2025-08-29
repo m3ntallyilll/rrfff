@@ -1,0 +1,144 @@
+xt to Speech
+Generate speech from text using the specified voice model. Supports emotion, volume, pitch, and tempo customization.
+
+First, list all available voice models using the GET /v1/voices endpoint, then use the voice_id from the response to generate speech with this endpoint. Each voice model has its own unique characteristics. See Listing all voices for available voices.
+
+POST
+/
+v1
+/
+text-to-speech
+
+Try it
+Text To Speech
+
+
+Copy
+
+Ask AI
+curl --request POST \
+  --url https://api.typecast.ai/v1/text-to-speech \
+  --header 'Content-Type: application/json' \
+  --header 'X-API-KEY: <api-key>' \
+  --data '{
+  "voice_id": "tc_62a8975e695ad26f7fb514d1",
+  "text": "Hello. How are you?",
+  "model": "ssfm-v21",
+  "language": "eng",
+  "prompt": {
+    "emotion_preset": "normal",
+    "emotion_intensity": 1
+  },
+  "output": {
+    "volume": 100,
+    "audio_pitch": 0,
+    "audio_tempo": 1,
+    "audio_format": "wav"
+  },
+  "seed": 42
+}'
+
+200
+
+400
+
+401
+
+402
+
+404
+
+422
+
+500
+
+Copy
+
+Ask AI
+This response does not have an example.
+Authorizations
+​
+X-API-KEY
+stringheaderrequired
+API key for authentication. You can obtain an API key from the Typecast dashboard.
+
+Body
+application/json
+​
+voice_id
+stringrequired
+Voice ID in format 'tc_' (Typecast voice) or 'uc_' (User-created voice) followed by a unique identifier (e.g., 'tc_62a8975e695ad26f7fb514d1' for a Typecast voice). See Listing all voices for available voices.
+
+Example:
+"tc_62a8975e695ad26f7fb514d1"
+
+​
+text
+stringrequired
+Text to convert to speech (max 5000 characters, credits consumed based on length, supports multiple languages including English, Korean, Japanese, and Chinese, special characters and punctuation handled automatically)
+
+Example:
+"Hello. How are you?"
+
+​
+model
+enum<string>required
+Voice model to use: ssfm-v21 (Speech Synthesis Foundation Model)
+
+Available options: ssfm-v21 
+​
+language
+string
+Language code following ISO 639-3 standard. If not provided, will be auto-detected based on text content.
+
+Supported language codes:
+
+Code	Language	Code	Language	Code	Language
+ENG	English	JPN	Japanese	UKR	Ukrainian
+KOR	Korean	ELL	Greek	IND	Indonesian
+SPA	Spanish	TAM	Tamil	DAN	Danish
+DEU	German	TGL	Tagalog	SWE	Swedish
+FRA	French	FIN	Finnish	MSA	Malay
+ITA	Italian	ZHO	Chinese	CES	Czech
+POL	Polish	SLK	Slovak	POR	Portuguese
+NLD	Dutch	ARA	Arabic	BUL	Bulgarian
+RUS	Russian	HRV	Croatian	RON	Romanian
+Example:
+"eng"
+
+​
+prompt
+object
+Emotion and style settings for the generated speech, including emotion type (happy/sad/angry/normal) and intensity (0.0 to 2.0) to control the emotional expression
+
+Show child attributes
+
+​
+output
+object
+Audio output settings including volume (0-200), pitch (-12 to +12 semitones), tempo (0.5x to 2.0x), and format (wav/mp3) for controlling the final audio characteristics
+
+Show child attributes
+
+​
+seed
+integer
+Random seed for reproducible results (same seed + same parameters = same output, useful for testing, reproducing specific results, and quality control)
+
+Example:
+42
+
+Response
+200
+
+200
+audio/wav
+Success - Returns audio file
+
+The response is of type file.
+
+Listing all voices
+github
+linkedin
+youtube
+website

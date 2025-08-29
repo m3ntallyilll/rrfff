@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="skinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#A0522D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#654321;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="hairGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2F1B14;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1A1A1A;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B8860B;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="bgGrad" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d0d0d;stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="400" fill="url(#bgGrad)" />
+  
+  <!-- Head/Face -->
+  <ellipse cx="200" cy="180" rx="80" ry="95" fill="url(#skinGrad)" stroke="#654321" stroke-width="2"/>
+  
+  <!-- Hair (Fade cut) -->
+  <ellipse cx="200" cy="120" rx="85" ry="50" fill="url(#hairGrad)"/>
+  <rect x="115" y="120" width="170" height="30" fill="url(#hairGrad)" rx="10"/>
+  
+  <!-- Eyes -->
+  <ellipse cx="175" cy="165" rx="12" ry="8" fill="white"/>
+  <ellipse cx="225" cy="165" rx="12" ry="8" fill="white"/>
+  <circle cx="175" cy="165" r="6" fill="#2F1B14"/>
+  <circle cx="225" cy="165" r="6" fill="#2F1B14"/>
+  <circle cx="177" cy="163" r="2" fill="white"/>
+  <circle cx="227" cy="163" r="2" fill="white"/>
+  
+  <!-- Eyebrows -->
+  <path d="M 165 155 Q 175 150 185 155" stroke="#2F1B14" stroke-width="4" fill="none"/>
+  <path d="M 215 155 Q 225 150 235 155" stroke="#2F1B14" stroke-width="4" fill="none"/>
+  
+  <!-- Nose -->
+  <path d="M 200 175 L 195 190 Q 200 195 205 190 Z" fill="url(#skinGrad)" stroke="#654321" stroke-width="1"/>
+  
+  <!-- Mouth -->
+  <path d="M 185 210 Q 200 220 215 210" stroke="#654321" stroke-width="3" fill="none"/>
+  
+  <!-- Jawline definition -->
+  <path d="M 140 220 Q 200 250 260 220" stroke="#654321" stroke-width="2" fill="none" opacity="0.7"/>
+  
+  <!-- Gold Chain -->
+  <circle cx="200" cy="290" r="15" fill="url(#goldGrad)" stroke="#B8860B" stroke-width="2"/>
+  <rect x="190" y="280" width="20" height="6" fill="url(#goldGrad)" rx="3"/>
+  <rect x="190" y="294" width="20" height="6" fill="url(#goldGrad)" rx="3"/>
+  
+  <!-- Chain links -->
+  <ellipse cx="180" cy="270" rx="8" ry="4" fill="url(#goldGrad)" stroke="#B8860B" stroke-width="1"/>
+  <ellipse cx="220" cy="270" rx="8" ry="4" fill="url(#goldGrad)" stroke="#B8860B" stroke-width="1"/>
+  <ellipse cx="160" cy="280" rx="6" ry="3" fill="url(#goldGrad)" stroke="#B8860B" stroke-width="1"/>
+  <ellipse cx="240" cy="280" rx="6" ry="3" fill="url(#goldGrad)" stroke="#B8860B" stroke-width="1"/>
+  
+  <!-- Clothing (Hoodie/Jersey) -->
+  <rect x="120" y="300" width="160" height="100" fill="#2C2C2C" rx="20"/>
+  <rect x="130" y="310" width="140" height="80" fill="#404040" rx="15"/>
+  
+  <!-- Confident expression details -->
+  <path d="M 170 200 Q 175 205 180 200" stroke="#654321" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M 220 200 Q 225 205 230 200" stroke="#654321" stroke-width="2" fill="none" opacity="0.6"/>
+  
+  <!-- Text -->
+  <text x="200" y="380" text-anchor="middle" fill="#FFD700" font-family="Arial Black, sans-serif" font-size="24" font-weight="bold">MC SILK</text>
+</svg>

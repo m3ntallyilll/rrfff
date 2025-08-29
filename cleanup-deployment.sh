@@ -36,20 +36,6 @@ echo "Removing additional large files..."
 rm -rf .git/ .github/ .vscode/ .idea/
 rm -rf notebooks/ docs/ documentation/
 rm -rf coverage/ test-results/ playwright-report/
-rm -rf attached_assets/
-
-# Remove all development configuration files
-echo "Removing development configuration files..."
-rm -f tsconfig.json vite.config.ts tailwind.config.ts postcss.config.js
-rm -f components.json deploy.config.json
-rm -f Dockerfile.production .dockerignore
-rm -f *.md README* deployment-guide.md replit.md
-
-# Remove build scripts and setup files  
-echo "Removing build and setup scripts..."
-rm -f build-production.sh optimize-for-cloud.sh
-rm -f setup_*.sh cleanup-build.sh deploy.sh
-rm -f pyproject.toml
 
 # Remove source maps and development assets
 echo "Removing source maps and development assets..."
@@ -60,20 +46,9 @@ find . -name "*.d.ts" -delete 2>/dev/null || true
 echo "Removing TypeScript build cache..."
 rm -f tsconfig.tsbuildinfo *.tsbuildinfo
 
-# Remove logs and all cache directories
-echo "Removing log files and caches..."
+# Remove logs
+echo "Removing log files..."
 rm -f *.log
-rm -rf logs/
-rm -rf .npm/ .yarn/ .pnpm-store/
-rm -rf .cache/ .parcel-cache/
-
-# Remove any files larger than 10MB (except in node_modules, dist, client/dist)
-echo "Removing large files (>10MB)..."
-find . -type f -size +10M -not -path "./node_modules/*" -not -path "./client/dist/*" -not -path "./dist/*" -delete 2>/dev/null || true
-
-# Remove empty directories
-echo "Removing empty directories..."
-find . -type d -empty -delete 2>/dev/null || true
 
 # Clean node_modules and reinstall production only
 echo "Cleaning node_modules..."
