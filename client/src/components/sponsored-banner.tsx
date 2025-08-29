@@ -12,23 +12,26 @@ interface SponsoredBanner {
 const SPONSORED_BANNERS: SponsoredBanner[] = [
   {
     id: 'replit',
-    text: 'Sponsored by Replit',
-    image: '/api/placeholder/120/40', // Placeholder for now
+    text: 'Sponsored by Replit - Start Coding Now!',
     url: 'https://replit.com?ref=rapbattle',
-    duration: 4000
+    duration: 5000
   },
   {
     id: 'groq',
-    text: 'Powered by Groq AI',
-    image: '/api/placeholder/120/40',
+    text: 'Powered by Groq AI - Lightning Fast',
     url: 'https://groq.com',
-    duration: 4000
+    duration: 5000
   },
   {
     id: 'typecast',
-    text: 'Voice by Typecast',
-    image: '/api/placeholder/120/40',
+    text: 'Voice by Typecast - AI Voices',
     url: 'https://typecast.ai',
+    duration: 5000
+  },
+  {
+    id: 'battle',
+    text: 'Battle Like a Pro - Join Premium!',
+    url: '/subscribe',
     duration: 4000
   }
 ];
@@ -120,19 +123,25 @@ export function SponsoredBanner({ interval = 30000, enabled = true }: SponsoredB
               </span>
               
               {currentBanner.url && (
-                <svg 
-                  className="w-4 h-4 opacity-70" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
+                <button 
+                  className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-xs font-semibold transition-colors flex items-center gap-1"
+                  data-testid="banner-click-button"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" 
-                  />
-                </svg>
+                  CLICK
+                  <svg 
+                    className="w-3 h-3" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" 
+                    />
+                  </svg>
+                </button>
               )}
             </div>
           </motion.div>

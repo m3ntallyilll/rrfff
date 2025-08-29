@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { SponsoredBanner } from "@/components/sponsored-banner";
 import Landing from "@/pages/Landing";
 import Home from "@/pages/Home";
 import Subscribe from "@/pages/Subscribe";
@@ -49,6 +50,7 @@ function App() {
       <TooltipProvider>
         <div className="min-h-screen bg-gradient-to-br from-primary-dark via-secondary-dark to-primary-dark">
           <Toaster />
+          <SponsoredBanner interval={25000} enabled={true} />
           <Router />
         </div>
       </TooltipProvider>
