@@ -6,6 +6,7 @@ import cv2
 import torch
 import glob
 import pickle
+import shlex
 import sys
 from tqdm import tqdm
 import copy
@@ -293,14 +294,22 @@ class Avatar:
 
         if out_vid_name is not None and args.skip_save_images is False:
             # optional
-            cmd_img2video = f"ffmpeg -y -v warning -r {fps} -f image2 -i {self.avatar_path}/tmp/%08d.png -vcodec libx264 -vf format=yuv420p -crf 18 {self.avatar_path}/temp.mp4"
-            print(cmd_img2video)
-            os.system(cmd_img2video)
+            cmd_img2video = [
+                "ffmpeg", "-y", "-v", "warning", "-r", str(fps),
+                "-f", "image2", "-i", f"{self.avatar_path}/tmp/%08d.png",
+                "-vcodec", "libx264", "-vf", "format=yuv420p",
+                "-crf", "18", f"{self.avatar_path}/temp.mp4"
+            ]
+            print(' '.join(cmd_img2video))
+            subprocess.run(cmd_img2video, check=True)
 
             output_vid = os.path.join(self.video_out_path, out_vid_name + ".mp4")  # on
-            cmd_combine_audio = f"ffmpeg -y -v warning -i {audio_path} -i {self.avatar_path}/temp.mp4 {output_vid}"
-            print(cmd_combine_audio)
-            os.system(cmd_combine_audio)
+            cmd_combine_audio = [
+                "ffmpeg", "-y", "-v", "warning",
+                "-i", audio_path, "-i", f"{self.avatar_path}/temp.mp4", output_vid
+            ]
+            print(' '.join(cmd_combine_audio))
+            subprocess.run(cmd_combine_audio, check=True)
 
             os.remove(f"{self.avatar_path}/temp.mp4")
             shutil.rmtree(f"{self.avatar_path}/tmp")

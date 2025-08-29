@@ -9,6 +9,7 @@ import pickle
 import argparse
 import numpy as np
 import subprocess
+import shlex
 from tqdm import tqdm
 from omegaconf import OmegaConf
 from transformers import WhisperModel
@@ -120,8 +121,11 @@ def main(args):
             if get_file_type(video_path) == "video":
                 save_dir_full = os.path.join(temp_dir, input_basename)
                 os.makedirs(save_dir_full, exist_ok=True)
-                cmd = f"ffmpeg -v fatal -i {video_path} -start_number 0 {save_dir_full}/%08d.png"
-                os.system(cmd)
+                cmd = [
+                    "ffmpeg", "-v", "fatal", "-i", video_path, 
+                    "-start_number", "0", f"{save_dir_full}/%08d.png"
+                ]
+                subprocess.run(cmd, check=True)
                 input_img_list = sorted(glob.glob(os.path.join(save_dir_full, '*.[jpJP][pnPN]*[gG]')))
                 fps = get_video_fps(video_path)
             elif get_file_type(video_path) == "image":
@@ -228,13 +232,21 @@ def main(args):
 
             # Save prediction results
             temp_vid_path = f"{temp_dir}/temp_{input_basename}_{audio_basename}.mp4"
-            cmd_img2video = f"ffmpeg -y -v warning -r {fps} -f image2 -i {result_img_save_path}/%08d.png -vcodec libx264 -vf format=yuv420p -crf 18 {temp_vid_path}"
-            print("Video generation command:", cmd_img2video)
-            os.system(cmd_img2video)   
+            cmd_img2video = [
+                "ffmpeg", "-y", "-v", "warning", "-r", str(fps), 
+                "-f", "image2", "-i", f"{result_img_save_path}/%08d.png",
+                "-vcodec", "libx264", "-vf", "format=yuv420p", 
+                "-crf", "18", temp_vid_path
+            ]
+            print("Video generation command:", ' '.join(cmd_img2video))
+            subprocess.run(cmd_img2video, check=True)   
             
-            cmd_combine_audio = f"ffmpeg -y -v warning -i {audio_path} -i {temp_vid_path} {output_vid_name}"
-            print("Audio combination command:", cmd_combine_audio) 
-            os.system(cmd_combine_audio)
+            cmd_combine_audio = [
+                "ffmpeg", "-y", "-v", "warning", 
+                "-i", audio_path, "-i", temp_vid_path, output_vid_name
+            ]
+            print("Audio combination command:", ' '.join(cmd_combine_audio))
+            subprocess.run(cmd_combine_audio, check=True)
             
             # Clean up temporary files
             shutil.rmtree(result_img_save_path)

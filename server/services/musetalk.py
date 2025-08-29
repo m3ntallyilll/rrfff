@@ -10,6 +10,7 @@ import json
 import argparse
 import tempfile
 import subprocess
+import shlex
 from pathlib import Path
 from typing import Optional, Dict, Any
 import base64
@@ -164,7 +165,6 @@ class MuseTalkLipSync:
             # In full implementation, this would use MuseTalk's real-time inference
             
             # Get audio duration
-            import subprocess
             result = subprocess.run([
                 'ffprobe', '-v', 'quiet', '-show_entries', 
                 'format=duration', '-of', 'csv=p=0', audio_path

@@ -9,19 +9,23 @@ import sys
 import subprocess
 import urllib.request
 import json
+import shlex
 from pathlib import Path
 
 def run_command(cmd, cwd=None):
     """Run command and return success"""
     try:
-        result = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True)
+        # Convert string command to list for safer execution
+        if isinstance(cmd, str):
+            cmd = shlex.split(cmd)
+        result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
         if result.returncode != 0:
-            print(f"Command failed: {cmd}")
+            print(f"Command failed: {' '.join(cmd) if isinstance(cmd, list) else cmd}")
             print(f"Error: {result.stderr}")
             return False
         return True
     except Exception as e:
-        print(f"Failed to run command: {cmd}, Error: {e}")
+        print(f"Failed to run command: {' '.join(cmd) if isinstance(cmd, list) else cmd}, Error: {e}")
         return False
 
 def download_file(url, path):
