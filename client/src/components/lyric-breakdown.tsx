@@ -113,31 +113,39 @@ export function LyricBreakdown({ text, isVisible, onClose }: LyricBreakdownProps
   const generateHighlightedText = (analysisData: DetailedScoreBreakdown) => {
     let highlighted = text;
     
-    // Apply rhyme highlights
-    analysisData.highlightData.rhymes.forEach((rhyme, index) => {
-      rhyme.words.forEach(word => {
-        const regex = new RegExp(`\\b${word}\\b`, 'gi');
+    // Apply rhyme highlights - with null checks
+    if (analysisData.highlightData?.rhymes?.length) {
+      analysisData.highlightData.rhymes.forEach((rhyme, index) => {
+        if (rhyme.words?.length) {
+          rhyme.words.forEach(word => {
+            const regex = new RegExp(`\\b${word}\\b`, 'gi');
+            highlighted = highlighted.replace(regex, 
+              `<span class="rhyme-highlight" style="background-color: ${rhyme.color}30; border: 2px solid ${rhyme.color}; border-radius: 4px; padding: 1px 3px;" title="Rhyme: ${rhyme.type}">$&</span>`
+            );
+          });
+        }
+      });
+    }
+
+    // Apply wordplay highlights - with null checks
+    if (analysisData.highlightData?.wordplay?.length) {
+      analysisData.highlightData.wordplay.forEach(wordplay => {
+        const regex = new RegExp(`\\b${wordplay.phrase}\\b`, 'gi');
         highlighted = highlighted.replace(regex, 
-          `<span class="rhyme-highlight" style="background-color: ${rhyme.color}30; border: 2px solid ${rhyme.color}; border-radius: 4px; padding: 1px 3px;" title="Rhyme: ${rhyme.type}">$&</span>`
+          `<span class="wordplay-highlight" style="background-color: #FFD700; border-radius: 4px; padding: 1px 3px; font-weight: bold;" title="${wordplay.explanation}">$&</span>`
         );
       });
-    });
+    }
 
-    // Apply wordplay highlights
-    analysisData.highlightData.wordplay.forEach(wordplay => {
-      const regex = new RegExp(`\\b${wordplay.phrase}\\b`, 'gi');
-      highlighted = highlighted.replace(regex, 
-        `<span class="wordplay-highlight" style="background-color: #FFD700; border-radius: 4px; padding: 1px 3px; font-weight: bold;" title="${wordplay.explanation}">$&</span>`
-      );
-    });
-
-    // Apply metaphor highlights
-    analysisData.highlightData.metaphors.forEach(metaphor => {
-      const regex = new RegExp(`\\b${metaphor.phrase}\\b`, 'gi');
-      highlighted = highlighted.replace(regex, 
-        `<span class="metaphor-highlight" style="background-color: #9C27B0; color: white; border-radius: 4px; padding: 1px 3px;" title="${metaphor.explanation}">$&</span>`
-      );
-    });
+    // Apply metaphor highlights - with null checks
+    if (analysisData.highlightData?.metaphors?.length) {
+      analysisData.highlightData.metaphors.forEach(metaphor => {
+        const regex = new RegExp(`\\b${metaphor.phrase}\\b`, 'gi');
+        highlighted = highlighted.replace(regex, 
+          `<span class="metaphor-highlight" style="background-color: #9C27B0; color: white; border-radius: 4px; padding: 1px 3px;" title="${metaphor.explanation}">$&</span>`
+        );
+      });
+    }
 
     setHighlightedText(highlighted);
   };

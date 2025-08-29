@@ -25,7 +25,8 @@ export function BattleTextDisplay({
 
   // Typewriter effect for AI response
   useEffect(() => {
-    if (aiResponse && !isAIGenerating) {
+    // Show AI response immediately when available, regardless of isAIGenerating state
+    if (aiResponse && aiResponse.trim()) {
       setCurrentCharIndex(0);
       setDisplayedAIText("");
       
@@ -39,11 +40,11 @@ export function BattleTextDisplay({
           setDisplayedAIText(aiResponse.substring(0, prev + 1));
           return prev + 1;
         });
-      }, 50); // Adjust speed as needed
+      }, 30); // Faster speed for better responsiveness
 
       return () => clearInterval(interval);
     }
-  }, [aiResponse, isAIGenerating]);
+  }, [aiResponse]);
 
   const formatRapText = (text: string) => {
     return text.split('\n').map((line, index) => (
