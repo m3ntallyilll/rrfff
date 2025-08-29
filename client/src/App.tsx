@@ -11,6 +11,9 @@ import Subscribe from "@/pages/Subscribe";
 import BattleArena from "@/pages/battle-arena";
 import Tournaments from "@/pages/tournaments";
 import TournamentDetail from "@/pages/tournament-detail";
+import TournamentLeaderboard from "@/pages/tournament-leaderboard";
+import TournamentHistory from "@/pages/tournament-history";
+import TournamentBrackets from "@/pages/tournament-brackets";
 import FineTuning from "@/pages/fine-tuning";
 import NotFound from "@/pages/not-found";
 
@@ -34,8 +37,13 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/subscribe" component={Subscribe} />
           <Route path="/battle" component={BattleArena} />
+          <Route path="/battle/:id" component={BattleArena} />
           <Route path="/tournaments" component={Tournaments} />
+          <Route path="/tournaments/leaderboard" component={TournamentLeaderboard} />
+          <Route path="/tournaments/history" component={TournamentHistory} />
+          <Route path="/tournaments/brackets" component={TournamentBrackets} />
           <Route path="/tournament/:id" component={TournamentDetail} />
+          <Route path="/tournament/:tournamentId/battle/:battleId" component={BattleArena} />
           <Route path="/fine-tuning" component={FineTuning} />
         </>
       )}

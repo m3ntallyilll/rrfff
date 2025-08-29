@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'wouter';
-import { Trophy, Users, Calendar, Play, Crown, Zap } from 'lucide-react';
+import { Link, useLocation } from 'wouter';
+import { Trophy, Users, Calendar, Play, Crown, Zap, History, Target, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +30,7 @@ interface CreateTournamentForm {
 export default function Tournaments() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [formData, setFormData] = useState<CreateTournamentForm>({
     name: '',
@@ -253,6 +254,69 @@ export default function Tournaments() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+        </div>
+
+        {/* Quick Navigation */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Button
+            variant="outline"
+            onClick={() => setLocation('/tournaments/brackets')}
+            className="border-purple-500 text-purple-400 hover:bg-purple-500/10 h-auto p-4"
+            data-testid="button-nav-brackets"
+          >
+            <div className="flex flex-col items-center space-y-2">
+              <Target size={24} />
+              <div className="text-center">
+                <div className="font-semibold">Live Brackets</div>
+                <div className="text-xs text-gray-400">Active tournaments</div>
+              </div>
+            </div>
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => setLocation('/tournaments/leaderboard')}
+            className="border-yellow-500 text-yellow-400 hover:bg-yellow-500/10 h-auto p-4"
+            data-testid="button-nav-leaderboard"
+          >
+            <div className="flex flex-col items-center space-y-2">
+              <Crown size={24} />
+              <div className="text-center">
+                <div className="font-semibold">Leaderboard</div>
+                <div className="text-xs text-gray-400">Top champions</div>
+              </div>
+            </div>
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => setLocation('/tournaments/history')}
+            className="border-blue-500 text-blue-400 hover:bg-blue-500/10 h-auto p-4"
+            data-testid="button-nav-history"
+          >
+            <div className="flex flex-col items-center space-y-2">
+              <History size={24} />
+              <div className="text-center">
+                <div className="font-semibold">History</div>
+                <div className="text-xs text-gray-400">Your battles</div>
+              </div>
+            </div>
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => setLocation('/tournaments')}
+            className="border-green-500 text-green-400 hover:bg-green-500/10 h-auto p-4"
+            data-testid="button-nav-tournaments"
+          >
+            <div className="flex flex-col items-center space-y-2">
+              <BarChart3 size={24} />
+              <div className="text-center">
+                <div className="font-semibold">Analytics</div>
+                <div className="text-xs text-gray-400">Performance</div>
+              </div>
+            </div>
+          </Button>
         </div>
 
         <Tabs defaultValue="my-tournaments" className="w-full">
