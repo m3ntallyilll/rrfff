@@ -65,6 +65,18 @@ export interface IStorage {
   updateTournament(id: string, updates: Partial<Tournament>): Promise<Tournament>;
   advanceTournament(tournamentId: string, matchId: string, winnerId: string): Promise<Tournament>;
   generateTournamentBracket(totalRounds: number, opponents: string[]): TournamentBracket;
+  
+  // API Key management
+  updateUserAPIKeys(userId: string, keys: { 
+    openaiApiKey?: string; 
+    groqApiKey?: string; 
+    preferredTtsService?: string 
+  }): Promise<User>;
+  getUserAPIKeysStatus(userId: string): Promise<{
+    hasValidOpenAI: boolean;
+    hasValidGroq: boolean;
+    preferredTtsService: string;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -464,6 +476,61 @@ export class DatabaseStorage implements IStorage {
     }
     
     return bracket;
+  }
+
+  // API Key management methods
+  async updateUserAPIKeys(
+    userId: string, 
+    keys: { 
+      openaiApiKey?: string; 
+      groqApiKey?: string; 
+      preferredTtsService?: string 
+    }
+  ): Promise<User> {
+    const updateData: any = { updatedAt: new Date() };
+    
+    if (keys.openaiApiKey !== undefined) {
+      // In production, you'd encrypt the API key here
+      updateData.openaiApiKey = keys.openaiApiKey;
+    }
+    
+    if (keys.groqApiKey !== undefined) {
+      // In production, you'd encrypt the API key here  
+      updateData.groqApiKey = keys.groqApiKey;
+    }
+    
+    if (keys.preferredTtsService !== undefined) {
+      updateData.preferredTtsService = keys.preferredTtsService;
+    }
+
+    const [user] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, userId))
+      .returning();
+      
+    return user;
+  }
+
+  async getUserAPIKeysStatus(userId: string): Promise<{
+    hasValidOpenAI: boolean;
+    hasValidGroq: boolean;
+    preferredTtsService: string;
+  }> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      return {
+        hasValidOpenAI: false,
+        hasValidGroq: false,
+        preferredTtsService: 'system'
+      };
+    }
+
+    return {
+      hasValidOpenAI: !!(user.openaiApiKey && user.openaiApiKey.length > 0),
+      hasValidGroq: !!(user.groqApiKey && user.groqApiKey.length > 0),
+      preferredTtsService: user.preferredTtsService || 'system'
+    };
   }
 }
 

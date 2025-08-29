@@ -140,6 +140,10 @@ export const users = pgTable("users", {
   lastBattleReset: timestamp("last_battle_reset").defaultNow(),
   totalBattles: integer("total_battles").default(0),
   totalWins: integer("total_wins").default(0),
+  // User-managed API keys for enhanced TTS services
+  openaiApiKey: varchar("openai_api_key"), // User's encrypted OpenAI API key
+  groqApiKey: varchar("groq_api_key"), // User's encrypted Groq API key  
+  preferredTtsService: varchar("preferred_tts_service").default("system"), // "openai", "groq", "system"
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

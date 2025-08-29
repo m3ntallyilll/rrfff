@@ -8,6 +8,7 @@ import { groqService } from "./services/groq";
 import { typecastService } from "./services/typecast";
 import { barkTTS } from "./services/bark";
 import { scoringService } from "./services/scoring";
+import { userTTSManager } from "./services/user-tts-manager";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -325,6 +326,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User API Key Management Routes
+  app.get('/api/user/api-keys', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const status = await storage.getUserAPIKeysStatus(userId);
+      res.json(status);
+    } catch (error) {
+      console.error("Error fetching API key status:", error);
+      res.status(500).json({ message: "Failed to fetch API key status" });
+    }
+  });
+
+  app.put('/api/user/api-keys', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { openaiApiKey, groqApiKey, preferredTtsService } = req.body;
+      
+      const user = await storage.updateUserAPIKeys(userId, {
+        openaiApiKey,
+        groqApiKey,
+        preferredTtsService
+      });
+      
+      // Clear cached TTS instances when keys change
+      userTTSManager.clearUserInstances(userId);
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating API keys:", error);
+      res.status(500).json({ message: "Failed to update API keys" });
+    }
+  });
+
+  app.post('/api/user/test-api-key', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { service } = req.body;
+      
+      if (!service || !['openai', 'groq'].includes(service)) {
+        return res.status(400).json({ message: "Invalid service specified" });
+      }
+      
+      const isValid = await userTTSManager.testUserAPIKey(userId, service as 'openai' | 'groq');
+      res.json({ valid: isValid });
+    } catch (error) {
+      console.error(`Error testing ${req.body.service} API key:`, error);
+      res.status(500).json({ message: `Failed to test ${req.body.service} API key` });
+    }
+  });
+
   // Legacy battle routes for backward compatibility
   app.get("/api/battles", async (req, res) => {
     // Return empty array for unauthenticated requests
@@ -488,47 +539,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userText = transcription.status === 'fulfilled' ? transcription.value : "Voice input";
       const aiResponseText = aiResponse.status === 'fulfilled' ? aiResponse.value : "System response ready!";
 
-      // 3. Generate TTS with actual AI response using correct character ID
-      const characterId = `mc_${battle.aiCharacterId || battle.aiCharacterName?.toLowerCase()?.replace('mc_', '').replace(' ', '_') || "venom"}`;
-      console.log(`🐶 Generating Bark TTS for character: ${characterId}`);
+      // 3. Generate TTS using user's preferred service or system fallback
+      const userId = req.user.claims.sub;
+      const characterId = battle.aiCharacterId || battle.aiCharacterName?.toLowerCase()?.replace('mc ', '').replace(' ', '_') || "venom";
+      console.log(`🎤 Generating TTS for character: ${characterId} (user: ${userId})`);
       
-      // Try Bark first, fallback to Typecast
+      // Use the new UserTTSManager to handle all TTS services
       let ttsResult: any;
       try {
-        console.log(`🐶 Attempting Bark TTS for ${characterId}...`);
-        ttsResult = await Promise.race([
-          barkTTS.generateAudio(aiResponseText, characterId),
-          new Promise<any>((_, reject) => 
-            setTimeout(() => reject(new Error("Bark timeout")), 30000)
-          )
-        ]);
-        console.log(`✅ Bark TTS successful: ${ttsResult.fileSize} bytes`);
-      } catch (error: any) {
-        console.log(`📢 Bark TTS failed, using Typecast fallback: ${error.message}`);
+        const { getCharacterById } = await import("@shared/characters");
+        const character = getCharacterById(characterId);
         
-        // Fallback to Typecast
-        const typecastCharacterId = characterId.replace('mc_', '');
-        try {
-          ttsResult = await Promise.race([
-            typecastService.generateSpeech(aiResponseText, typecastCharacterId),
-            new Promise<any>((_, reject) => 
-              setTimeout(() => reject(new Error("Typecast timeout")), 5000)
-            )
-          ]);
-          console.log(`✅ Typecast fallback successful`);
-          // Convert Typecast response format to match expected format
-          ttsResult = { audioPath: "", audioUrl: ttsResult.audioUrl || "" };
-        } catch (typecastError) {
-          console.error(`❌ Both Bark and Typecast failed:`, typecastError);
-          
-          // Create a simple placeholder audio notification
-          console.log(`🔊 Creating text-only response due to audio system issues`);
-          ttsResult = { 
-            audioPath: "", 
-            audioUrl: "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBkOa4P", 
-            fileSize: 0 
-          };
-        }
+        const audioResponse = await userTTSManager.generateTTS(aiResponseText, userId, {
+          characterId,
+          characterName: character?.name || `MC ${characterId}`,
+          gender: character?.gender || 'male',
+          voiceStyle: battle.styleIntensity > 70 ? 'aggressive' : 
+                     battle.styleIntensity > 40 ? 'confident' : 'smooth'
+        });
+        
+        // Convert to expected format
+        ttsResult = { 
+          audioPath: "", 
+          audioUrl: audioResponse.audioUrl,
+          fileSize: audioResponse.audioUrl.length 
+        };
+        
+        console.log(`✅ User TTS successful: ${audioResponse.audioUrl.length > 0 ? 'Audio generated' : 'Silent mode'}`);
+      } catch (error: any) {
+        console.error(`❌ User TTS failed:`, error.message);
+        
+        // Fallback to empty audio (battles continue without sound)
+        ttsResult = { 
+          audioPath: "", 
+          audioUrl: "", 
+          fileSize: 0 
+        };
       }
 
       const audioResult = ttsResult;

@@ -15,6 +15,7 @@ import TournamentLeaderboard from "@/pages/tournament-leaderboard";
 import TournamentHistory from "@/pages/tournament-history";
 import TournamentBrackets from "@/pages/tournament-brackets";
 import FineTuning from "@/pages/fine-tuning";
+import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -45,6 +46,7 @@ function Router() {
           <Route path="/tournament/:id" component={TournamentDetail} />
           <Route path="/tournament/:tournamentId/battle/:battleId" component={BattleArena} />
           <Route path="/fine-tuning" component={FineTuning} />
+          <Route path="/settings" component={Settings} />
         </>
       )}
       <Route component={NotFound} />
