@@ -181,20 +181,10 @@ export class BarkTTS {
    */
   private applyRobotEffects(text: string, characterId: string): string {
     if (characterId === 'cypher') {
-      // Add robotic speech processing and digital distortion markers
-      let robotText = text
-        .replace(/\bi\b/gi, 'SYSTEM-01')
-        .replace(/\byou\b/gi, 'HUMAN.TARGET')
-        .replace(/destroy/gi, 'TERMINATE')
-        .replace(/kill/gi, 'DELETE')
-        .replace(/beat/gi, 'OVERRIDE')
-        .replace(/weak/gi, 'INSUFFICIENT')
-        .replace(/strong/gi, 'OPTIMIZED');
-      
-      // Add pitch modulation and distortion markers for TTS
-      robotText = `[robotic_fx][pitch_shift:-0.3][distortion:0.4] ${robotText} [/distortion][/pitch_shift][/robotic_fx]`;
-      
-      return robotText;
+      // DON'T change the actual words - just return clean text
+      // Robot effects will come from voice config and lower temperature
+      console.log(`🤖 CYPHER-9000 BARK: Using robotic voice config with low temperature`);
+      return text;
     }
     return text;
   }

@@ -46,7 +46,7 @@ export class GroqTTSService {
       'razor': 'Cheyenne-PlayAI',  // Female, sharp and cutting
       'venom': 'Thunder-PlayAI',   // Male, intense and powerful
       'silk': 'Basil-PlayAI',      // Male, smooth and controlled
-      'cypher': 'Fritz-PlayAI',    // Robot - Deep, mechanical bass
+      'cypher': 'Thunder-PlayAI',  // Robot - Use deepest male voice for robotic effect
     };
 
     if (voiceMap[characterId]) {
@@ -61,21 +61,9 @@ export class GroqTTSService {
   private applyRobotVoiceEffects(text: string, characterId: string): string {
     // Special robot voice processing for CYPHER-9000
     if (characterId === 'cypher') {
-      // Add robotic speech patterns and digital terminology
-      let robotText = text
-        .replace(/\bi\b/g, 'SYSTEM')
-        .replace(/\byou\b/g, 'HUMAN_TARGET') 
-        .replace(/\byour\b/g, 'HUMAN_TARGET.PROPERTY')
-        .replace(/destroy/g, 'TERMINATE')
-        .replace(/kill/g, 'DELETE')
-        .replace(/beat/g, 'OVERRIDE')
-        .replace(/weak/g, 'INSUFFICIENT')
-        .replace(/strong/g, 'OPTIMIZED');
-      
-      // Add robotic delivery markers
-      robotText = `[robotic_voice_fx] ${robotText} [/robotic_voice_fx]`;
-      
-      return robotText;
+      // DON'T change the words - just return clean text for TTS
+      // The robot effect will come from voice selection and speed/pitch
+      return text;
     }
     return text;
   }
@@ -113,13 +101,20 @@ export class GroqTTSService {
             .trim();
 
       // Use Groq's PlayAI TTS model (10x faster than real-time)
-      const response = await this.groq.audio.speech.create({
+      const ttsOptions: any = {
         model: "playai-tts", // Fast PlayAI model from Groq
         voice: voice,
         input: cleanText,
         response_format: 'wav',
-        speed: 1.0
-      });
+        speed: characterId === 'cypher' ? 0.85 : 1.0  // Slower speed for robotic effect
+      };
+
+      // Add special robot voice modulation for CYPHER-9000
+      if (characterId === 'cypher') {
+        console.log(`🤖 CYPHER-9000 VOICE: Applying robotic modulation (slower speed: ${ttsOptions.speed})`);
+      }
+
+      const response = await this.groq.audio.speech.create(ttsOptions);
 
       const timestamp = Date.now();
       const filename = `groq_tts_${characterId}_${timestamp}.wav`;
