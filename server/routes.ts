@@ -6,8 +6,11 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { SUBSCRIPTION_TIERS, insertTournamentSchema } from "@shared/schema";
 import { groqService } from "./services/groq";
 import { typecastService } from "./services/typecast";
+import { barkTTS } from "./services/bark";
 import { scoringService } from "./services/scoring";
 import multer from "multer";
+import path from "path";
+import fs from "fs";
 
 // Configure multer for audio uploads
 const upload = multer({
@@ -486,18 +489,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const aiResponseText = aiResponse.status === 'fulfilled' ? aiResponse.value : "System response ready!";
 
       // 3. Generate TTS with actual AI response using correct character ID
-      const characterId = battle.aiCharacterId || battle.aiCharacterName?.toLowerCase() || "venom";
-      console.log(`🎵 Generating TTS for character: ${characterId}`);
+      const characterId = `mc_${battle.aiCharacterId || battle.aiCharacterName?.toLowerCase()?.replace('mc_', '').replace(' ', '_') || "venom"}`;
+      console.log(`🐶 Generating Bark TTS for character: ${characterId}`);
       
-      const ttsResult = await Promise.race([
-        typecastService.generateSpeech(aiResponseText, characterId),
-        new Promise<any>((resolve) => 
-          setTimeout(() => resolve({ audioUrl: "", duration: 0 }), 3000) // 3 second timeout for TTS
-        )
-      ]).catch((error) => {
-        console.error(`TTS generation failed for character ${characterId}:`, error);
-        return { audioUrl: "", duration: 0 };
-      });
+      // Try Bark first, fallback to Typecast
+      let ttsResult: any;
+      try {
+        console.log(`🐶 Attempting Bark TTS for ${characterId}...`);
+        ttsResult = await Promise.race([
+          barkTTS.generateAudio(aiResponseText, characterId),
+          new Promise<any>((_, reject) => 
+            setTimeout(() => reject(new Error("Bark timeout")), 30000)
+          )
+        ]);
+        console.log(`✅ Bark TTS successful: ${ttsResult.fileSize} bytes`);
+      } catch (error: any) {
+        console.log(`📢 Bark TTS failed, using Typecast fallback: ${error.message}`);
+        
+        // Fallback to Typecast
+        const typecastCharacterId = characterId.replace('mc_', '');
+        try {
+          ttsResult = await Promise.race([
+            typecastService.generateSpeech(aiResponseText, typecastCharacterId),
+            new Promise<any>((_, reject) => 
+              setTimeout(() => reject(new Error("Typecast timeout")), 5000)
+            )
+          ]);
+          console.log(`✅ Typecast fallback successful`);
+          // Convert Typecast response format to match expected format
+          ttsResult = { audioPath: "", audioUrl: ttsResult.audioUrl || "" };
+        } catch (typecastError) {
+          console.error(`❌ Both Bark and Typecast failed:`, typecastError);
+          ttsResult = { audioPath: "", audioUrl: "", fileSize: 0 };
+        }
+      }
 
       const audioResult = ttsResult;
 
@@ -522,7 +547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         aiResponse: aiResponseText,
         userScore: scores.userScore,
         aiScore: scores.aiScore,
-        audioUrl: audioResult.audioUrl,
+        audioUrl: audioResult.audioPath ? `/api/audio/${path.basename(audioResult.audioPath)}` : (audioResult.audioUrl || ""),
         userBattleMap: userBattleMap, // Add battle map for frontend display
         timestamp: Date.now()
       };
@@ -735,6 +760,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Error starting tournament battle:', error);
       res.status(500).json({ message: 'Failed to start tournament battle', error: error.message });
+    }
+  });
+
+  // Serve Bark generated audio files
+  app.get('/api/audio/:filename', (req, res) => {
+    try {
+      const filename = req.params.filename;
+      const filePath = path.join(process.cwd(), 'temp_audio', filename);
+      
+      // Security: Validate filename to prevent path traversal
+      if (!filename.startsWith('bark_') || !filename.endsWith('.wav')) {
+        return res.status(404).json({ message: 'File not found' });
+      }
+      
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: 'Audio file not found' });
+      }
+      
+      res.setHeader('Content-Type', 'audio/wav');
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+      
+    } catch (error) {
+      console.error('Error serving audio file:', error);
+      res.status(500).json({ message: 'Failed to serve audio file' });
     }
   });
 
