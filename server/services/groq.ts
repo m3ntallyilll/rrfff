@@ -111,6 +111,56 @@ export class GroqService {
     return cleanWord.slice(-2);
   }
 
+  private analyzeRhymeScheme(lines: string[]): string[] {
+    const rhymeSounds: string[] = [];
+    const schemeMap: { [key: string]: string } = {};
+    let currentScheme = 'A';
+    
+    for (const line of lines) {
+      const words = line.trim().split(/\s+/);
+      const lastWord = words[words.length - 1];
+      const rhymeSound = this.extractRhymeSound(lastWord);
+      
+      // Find if this rhyme sound already exists
+      let scheme = '';
+      for (const [sound, letter] of Object.entries(schemeMap)) {
+        if (this.soundsSimilar(sound, rhymeSound)) {
+          scheme = letter;
+          break;
+        }
+      }
+      
+      // If no match found, assign new scheme letter
+      if (!scheme) {
+        scheme = currentScheme;
+        schemeMap[rhymeSound] = scheme;
+        currentScheme = String.fromCharCode(currentScheme.charCodeAt(0) + 1);
+      }
+      
+      rhymeSounds.push(scheme);
+    }
+    
+    return rhymeSounds;
+  }
+  
+  private soundsSimilar(sound1: string, sound2: string): boolean {
+    if (sound1 === sound2) return true;
+    
+    // Check for similar phonetic patterns
+    const similar = [
+      ['er', 'ar', 'or'], ['ay', 'ey', 'ai'], ['oo', 'ew', 'ue'],
+      ['ow', 'ou'], ['ee', 'ea', 'ie'], ['ine', 'ime', 'ign']
+    ];
+    
+    for (const group of similar) {
+      if (group.includes(sound1) && group.includes(sound2)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
   // Blend AI response with advanced rhyme techniques
   private blendResponses(aiResponse: string, enhancedVerse: string): string {
     // If AI response is too short or generic, use enhanced verse
@@ -149,28 +199,42 @@ export class GroqService {
       syllableAnalysis += `Line ${index + 1}: ${syllables} syllables, rhyme sound: "${rhymeSound}"\n`;
     });
 
-    const analysisPrompt = `You are a RHYME PATTERN ANALYSIS AGENT specialized in rap battle techniques.
+    // Create professional battle rap mapping analysis
+    let rhymeMap = "";
+    const rhymeScheme = this.analyzeRhymeScheme(lines);
+    
+    lines.forEach((line, index) => {
+      const syllables = this.countSyllablesInLine(line);
+      const scheme = rhymeScheme[index] || 'X';
+      const dots = '.'.repeat(Math.max(1, Math.floor(syllables / 2))); // Visual syllable representation
+      const endWords = line.trim().split(/\s+/).slice(-2).join(' '); // Last 1-2 words for rhyme reference
+      
+      rhymeMap += `${syllables}${scheme}${dots}${endWords.toLowerCase()}\n`;
+    });
 
-ANALYZE this verse using professional syllable mapping like: 
-"4AB....sinna hobo" (4 syllables, A rhyme, B rhyme)
-"4AB....beena broke ho" (4 syllables, A rhyme, B rhyme)  
-"4CB....plastic yoyo" (4 syllables, C rhyme, B rhyme)
-"4CB....ass kicked oh no" (4 syllables, C rhyme, B rhyme)
+    const analysisPrompt = `You are a RHYME PATTERN ANALYSIS AGENT using REALISTIC BATTLE RAP MAPPING.
 
-USER VERSE: "${userVerse}"
+PROFESSIONAL RAP BATTLE MAPPING EXAMPLE:
+"4AB....sinna hobo" = 4 syllables, A+B rhyme sounds, dots show rhythm, end words for rhyme reference
+"4AB....beena broke ho" = Same pattern, matching syllables and rhyme scheme
+"4CB....plastic yoyo" = Different A sound (C), same B sound, maintains 4-syllable flow
+"4CB....ass kicked oh no" = Completes the pattern with consistent structure
 
-SYLLABLE ANALYSIS:
-${syllableAnalysis}
+USER'S BATTLE MAP:
+${rhymeMap}
 
-PROVIDE technical analysis focusing on:
-1. Exact syllable count per line and consistency
-2. End rhyme scheme pattern (AABB, ABAB, ABCB, etc.)
-3. Internal rhyme opportunities within lines
-4. Multi-syllabic rhyme chains they used
-5. Suggested counter-rhyme families to dominate their pattern
-6. Flow recommendations to match/exceed their rhythm
+ORIGINAL VERSE:
+"${userVerse}"
 
-Format as technical brief: "User has [X syllables/line], [rhyme pattern], suggest [counter-strategy]" (max 4 sentences).`;
+TECHNICAL ANALYSIS REQUIRED:
+1. Syllable consistency (are they maintaining steady rhythm?)
+2. Rhyme scheme complexity (simple AABB vs advanced ABCB patterns)
+3. Multi-syllabic rhyme density (single vs compound rhymes)
+4. Internal rhyme opportunities they missed
+5. Counter-attack rhyme families to dominate their pattern
+6. Flow weaknesses to exploit
+
+OUTPUT: Technical brief for AI rapper in format: "User: [syllables/line], [scheme pattern], [weakness]. Counter with: [strategy]" (max 3 sentences).`;
 
     try {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
