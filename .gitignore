@@ -1,6 +1,70 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+dist/
+build/
+
+# ML model directories (large files)
+ARTalk/
+MuseTalk/
+bark/
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*
+
+# Development files
+.replit
+.git/
+*.log
+.cache/
+.tmp/
+temp_audio/
+tmp/
+
+# Python cache and libraries
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+*.egg-info/
+.pythonlibs/
+.cache/
+.uv/
+
+# System files
 .DS_Store
+Thumbs.db
+
+# Build artifacts
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Audio/media temp files
+*.wav
+*.mp3
+*.mp4
+temp_audio.wav
+
+# Training data (can be large)
+*.jsonl
+battle_rap_training_data.json
+
+# Scripts and utilities not needed in production
+cleanup-build.sh
+deploy.sh
+Dockerfile.production
+setup_*.py
+install_*.py
+test_*.py
+test_*.js
+optimize_*.py
+generate_*.py
+emergency_*.ts
+final_*.js
