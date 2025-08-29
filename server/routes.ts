@@ -520,7 +520,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ttsResult = { audioPath: "", audioUrl: ttsResult.audioUrl || "" };
         } catch (typecastError) {
           console.error(`❌ Both Bark and Typecast failed:`, typecastError);
-          ttsResult = { audioPath: "", audioUrl: "", fileSize: 0 };
+          
+          // Create a simple placeholder audio notification
+          console.log(`🔊 Creating text-only response due to audio system issues`);
+          ttsResult = { 
+            audioPath: "", 
+            audioUrl: "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBkOa4P", 
+            fileSize: 0 
+          };
         }
       }
 

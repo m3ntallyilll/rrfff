@@ -17,7 +17,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     id: 'razor',
     name: 'MC Razor',
     displayName: 'Razor',
-    voiceId: 'tc_67d237f1782cabcc6155272f', // MC Razor - Using working voice ID
+    voiceId: 'tc_685ca2dcfa58f44bdbe60d65', // Use known working voice ID
     gender: 'female',
     personality: 'Fierce, aggressive, no-nonsense attitude with razor-sharp wit',
     style: 'hardcore',
@@ -30,7 +30,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     id: 'venom',
     name: 'MC Venom',
     displayName: 'Venom',
-    voiceId: 'tc_67d237f1782cabcc6155272f', // MC Venom - Male rapper voice (Character 2 - Rapper type)
+    voiceId: 'tc_685ca2dcfa58f44bdbe60d65', // Use known working voice ID
     gender: 'male',
     personality: 'Intense, intimidating, uses psychological warfare and dark imagery',
     style: 'aggressive',
@@ -43,7 +43,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     id: 'silk',
     name: 'MC Silk',
     displayName: 'Silk',
-    voiceId: 'tc_685ca2dcfa58f44bdbe60d65', // MC Silk - Wade voice (male)
+    voiceId: 'tc_685ca2dcfa58f44bdbe60d65', // Use known working voice ID
     gender: 'male',
     personality: 'Smooth, charismatic black male MC who uses clever wordplay and sophisticated flow',
     style: 'smooth',
