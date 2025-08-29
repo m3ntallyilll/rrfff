@@ -31,18 +31,18 @@ export class TypecastService {
         },
         body: JSON.stringify({
           voice_id: voiceId,
-          text,
-          model: "ssfm-v21",
+          text: text.trim(), // Clean input text
+          model: "ssfm-v21", // Advanced model for best quality
           language: "eng",
           prompt: {
-            emotion_preset: "normal",
-            emotion_intensity: 1.0
+            emotion_preset: "confident", // Better for rap battles
+            emotion_intensity: 1.2 // Higher intensity for battle energy
           },
           output: {
             volume: 100,
-            audio_pitch: 0,
-            audio_tempo: 1.0,
-            audio_format: "wav"
+            audio_pitch: 0, // Keep natural pitch
+            audio_tempo: 1.1, // Slightly faster for rap energy
+            audio_format: "wav" // High quality format
           }
         }),
       });
