@@ -573,7 +573,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Continue with the rest of the processing - no streaming for now, 
       // but transcription is now much faster (1s vs 2s)
       
-      // NOW generate AI response in background (can take longer)
+      // FIRST: Calculate user's performance to inform AI reaction
+      console.log(`📊 Pre-analyzing user performance for reactive AI...`);
+      const userPerformanceScore = scoringService.calculateUserScore(userText);
+      console.log(`🎯 User performance: ${userPerformanceScore}/100 - AI will react accordingly`);
+
+      // NOW generate AI response with user score context for reactive behavior
       console.log(`🤖 Generating AI response for: "${userText.substring(0, 30)}..."`);
       
       let aiResponseText = "System response ready!";
@@ -584,7 +589,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             battle.difficulty, 
             battle.profanityFilter,
             battle.lyricComplexity || 50,
-            battle.styleIntensity || 50
+            battle.styleIntensity || 50,
+            userPerformanceScore // Pass user score for reactive AI
           ),
           new Promise<string>((_, reject) => 
             setTimeout(() => reject(new Error("AI timeout")), 5000) // Longer timeout for AI

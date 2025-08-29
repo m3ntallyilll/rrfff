@@ -416,6 +416,20 @@ export class ScoringService {
     
     return Math.max(0, 100 - (distance * 10));
   }
+
+  calculateUserScore(userText: string): number {
+    // Calculate individual components
+    const rhymeDensity = this.calculateRhymeDensity(userText);
+    const flowQuality = this.calculateFlowQuality(userText);
+    const creativity = this.calculateCreativity(userText);
+    
+    // Weighted average: Creativity 50%, Rhyme 30%, Flow 20%
+    const userScore = Math.round(creativity * 0.5 + rhymeDensity * 0.3 + flowQuality * 0.2);
+    
+    console.log(`🎯 User components: Rhyme ${rhymeDensity}, Flow ${flowQuality}, Creativity ${creativity} → Score ${userScore}`);
+    
+    return Math.max(0, Math.min(100, userScore));
+  }
 }
 
 export const scoringService = new ScoringService();

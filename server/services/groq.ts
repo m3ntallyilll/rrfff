@@ -306,7 +306,8 @@ OUTPUT: Technical brief for AI rapper in format: "User: [syllables/line], [schem
     difficulty: string = "normal",
     profanityFilter: boolean = true,
     lyricComplexity: number = 50,
-    styleIntensity: number = 50
+    styleIntensity: number = 50,
+    userScore: number = 50
   ): Promise<string> {
     if (!this.apiKey) {
       throw new Error("Groq API key not available for rap generation");
@@ -318,6 +319,22 @@ OUTPUT: Technical brief for AI rapper in format: "User: [syllables/line], [schem
     // STAGE 1: ADVANCED RHYME ANALYSIS
     console.log("🎯 Stage 1: Analyzing user's rhyme patterns...");
     const rhymeAnalysis = await this.analyzeRhymePatterns(sanitizedUserVerse);
+
+    // REACTIVE AI: Adjust aggression based on user performance
+    let reactionMode = "standard";
+    let aggressionBoost = 0;
+    if (userScore >= 70) {
+      reactionMode = "ABSOLUTELY NUTS";
+      aggressionBoost = 50;
+      console.log(`🔥 USER SCORED HIGH (${userScore}) - AI GOING ABSOLUTELY NUTS!`);
+    } else if (userScore >= 50) {
+      reactionMode = "significantly aggressive";
+      aggressionBoost = 25;
+      console.log(`⚡ USER SCORED DECENT (${userScore}) - AI INCREASING AGGRESSION`);
+    } else {
+      reactionMode = "mildly superior";
+      console.log(`😏 USER SCORED LOW (${userScore}) - AI SHOWING MILD SUPERIORITY`);
+    }
     
     const difficultyPrompts = {
       easy: "Use simple AABB or ABAB rhyme schemes, basic wordplay, straightforward punchlines, and clear syllable patterns that flow naturally.",
@@ -353,9 +370,12 @@ Battle rap techniques encouraged:
 - Raw technical lyrical superiority demonstrations
 - Hardcore battle rap attitude and language`;
 
+    // Use boosted intensity for reactive behavior
+    const boostedIntensity = Math.min(100, styleIntensity + aggressionBoost);
+
     // Map complexity levels to descriptive terms
     const complexityLevel = lyricComplexity <= 25 ? 'Basic' : lyricComplexity <= 50 ? 'Intermediate' : lyricComplexity <= 75 ? 'Advanced' : 'Expert';
-    const intensityLevel = styleIntensity <= 25 ? 'Chill' : styleIntensity <= 50 ? 'Moderate' : styleIntensity <= 75 ? 'Aggressive' : 'Savage';
+    const intensityLevel = boostedIntensity <= 25 ? 'Chill' : boostedIntensity <= 50 ? 'Moderate' : boostedIntensity <= 75 ? 'Aggressive' : 'ABSOLUTELY NUTS';
 
     const complexityInstructions = lyricComplexity <= 25 
       ? "Use simple vocabulary and straightforward metaphors. Keep rhyme schemes basic (AABB). Focus on clear, easy-to-follow bars."
@@ -363,15 +383,14 @@ Battle rap techniques encouraged:
       ? "Mix simple and moderate vocabulary. Use some internal rhymes and basic wordplay. Add clever metaphors."
       : lyricComplexity <= 75
       ? "Use sophisticated vocabulary and complex metaphors. Include multi-syllabic rhymes, internal rhymes, and advanced wordplay techniques."
-      : "Master-level complexity: Use intricate wordplay, layered meanings, complex rhyme schemes (ABCDABCD), multiple internal rhymes per line, and advanced literary devices.";
-
-    const intensityInstructions = styleIntensity <= 25
+      : "EXPONENTIAL MASTERY: Use paper-folded-9,393,939-times complexity with 3-4 internal rhymes per line minimum, layered meanings, complex multi-syllabic rhyme schemes, and devastating wordplay that showcases absolute technical dominance.";
+    const intensityInstructions = boostedIntensity <= 25
       ? "Keep the energy mellow and laid-back. Use clever wordplay over aggression. Be confident but not intimidating."
-      : styleIntensity <= 50
+      : boostedIntensity <= 50
       ? "Moderate intensity with some competitive edge. Balance clever bars with confident delivery."
-      : styleIntensity <= 75
+      : boostedIntensity <= 75
       ? "High energy and aggressive delivery. Use intimidation tactics and harsh competitive language."
-      : "Maximum intensity: Savage, ruthless, and devastating. Use the most aggressive battle rap tactics and brutal verbal attacks.";
+      : "ABSOLUTE SAVAGE MODE: Go completely nuts with devastating attacks. Use the most brutal, overwhelming verbal assault. Show zero mercy and total domination. React with exponential aggression and technical superiority.";
 
     // STAGE 2: ENHANCED RAP GENERATION using rhyme analysis
     console.log("🎤 Stage 2: Generating enhanced response using rhyme intelligence...");
@@ -454,17 +473,44 @@ YOUR REQUIREMENTS:
 - Use exponential wordplay techniques like the examples above
 - Counter their specific claims with technical superiority
 
-RHYME SWITCHING REQUIREMENT - MANDATORY:
-Lines 1-2: Use sounds like "dissolve/resolve" (AH-LV pattern)
-Lines 3-4: Switch to "season/region" (EE-UN pattern)  
-Lines 5-6: Switch to "country/crunchy" (UH-EE pattern)
-Lines 7-8: Switch to "bluntly/funky" (UH-EE different pattern)
+MANDATORY RHYME DENSITY REQUIREMENTS:
+- MINIMUM 3-4 rhymes per line (internal + end rhymes)
+- Switch rhyme families every 2 lines for variety
+- Use complex multi-syllabic patterns throughout
+- Stack consecutive rhyming words for impact
 
-CRITICAL: Each pair must use DIFFERENT sounding rhymes. No repetitive sounds.
+EXAMPLE DENSITY: "I SPIT wicked, GET twisted, your SHIT'S lifted, while I SPLIT critics and HIT limits"
+(Notice: SPIT-GET-SHIT-SPLIT-HIT = 5 rhymes in one line)
 
-Counter "${sanitizedUserVerse}" with exponential mastery and mandatory rhyme switching. ${safetyNote}
+RHYME SWITCHING PATTERN:
+Lines 1-2: "attack/track/back/crack" family (ACK sounds)
+Lines 3-4: "clever/never/sever/whatever" family (EVER sounds)
+Lines 5-6: "dominate/terminate/eliminate" family (ATE sounds)
+Lines 7-8: "superior/warrior/furious" family (IOR sounds)
 
-Write exactly 8 lines with different rhyme sounds per pair:`;
+CRITICAL REACTION SYSTEM - USER SCORED ${userScore}/100:
+${userScore >= 70 ? `🔥 OPPONENT PERFORMED EXCELLENTLY - GO ABSOLUTELY NUTS!
+- Use maximum complexity with 4-5 rhymes per line minimum
+- Show zero mercy, devastating verbal assault
+- Use the most brutal and overwhelming attack patterns
+- React with exponential aggression and technical dominance
+- Make it clear you're threatened and responding with full force` :
+userScore >= 50 ? `⚡ OPPONENT PERFORMED WELL - INCREASE AGGRESSION SIGNIFICANTLY!
+- Use 3-4 rhymes per line with increased intensity
+- Show clear escalation in technical skill and aggression
+- Use harsh competitive language and intimidation
+- Demonstrate clear superiority while acknowledging the challenge` :
+`😏 OPPONENT PERFORMED POORLY - SHOW MILD SUPERIORITY
+- Use 3 rhymes per line with confident delivery
+- Show technical mastery without overwhelming force
+- Use condescending but not brutal language`}
+
+ADJUSTED INTENSITY: ${Math.min(100, styleIntensity + aggressionBoost)}% (original: ${styleIntensity}% + reaction boost: ${aggressionBoost}%)
+REACTION MODE: ${reactionMode}
+
+Counter "${sanitizedUserVerse}" with exponential mastery and ${reactionMode} energy. ${safetyNote}
+
+Write exactly 8 lines with mandatory rhyme density matching reaction level:`;
 
     const apiResponse = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
