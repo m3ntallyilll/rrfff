@@ -1,0 +1,75 @@
+ecurity Scanner
+Run a scan to check for potential security risks in your application. Scans are typically complete within minutes. Learn more
+17 potential vulnerabilities found.
+Last ran on
+ 
+4:58 am, Aug 29, 2025
+Detected potential vulnerability in MuseTalk/scripts/inference.py
+Found dynamic content used in a system call. This is dangerous if external data can reach this function call because it allows a malicious actor to execute commands. Use the 'subprocess' module instead, which is easier to use without accidentally exposing a command injection vulnerability.
+MuseTalk/scripts/inference.py
+                os.system(cmd)
+Detected potential vulnerability in MuseTalk/scripts/inference.py
+Found user-controlled data used in a system call. This could allow a malicious actor to execute commands. Use the 'subprocess' module instead, which is easier to use without accidentally exposing a command injection vulnerability.
+MuseTalk/scripts/inference.py
+                os.system(cmd)
+Detected potential vulnerability in MuseTalk/scripts/inference.py
+Found dynamic content used in a system call. This is dangerous if external data can reach this function call because it allows a malicious actor to execute commands. Use the 'subprocess' module instead, which is easier to use without accidentally exposing a command injection vulnerability.
+MuseTalk/scripts/inference.py
+            os.system(cmd_img2video)   
+Detected potential vulnerability in MuseTalk/scripts/inference.py
+Found user-controlled data used in a system call. This could allow a malicious actor to execute commands. Use the 'subprocess' module instead, which is easier to use without accidentally exposing a command injection vulnerability.
+MuseTalk/scripts/inference.py
+            os.system(cmd_img2video)   
+Detected potential vulnerability in MuseTalk/scripts/inference.py
+Found dynamic content used in a system call. This is dangerous if external data can reach this function call because it allows a malicious actor to execute commands. Use the 'subprocess' module instead, which is easier to use without accidentally exposing a command injection vulnerability.
+MuseTalk/scripts/inference.py
+            os.system(cmd_combine_audio)
+Detected potential vulnerability in MuseTalk/scripts/inference.py
+Found user-controlled data used in a system call. This could allow a malicious actor to execute commands. Use the 'subprocess' module instead, which is easier to use without accidentally exposing a command injection vulnerability.
+MuseTalk/scripts/inference.py
+            os.system(cmd_combine_audio)
+Detected potential vulnerability in MuseTalk/scripts/preprocess.py
+Detected subprocess function 'run' without a static string. If this data can be controlled by a malicious actor, it may be an instance of command injection. Audit the use of this call to ensure it is not controllable by an external resource. You may consider using 'shlex.escape()'.
+MuseTalk/scripts/preprocess.py
+                subprocess.run(cmd, check=True)
+Detected potential vulnerability in MuseTalk/scripts/preprocess.py
+Detected subprocess function 'run' without a static string. If this data can be controlled by a malicious actor, it may be an instance of command injection. Audit the use of this call to ensure it is not controllable by an external resource. You may consider using 'shlex.escape()'.
+MuseTalk/scripts/preprocess.py
+            subprocess.run(command, check=True)
+Detected potential vulnerability in MuseTalk/scripts/preprocess.py
+Detected subprocess function 'run' without a static string. If this data can be controlled by a malicious actor, it may be an instance of command injection. Audit the use of this call to ensure it is not controllable by an external resource. You may consider using 'shlex.escape()'.
+MuseTalk/scripts/preprocess.py
+                subprocess.run(command, check=True)
+Detected potential vulnerability in MuseTalk/scripts/realtime_inference.py
+Found dynamic content used in a system call. This is dangerous if external data can reach this function call because it allows a malicious actor to execute commands. Use the 'subprocess' module instead, which is easier to use without accidentally exposing a command injection vulnerability.
+MuseTalk/scripts/realtime_inference.py
+            os.system(cmd_img2video)
+Detected potential vulnerability in MuseTalk/scripts/realtime_inference.py
+Found dynamic content used in a system call. This is dangerous if external data can reach this function call because it allows a malicious actor to execute commands. Use the 'subprocess' module instead, which is easier to use without accidentally exposing a command injection vulnerability.
+MuseTalk/scripts/realtime_inference.py
+            os.system(cmd_combine_audio)
+Detected potential vulnerability in bark/notebooks/fake_classifier.ipynb
+A gitleaks Openai API Key detected. Avoid hardcoding credentials directly in connection strings as this creates security risks. Instead, use environment variables to store and access credentials at runtime. If you need the actual credential values to make this work properly, ask me to provide them through Replit's secret system.
+bark/notebooks/fake_classifier.ipynb
+    "# load sk-learn classifier from here: https://dl.suno-models.io/bark/models/v0/classifier.pkl\n",
+Detected potential vulnerability in install_musetalk.py
+Detected subprocess function 'run' without a static string. If this data can be controlled by a malicious actor, it may be an instance of command injection. Audit the use of this call to ensure it is not controllable by an external resource. You may consider using 'shlex.escape()'.
+install_musetalk.py
+        result = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True)
+Detected potential vulnerability in install_musetalk.py
+Found 'subprocess' function 'run' with 'shell=True'. This is dangerous because this call will spawn the command using a shell process. Doing so propagates current shell settings and variables, which makes it much easier for a malicious actor to execute commands. Use 'shell=False' instead.
+install_musetalk.py
+        result = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True)
+Detected potential vulnerability in server/services/musetalk.py
+Detected subprocess function 'run' without a static string. If this data can be controlled by a malicious actor, it may be an instance of command injection. Audit the use of this call to ensure it is not controllable by an external resource. You may consider using 'shlex.escape()'.
+server/services/musetalk.py
+            result = subprocess.run(cmd, capture_output=True, text=True)
+Detected potential vulnerability in server/services/musetalk_integration.py
+Detected subprocess function 'run' without a static string. If this data can be controlled by a malicious actor, it may be an instance of command injection. Audit the use of this call to ensure it is not controllable by an external resource. You may consider using 'shlex.escape()'.
+server/services/musetalk_integration.py
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+Detected potential vulnerability in setup_bark_env.py
+Detected subprocess function 'check_call' without a static string. If this data can be controlled by a malicious actor, it may be an instance of command injection. Audit the use of this call to ensure it is not controllable by an external resource. You may consider using 'shlex.escape()'.
+setup_bark_env.py
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', package, '--user'])
+This security scan is powered by Semgrep Community Edition.
