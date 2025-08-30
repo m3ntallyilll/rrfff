@@ -166,19 +166,13 @@ export default function BattleArena() {
             updateBattleState({ isPlayingAudio: true });
           }, 200);
           
-          // Reset speaking state after reasonable time to allow for next round
-          setTimeout(() => {
-            console.log('🔄 Resetting battle state for next round');
-            updateBattleState({ isPlayingAudio: false, isAIResponding: false });
-          }, 8000); // 8 seconds should be enough for most AI responses
+          // Don't auto-reset - let the battle continue naturally after AI speaks
         } else {
           console.log('⚠️ No valid audio URL received:', result.audioUrl?.substring(0, 50));
         }
         
-        toast({
-          title: "Round Complete!",
-          description: `Score: You ${result.userScore || 0} - AI ${result.aiScore || 0}`,
-        });
+        // Don't show "Round Complete" toast immediately - let the battle continue
+        console.log('🎯 Round processed, scores updated:', { user: result.userScore, ai: result.aiScore });
       }
     } catch (error) {
       toast({

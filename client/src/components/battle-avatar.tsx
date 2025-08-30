@@ -174,7 +174,10 @@ export function BattleAvatar({
             autoPlay={isAISpeaking}
             volume={1.0}
             onPlay={() => console.log('🔊 TTS Audio started')}
-            onEnded={() => console.log('🔇 TTS Audio ended')}
+            onEnded={() => {
+              console.log('🔇 TTS Audio ended - ready for next round');
+              // Don't reset speaking state immediately to avoid disrupting the flow
+            }}
           />
           
           {/* Subtle visual feedback when speaking */}
