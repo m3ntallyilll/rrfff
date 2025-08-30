@@ -11,9 +11,19 @@ import { Loader2, Zap } from 'lucide-react';
 const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
 
 // Initialize Stripe promise outside component to avoid recreation
-const stripePromise = STRIPE_PUBLIC_KEY && STRIPE_PUBLIC_KEY.startsWith('pk_') 
-  ? loadStripe(STRIPE_PUBLIC_KEY)
-  : null;
+// Create a safe Stripe promise that won't cause errors
+const createStripePromise = () => {
+  if (!STRIPE_PUBLIC_KEY || !STRIPE_PUBLIC_KEY.startsWith('pk_')) {
+    return Promise.resolve(null);
+  }
+  
+  return loadStripe(STRIPE_PUBLIC_KEY).catch((error) => {
+    console.error('Stripe loading failed:', error);
+    return null;
+  });
+};
+
+const stripePromise = createStripePromise();
 
 interface PaymentFormProps {
   tier?: 'premium' | 'pro';

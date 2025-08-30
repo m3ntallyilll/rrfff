@@ -328,7 +328,6 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
               subscriptionTier: tier,
               subscriptionStatus: subscription.status,
               stripeSubscriptionId: subscription.id,
-              battlesRemaining: isActive ? (tier === 'premium' ? 25 : -1) : 3,
             });
             
             console.log(`✅ Updated subscription for user ${user.id}: ${tier} (${subscription.status})`);
@@ -478,7 +477,7 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
         userScore: scores.userScore,
         aiScore: scores.aiScore,
         aiAudioPath: aiAudioPath || undefined,
-        analysis: scores.analysis,
+        analysis: scores.analysis || {},
         createdAt: new Date(),
       };
 

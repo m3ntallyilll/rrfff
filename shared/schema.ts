@@ -12,6 +12,12 @@ export interface RoundScores {
   flowQuality: number;
   creativity: number;
   totalScore: number;
+  analysis?: {
+    strengths?: string[];
+    weaknesses?: string[];
+    techniques?: string[];
+    improvementTips?: string[];
+  };
 }
 
 // Battles table with user authentication
