@@ -142,6 +142,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           payment_method_types: paymentMethodTypes,
         },
         expand: ['latest_invoice.payment_intent'],
+        metadata: {
+          paymentMethod: paymentMethod,
+          ...(paymentMethod === 'cashapp' && { cashapp_account: '$ILLAITHEGPTSTORE' })
+        },
+        description: paymentMethod === 'cashapp' 
+          ? `${tier.charAt(0).toUpperCase() + tier.slice(1)} subscription - Pay to $ILLAITHEGPTSTORE`
+          : `${tier.charAt(0).toUpperCase() + tier.slice(1)} subscription`,
       });
 
       console.log(`✅ Subscription created: ${subscription.id}`);

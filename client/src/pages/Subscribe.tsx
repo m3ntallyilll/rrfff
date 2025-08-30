@@ -89,7 +89,7 @@ function SubscriptionForm({ tier, paymentMethod }: SubscriptionFormProps) {
           </>
         ) : (
           paymentMethod === 'cashapp' ? 
-            `Pay with Cash App - $${tier === 'premium' ? '9.99' : '19.99'}/month` :
+            `Pay with Cash App ($ILLAITHEGPTSTORE) - $${tier === 'premium' ? '9.99' : '19.99'}/month` :
             `Subscribe to ${tier === 'premium' ? 'Premium' : 'Pro'} - $${tier === 'premium' ? '9.99' : '19.99'}/month`
         )}
       </Button>
@@ -177,7 +177,7 @@ export default function Subscribe() {
                 }`}
                 data-testid="button-select-cashapp"
               >
-                💰 Cash App
+                💰 Cash App ($ILLAITHEGPTSTORE)
               </Button>
             </div>
           </div>
@@ -297,7 +297,7 @@ export default function Subscribe() {
           </CardDescription>
           <div className="text-center mt-2">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-              {paymentMethod === 'cashapp' ? '💰 Cash App Payment' : '💳 Credit Card Payment'}
+              {paymentMethod === 'cashapp' ? '💰 Cash App → $ILLAITHEGPTSTORE' : '💳 Credit Card Payment'}
             </span>
           </div>
         </CardHeader>
