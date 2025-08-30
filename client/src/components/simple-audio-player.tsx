@@ -54,27 +54,14 @@ export function SimpleAudioPlayer({
       // Auto-play if enabled
       if (autoPlay) {
         console.log('🔥 Auto-playing audio immediately');
-        console.log('🔥 Audio ready state:', audio.readyState);
-        console.log('🔥 Audio can play through:', audio.HAVE_ENOUGH_DATA);
-        
         // Add slight delay to ensure audio is loaded
         setTimeout(() => {
-          console.log('🔊 Attempting audio playback...');
-          audio.play().then(() => {
-            console.log('✅ Audio playback started successfully');
-          }).catch(error => {
+          audio.play().catch(error => {
             console.error('🔊 Auto-play failed:', error);
-            console.log('🔊 Error details:', error.name, error.message);
-            
-            // Try manual playback as fallback with user interaction
+            // Try manual playback as fallback
             console.log('🔄 Retrying audio playback...');
             setTimeout(() => {
-              audio.play().then(() => {
-                console.log('✅ Retry playback successful');
-              }).catch(e => {
-                console.error('🔊 Retry failed:', e);
-                console.log('🔊 Final fallback - audio may need user interaction');
-              });
+              audio.play().catch(e => console.error('🔊 Retry failed:', e));
             }, 500);
           });
         }, 100);
