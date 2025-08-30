@@ -15,9 +15,10 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 interface SubscriptionFormProps {
   tier: 'premium' | 'pro';
+  paymentMethod: 'stripe' | 'cashapp';
 }
 
-function SubscriptionForm({ tier }: SubscriptionFormProps) {
+function SubscriptionForm({ tier, paymentMethod }: SubscriptionFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -65,7 +66,16 @@ function SubscriptionForm({ tier }: SubscriptionFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement />
+      <PaymentElement 
+        options={{
+          defaultValues: {
+            billingDetails: {
+              name: '',
+              email: ''
+            }
+          }
+        }}
+      />
       <Button 
         type="submit" 
         disabled={!stripe || isProcessing}
@@ -78,7 +88,9 @@ function SubscriptionForm({ tier }: SubscriptionFormProps) {
             Processing...
           </>
         ) : (
-          `Subscribe to ${tier === 'premium' ? 'Premium' : 'Pro'} - $${tier === 'premium' ? '9.99' : '19.99'}/month`
+          paymentMethod === 'cashapp' ? 
+            `Pay with Cash App - $${tier === 'premium' ? '9.99' : '19.99'}/month` :
+            `Subscribe to ${tier === 'premium' ? 'Premium' : 'Pro'} - $${tier === 'premium' ? '9.99' : '19.99'}/month`
         )}
       </Button>
     </form>
@@ -87,12 +99,16 @@ function SubscriptionForm({ tier }: SubscriptionFormProps) {
 
 export default function Subscribe() {
   const [tier, setTier] = useState<'premium' | 'pro'>('premium');
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'cashapp'>('stripe');
   const [clientSecret, setClientSecret] = useState<string>('');
   const { toast } = useToast();
 
   const createSubscription = useMutation({
-    mutationFn: async (selectedTier: 'premium' | 'pro') => {
-      const response = await apiRequest('POST', '/api/create-subscription', { tier: selectedTier });
+    mutationFn: async (data: { tier: 'premium' | 'pro'; paymentMethod: 'stripe' | 'cashapp' }) => {
+      const response = await apiRequest('POST', '/api/create-subscription', { 
+        tier: data.tier,
+        paymentMethod: data.paymentMethod 
+      });
       if (!response.ok) {
         throw new Error('Failed to create subscription');
       }
@@ -119,7 +135,7 @@ export default function Subscribe() {
   const handleTierSelect = (selectedTier: 'premium' | 'pro') => {
     setTier(selectedTier);
     setClientSecret('');
-    createSubscription.mutate(selectedTier);
+    createSubscription.mutate({ tier: selectedTier, paymentMethod });
   };
 
   if (!clientSecret) {
@@ -133,6 +149,37 @@ export default function Subscribe() {
             <p className="text-gray-400 text-lg">
               Upgrade to unlock unlimited rap battles and premium features
             </p>
+          </div>
+
+          {/* Payment Method Selection */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-semibold text-white mb-4 text-center">Choose Payment Method</h2>
+            <div className="flex justify-center gap-4">
+              <Button
+                variant={paymentMethod === 'stripe' ? 'default' : 'outline'}
+                onClick={() => setPaymentMethod('stripe')}
+                className={`px-6 py-3 ${
+                  paymentMethod === 'stripe'
+                    ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                    : 'border-purple-500 text-purple-400 hover:bg-purple-600/20'
+                }`}
+                data-testid="button-select-stripe"
+              >
+                💳 Credit Card
+              </Button>
+              <Button
+                variant={paymentMethod === 'cashapp' ? 'default' : 'outline'}
+                onClick={() => setPaymentMethod('cashapp')}
+                className={`px-6 py-3 ${
+                  paymentMethod === 'cashapp'
+                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    : 'border-green-500 text-green-400 hover:bg-green-600/20'
+                }`}
+                data-testid="button-select-cashapp"
+              >
+                💰 Cash App
+              </Button>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -248,10 +295,15 @@ export default function Subscribe() {
           <CardDescription className="text-gray-400 text-center">
             {tier === 'premium' ? 'Premium Plan - $9.99/month' : 'Pro Plan - $19.99/month'}
           </CardDescription>
+          <div className="text-center mt-2">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+              {paymentMethod === 'cashapp' ? '💰 Cash App Payment' : '💳 Credit Card Payment'}
+            </span>
+          </div>
         </CardHeader>
         <CardContent>
           <Elements stripe={stripePromise} options={stripeOptions}>
-            <SubscriptionForm tier={tier} />
+            <SubscriptionForm tier={tier} paymentMethod={paymentMethod} />
           </Elements>
         </CardContent>
       </Card>

@@ -73,7 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/create-subscription', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { tier } = req.body; // 'premium' or 'pro'
+      const { tier, paymentMethod = 'stripe' } = req.body; // 'premium' or 'pro', 'stripe' or 'cashapp'
       
       if (!tier || !['premium', 'pro'].includes(tier)) {
         return res.status(400).json({ message: 'Invalid subscription tier' });
@@ -87,10 +87,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tierInfo = SUBSCRIPTION_TIERS[tier as keyof typeof SUBSCRIPTION_TIERS];
       
       if (user.stripeSubscriptionId) {
-        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId, {
+          expand: ['latest_invoice.payment_intent']
+        });
+        
+        const latestInvoice = subscription.latest_invoice as any;
+        const clientSecret = latestInvoice?.payment_intent?.client_secret;
+          
         res.json({
           subscriptionId: subscription.id,
-          clientSecret: (subscription.latest_invoice as any)?.payment_intent?.client_secret,
+          clientSecret: clientSecret,
         });
         return;
       }
@@ -120,6 +126,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🔧 Creating subscription with price ID: ${priceId}`);
       
+      // Configure payment method types based on selection
+      const paymentMethodTypes = paymentMethod === 'cashapp' 
+        ? ['cashapp'] 
+        : ['card', 'cashapp']; // Allow both card and CashApp for Stripe
+
       const subscription = await stripe.subscriptions.create({
         customer: customer.id,
         items: [{
@@ -128,15 +139,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         payment_behavior: 'default_incomplete',
         payment_settings: {
           save_default_payment_method: 'on_subscription',
+          payment_method_types: paymentMethodTypes,
         },
         expand: ['latest_invoice.payment_intent'],
       });
 
       console.log(`✅ Subscription created: ${subscription.id}`);
-      console.log(`📋 Latest invoice:`, subscription.latest_invoice?.id);
+      const invoiceObj = subscription.latest_invoice as any;
+      console.log(`📋 Latest invoice:`, invoiceObj?.id);
       
-      // Extract payment intent and client secret
-      const paymentIntent = (subscription.latest_invoice as any)?.payment_intent;
+      // Extract payment intent and client secret - handle expanded Stripe objects
+      const latestInvoice = subscription.latest_invoice as any;
+      const paymentIntent = latestInvoice?.payment_intent;
       const clientSecret = paymentIntent?.client_secret;
       
       console.log(`🔑 Payment intent: ${paymentIntent?.id}`);
