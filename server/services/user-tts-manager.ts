@@ -1,7 +1,5 @@
 import { createOpenAITTS, OpenAITTSService } from './openai-tts';
 import { createGroqTTS, GroqTTSService } from './groq-tts';
-import { barkTTS } from './bark';
-import { typecastService } from './typecast';
 import { storage } from '../storage';
 
 export interface TTSGenerationOptions {
@@ -124,33 +122,46 @@ export class UserTTSManager {
     text: string, 
     options: TTSGenerationOptions
   ): Promise<{ audioUrl: string; duration: number }> {
-    console.log(`🏠 Using system TTS services (Bark + Typecast fallback)`);
+    console.log(`🔄 Using system TTS services (Groq/OpenAI only)`);
     
-    try {
-      // Try Bark TTS first
-      console.log(`🐶 Attempting system Bark TTS...`);
-      const barkResult = await barkTTS.generateAudio(text, options.characterId);
-      // Convert bark response to expected format
-      return {
-        audioUrl: barkResult.audioPath,
-        duration: Math.floor(text.length / 15)
-      };
-    } catch (barkError: any) {
-      console.log(`📢 Bark failed, trying Typecast fallback: ${barkError.message}`);
-      
+    // Try system Groq first (best option for all characters)
+    if (process.env.GROQ_API_KEY) {
       try {
-        // Try Typecast as fallback
-        return await typecastService.generateSpeech(text, options.characterId);
-      } catch (typecastError: any) {
-        console.log(`❌ Typecast also failed: ${typecastError.message}`);
-        
-        // Return empty audio - battles continue without audio
-        return {
-          audioUrl: "",
-          duration: Math.floor(text.length / 15)
-        };
+        console.log(`🚀 Using system Groq TTS...`);
+        const groqInstance = this.getGroqInstance(process.env.GROQ_API_KEY);
+        return await groqInstance.generateTTS(text, options.characterId, {
+          voiceStyle: options.voiceStyle,
+          characterName: options.characterName,
+          gender: options.gender,
+          speedMultiplier: options.speedMultiplier
+        });
+      } catch (error: any) {
+        console.log(`❌ System Groq TTS failed: ${error.message}`);
       }
     }
+    
+    // Try system OpenAI as fallback
+    if (process.env.OPENAI_API_KEY) {
+      try {
+        console.log(`🚀 Using system OpenAI TTS as fallback...`);
+        const openaiInstance = this.getOpenAIInstance(process.env.OPENAI_API_KEY);
+        return await openaiInstance.generateTTS(text, options.characterId, {
+          voiceStyle: options.voiceStyle,
+          characterName: options.characterName,
+          gender: options.gender,
+          speedMultiplier: options.speedMultiplier
+        });
+      } catch (error: any) {
+        console.log(`❌ System OpenAI TTS failed: ${error.message}`);
+      }
+    }
+    
+    // All services failed - return empty audio (battle continues without sound)
+    console.log(`🚫 No working TTS services available (Groq/OpenAI only) - continuing with silent mode`);
+    return {
+      audioUrl: "", // Empty audio - frontend handles gracefully
+      duration: Math.floor(text.length / 15)
+    };
   }
 
   // Test a user's API key
