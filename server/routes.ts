@@ -113,10 +113,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-          // Use actual Stripe price IDs - these should be created in Stripe Dashboard
+          // Use actual Stripe price IDs created by setup script
       const priceId = tier === 'premium' ? 
-        process.env.STRIPE_PREMIUM_PRICE_ID || 'price_1QRCfj2eZvKYlo2CiPBJV7q9' : // $9.99/month Premium
-        process.env.STRIPE_PRO_PRICE_ID || 'price_1QRCfj2eZvKYlo2CXb1JYlS6'; // $19.99/month Pro
+        process.env.STRIPE_PREMIUM_PRICE_ID || 'price_1S1fdYE0KDhHKBCxa46JAd1e' : // $9.99/month Premium
+        process.env.STRIPE_PRO_PRICE_ID || 'price_1S1fdYE0KDhHKBCxCxmXMeXX'; // $19.99/month Pro
       
       const subscription = await stripe.subscriptions.create({
         customer: customer.id,
@@ -168,10 +168,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       case 'customer.subscription.deleted':
         const subscription = event.data.object as Stripe.Subscription;
         
-        // Find user by stripe customer ID
-        const users = await storage.getUserBattles('dummy', 1000); // Hack: need to implement getUserByStripeCustomerId
-        // TODO: Implement proper user lookup by stripe customer ID
-        
+        try {
+          // Get all users to find the one with matching stripe customer ID
+          // Note: In production, you'd want a more efficient lookup method
+          const allUsers = await storage.getAllUsers();
+          const user = allUsers.find(u => u.stripeCustomerId === subscription.customer);
+          
+          if (user) {
+            const subscriptionStatus = subscription.status === 'active' ? 'active' : 'inactive';
+            const subscriptionTier = subscription.status === 'active' ? 
+              (subscription.items.data[0]?.price?.unit_amount === 999 ? 'premium' : 'pro') : 'free';
+            
+            await storage.updateUserSubscription(user.id, {
+              subscriptionStatus,
+              subscriptionTier,
+              stripeSubscriptionId: subscription.id
+            });
+            
+            console.log(`Updated user ${user.id} subscription: ${subscriptionTier} (${subscriptionStatus})`);
+          } else {
+            console.log(`No user found for Stripe customer ${subscription.customer}`);
+          }
+        } catch (error) {
+          console.error('Error processing subscription webhook:', error);
+        }
         break;
       default:
         console.log(`Unhandled event type ${event.type}`);

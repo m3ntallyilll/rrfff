@@ -126,8 +126,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllUsers(): Promise<User[]> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    const allUsers = await db.select().from(users);
+    return allUsers;
   }
 
   // Subscription management
