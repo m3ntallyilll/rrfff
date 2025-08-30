@@ -689,7 +689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         aiResponse: aiResponseText,
         userScore: scores.userScore,
         aiScore: scores.aiScore,
-        audioUrl: audioResult.audioPath ? `/api/audio/${path.basename(audioResult.audioPath)}` : (audioResult.audioUrl || ""),
+        audioUrl: audioResult.audioUrl || "",
         userBattleMap: userBattleMap, // Add battle map for frontend display
         timestamp: Date.now()
       };
