@@ -6,23 +6,23 @@ import { useEffect } from "react";
 
 export default function Landing() {
   useEffect(() => {
-    // Update page title and meta description dynamically for SEO
-    document.title = "Battle Rap AI - Epic Voice-Powered Rap Battles Against AI | Face CYPHER-9000";
+    // Update page title and meta description dynamically for viral SEO
+    document.title = "CYPHER-9000 Destroyed 10,000 Rappers - Can YOU Survive? | Battle Rap AI";
     
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Experience the future of rap battles! Fight AI opponents like CYPHER-9000 with real-time voice recognition, authentic battle scoring, and 10 battles for just $1. Master your flow, perfect your rhymes, and dominate the mic!');
+      metaDescription.setAttribute('content', '🔥 WARNING: CYPHER-9000 has NEVER been defeated! This terrifying AI rapper analyzes your flow in real-time and delivers devastating counter-attacks. Thousands tried. All failed. Will you be the first to survive? Your voice vs the machine - the ultimate test!');
     }
 
-    // Update Open Graph tags for social sharing
+    // Update Open Graph tags for maximum social sharing impact
     const ogTitle = document.querySelector('meta[property="og:title"]');
     const ogDescription = document.querySelector('meta[property="og:description"]');
     
     if (ogTitle) {
-      ogTitle.setAttribute('content', 'Battle Rap AI - Epic Voice-Powered Rap Battles Against AI | Face CYPHER-9000');
+      ogTitle.setAttribute('content', '🔥 CYPHER-9000 Destroyed 10,000 Rappers - Can YOU Survive?');
     }
     if (ogDescription) {
-      ogDescription.setAttribute('content', 'Experience the future of rap battles! Fight AI opponents like CYPHER-9000 with real-time voice recognition, authentic battle scoring, and 10 battles for just $1. Master your flow, perfect your rhymes, and dominate the mic!');
+      ogDescription.setAttribute('content', 'WARNING: This terrifying AI rapper has NEVER been defeated! CYPHER-9000 analyzes your flow in real-time and delivers devastating counter-attacks. Thousands tried. All failed. Will you be the first to survive the ultimate voice vs machine battle?');
     }
   }, []);
 
