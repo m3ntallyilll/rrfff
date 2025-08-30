@@ -90,7 +90,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let customer;
       if (user.stripeCustomerId) {
-        customer = await stripe.customers.retrieve(user.stripeCustomerId);
+        try {
+          customer = await stripe.customers.retrieve(user.stripeCustomerId);
+        } catch (error: any) {
+          // Handle test/live mode mismatch - create new customer
+          if (error.code === 'resource_missing') {
+            console.log(`🔄 Customer not found in current mode, creating new customer...`);
+            customer = await stripe.customers.create({
+              email: user.email,
+              name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+            });
+            
+            user = await storage.updateUserStripeInfo(userId, { 
+              stripeCustomerId: customer.id 
+            });
+          } else {
+            throw error;
+          }
+        }
       } else {
         customer = await stripe.customers.create({
           email: user.email,
@@ -179,7 +196,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let customer;
       if (user.stripeCustomerId) {
-        customer = await stripe.customers.retrieve(user.stripeCustomerId);
+        try {
+          customer = await stripe.customers.retrieve(user.stripeCustomerId);
+        } catch (error: any) {
+          // Handle test/live mode mismatch - create new customer
+          if (error.code === 'resource_missing') {
+            console.log(`🔄 Customer not found in current mode, creating new customer...`);
+            customer = await stripe.customers.create({
+              email: user.email,
+              name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+            });
+            
+            user = await storage.updateUserStripeInfo(userId, { 
+              stripeCustomerId: customer.id,
+              stripeSubscriptionId: null // Clear old subscription ID
+            });
+          } else {
+            throw error;
+          }
+        }
       } else {
         customer = await stripe.customers.create({
           email: user.email,
