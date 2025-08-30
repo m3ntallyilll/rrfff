@@ -142,7 +142,14 @@ export default function BattleArena() {
         
         if (result.aiResponse) {
           console.log('🤖 Setting AI response:', result.aiResponse.substring(0, 100) + '...');
-          setAiResponse(result.aiResponse);
+          
+          // Clear any previous response first, then set new one
+          setAiResponse("");
+          
+          setTimeout(() => {
+            console.log('🔄 Now setting the actual AI response');
+            setAiResponse(result.aiResponse);
+          }, 50);
         } else {
           console.log('⚠️ No AI response in result');
         }

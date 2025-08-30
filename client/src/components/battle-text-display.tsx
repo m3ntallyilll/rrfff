@@ -25,8 +25,11 @@ export function BattleTextDisplay({
 
   // Typewriter effect for AI response
   useEffect(() => {
+    console.log('🎯 BattleTextDisplay: AI response changed:', aiResponse?.length || 0, 'chars');
+    
     // Show AI response immediately when available, regardless of isAIGenerating state
     if (aiResponse && aiResponse.trim()) {
+      console.log('🎭 Starting typewriter effect for AI response');
       setCurrentCharIndex(0);
       setDisplayedAIText("");
       
@@ -34,15 +37,19 @@ export function BattleTextDisplay({
         setCurrentCharIndex((prev) => {
           if (prev >= aiResponse.length) {
             clearInterval(interval);
+            console.log('🎭 Typewriter effect completed');
             return prev;
           }
           
           setDisplayedAIText(aiResponse.substring(0, prev + 1));
           return prev + 1;
         });
-      }, 30); // Faster speed for better responsiveness
+      }, 20); // Even faster for immediate response
 
       return () => clearInterval(interval);
+    } else {
+      console.log('🎭 No AI response to display');
+      setDisplayedAIText("");
     }
   }, [aiResponse]);
 
