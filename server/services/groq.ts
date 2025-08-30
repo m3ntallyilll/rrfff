@@ -704,22 +704,26 @@ ${difficulty === 'nightmare' ? '- CYPHER-9000 MODE: Cold robotic delivery with s
       // SECURITY: Apply additional reasoning filtering before moderation
       rapResponse = this.filterReasoningFromContent(rapResponse);
       
-      // Apply AI-powered content moderation
-      const safetyLevel = profanityFilter ? 'strict' : 'moderate';
-      const moderationResult = await contentModerationService.filterContent(
-        rapResponse, 
-        safetyLevel, 
-        'response'
-      );
-      
-      if (moderationResult.wasFlagged) {
-        console.log(`Security: Content filtered for ${moderationResult.reason}`);
-        // SECURITY: Don't log actual content in production
-        console.log(`Content filtered - length: ${rapResponse.length} chars`);
+      // Apply AI-powered content moderation based on profanity filter setting
+      if (profanityFilter) {
+        // Only apply moderation when profanity filter is ON
+        const moderationResult = await contentModerationService.filterContent(
+          rapResponse, 
+          'strict', 
+          'response'
+        );
+        
+        if (moderationResult.wasFlagged) {
+          console.log(`Security: Content filtered for ${moderationResult.reason}`);
+          console.log(`Content filtered - length: ${rapResponse.length} chars`);
+        }
+        
+        return this.sanitizeContent(moderationResult.content);
+      } else {
+        // BYPASS ALL MODERATION when profanity filter is OFF
+        console.log(`🔥 UNFILTERED MODE: Bypassing all content moderation`);
+        return this.sanitizeContent(rapResponse);
       }
-      
-      // SECURITY: Final sanitization pass
-      return this.sanitizeContent(moderationResult.content);
     }
 
     // If we got reasoning instead of content, extract clean rap verses
