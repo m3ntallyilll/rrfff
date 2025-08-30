@@ -241,7 +241,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         items: [{
           price_data: {
             currency: 'usd',
-            product: `${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan`,
+            product_data: {
+              name: `${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan`,
+              description: `Rap Battle ${tier.charAt(0).toUpperCase() + tier.slice(1)} Subscription`
+            },
             recurring: {
               interval: 'month',
             },
