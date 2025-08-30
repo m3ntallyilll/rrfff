@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Mic, Bot, Trophy, Zap } from "lucide-react";
+import { getCharacterById } from "@shared/characters";
 
 interface SimpleBattleDisplayProps {
   userText: string;
@@ -10,6 +11,7 @@ interface SimpleBattleDisplayProps {
   aiScore: number;
   isProcessing: boolean;
   round: number;
+  characterId?: string;
 }
 
 export function SimpleBattleDisplay({
@@ -18,7 +20,8 @@ export function SimpleBattleDisplay({
   userScore,
   aiScore,
   isProcessing,
-  round
+  round,
+  characterId
 }: SimpleBattleDisplayProps) {
   
   const formatRapText = (text: string) => {
@@ -29,6 +32,8 @@ export function SimpleBattleDisplay({
       </div>
     ));
   };
+
+  const character = characterId ? getCharacterById(characterId) : null;
 
   return (
     <div className="space-y-6">
@@ -52,9 +57,14 @@ export function SimpleBattleDisplay({
       {/* User Section */}
       <Card className="bg-slate-800 border-blue-500">
         <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Mic className="w-5 h-5 text-blue-400" />
-            <h3 className="font-semibold text-blue-400">Your Verse</h3>
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+              <Mic className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-blue-400">Your Verse</h3>
+              <p className="text-xs text-slate-400">Human MC</p>
+            </div>
             {isProcessing && (
               <motion.div
                 className="w-2 h-2 bg-blue-400 rounded-full"
@@ -86,9 +96,26 @@ export function SimpleBattleDisplay({
       {/* AI Section */}
       <Card className="bg-slate-800 border-red-500">
         <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Bot className="w-5 h-5 text-red-400" />
-            <h3 className="font-semibold text-red-400">AI Response</h3>
+          <div className="flex items-center gap-4 mb-4">
+            {character?.avatar ? (
+              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-red-500 bg-red-900">
+                <div className="w-full h-full bg-gradient-to-br from-red-500 to-red-800 flex items-center justify-center text-white font-bold text-xs">
+                  {character.displayName.substring(0, 2)}
+                </div>
+              </div>
+            ) : (
+              <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
+                <Bot className="w-6 h-6 text-white" />
+              </div>
+            )}
+            <div className="flex-1">
+              <h3 className="font-semibold text-red-400">
+                {character?.displayName || "AI"} Response
+              </h3>
+              <p className="text-xs text-slate-400">
+                {character?.difficulty.toUpperCase()} • {character?.style || "AI MC"}
+              </p>
+            </div>
             {isProcessing && (
               <motion.div className="flex space-x-1">
                 <motion.div

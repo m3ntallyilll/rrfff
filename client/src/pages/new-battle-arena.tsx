@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { useSimpleBattle } from "@/hooks/use-simple-battle";
 import { SimpleBattleDisplay } from "@/components/simple-battle-display";
+import { BATTLE_CHARACTERS, getCharacterById } from "@shared/characters";
 
 export default function NewBattleArena() {
   const { toast } = useToast();
@@ -216,12 +217,23 @@ export default function NewBattleArena() {
               </Select>
               
               <Select value={character} onValueChange={setCharacter}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
+                <SelectTrigger className="w-48">
+                  <SelectValue>
+                    {character && getCharacterById(character)?.displayName}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="razor">Razor</SelectItem>
-                  <SelectItem value="cypher">CYPHER-9000</SelectItem>
+                  {BATTLE_CHARACTERS.map((char) => (
+                    <SelectItem key={char.id} value={char.id} className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-red-600 flex-shrink-0" />
+                        <div>
+                          <div className="font-medium">{char.displayName}</div>
+                          <div className="text-xs text-slate-400">{char.difficulty.toUpperCase()}</div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               
@@ -245,6 +257,7 @@ export default function NewBattleArena() {
             aiScore={currentAiScore}
             isProcessing={isProcessing}
             round={currentRound}
+            characterId={battle?.characterId}
           />
         ) : (
           <Card className="bg-slate-800 border-slate-700">

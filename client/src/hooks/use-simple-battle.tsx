@@ -73,8 +73,8 @@ export function useSimpleBattle() {
     // Initial load
     pollBattleData();
 
-    // Poll every 2 seconds for updates
-    const interval = setInterval(pollBattleData, 2000);
+    // Poll every 500ms for fast updates
+    const interval = setInterval(pollBattleData, 500);
     return () => clearInterval(interval);
   }, [currentBattleId, pollBattleData]);
 
@@ -141,8 +141,8 @@ export function useSimpleBattle() {
       if (result.aiResponse) setCurrentAiResponse(result.aiResponse);
       if (result.audioUrl) setCurrentAudioUrl(result.audioUrl);
 
-      // Trigger a poll to get latest data
-      setTimeout(pollBattleData, 500);
+      // Trigger immediate poll to get latest data
+      setTimeout(pollBattleData, 100);
       
       return result;
     } catch (error) {
