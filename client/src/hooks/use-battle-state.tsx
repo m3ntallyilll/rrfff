@@ -45,8 +45,10 @@ export function useBattleState(battleId?: string) {
       return res.json();
     },
     onSuccess: (data: Battle) => {
+      console.log('🎯 Battle created successfully:', data.id);
       setCurrentBattleId(data.id);
-      queryClient.invalidateQueries({ queryKey: ["/api/battle"] });
+      // Don't invalidate all battle queries - only specific ones to avoid triggering reloads
+      queryClient.setQueryData(["/api/battle", data.id], data);
     },
   });
 
@@ -58,8 +60,10 @@ export function useBattleState(battleId?: string) {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/battle", currentBattleId, "state"] 
+      // Use setQueryData instead of invalidate to prevent unnecessary reloads
+      queryClient.refetchQueries({ 
+        queryKey: ["/api/battle", currentBattleId, "state"],
+        exact: true 
       });
     },
   });
@@ -118,14 +122,18 @@ export function useBattleState(battleId?: string) {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/battle", currentBattleId] 
+      // Use targeted refetch instead of invalidate to prevent session confusion
+      queryClient.refetchQueries({ 
+        queryKey: ["/api/battle", currentBattleId], 
+        exact: true 
       });
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/battle", currentBattleId, "state"] 
+      queryClient.refetchQueries({ 
+        queryKey: ["/api/battle", currentBattleId, "state"], 
+        exact: true 
       });
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/battle", currentBattleId, "rounds"] 
+      queryClient.refetchQueries({ 
+        queryKey: ["/api/battle", currentBattleId, "rounds"], 
+        exact: true 
       });
     },
     onError: (error) => {

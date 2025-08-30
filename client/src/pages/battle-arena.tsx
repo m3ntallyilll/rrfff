@@ -78,12 +78,13 @@ export default function BattleArena() {
     }
   }, [battleState?.timeRemaining, updateBattleState]);
 
-  // Initialize new battle on component mount
+  // Initialize new battle on component mount (but don't trigger during active battles)
   useEffect(() => {
-    if (!currentBattleId && !showCharacterSelector && !selectedCharacter) {
+    if (!currentBattleId && !showCharacterSelector && !selectedCharacter && !isProcessing) {
+      console.log('🎯 No active battle detected, showing character selector');
       setShowCharacterSelector(true);
     }
-  }, [currentBattleId, showCharacterSelector, selectedCharacter]);
+  }, [currentBattleId, showCharacterSelector, selectedCharacter, isProcessing]);
 
   const handleRecordingComplete = async (recording: { blob: Blob; duration: number; url: string }) => {
     try {
