@@ -344,6 +344,18 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
   });
 
   // Battle management routes
+  app.get('/api/battles', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      // Get user's current active battle
+      const activeBattles = await storage.getUserActiveBattles(userId);
+      res.json(activeBattles);
+    } catch (error) {
+      console.error("Error fetching active battles:", error);
+      res.status(500).json({ message: "Failed to fetch active battles" });
+    }
+  });
+
   app.get('/api/battles/history', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

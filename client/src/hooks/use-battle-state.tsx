@@ -8,19 +8,19 @@ export function useBattleState(battleId?: string) {
 
   // Fetch battle state
   const { data: battleState, isLoading: stateLoading } = useQuery({
-    queryKey: ["/api/battles", currentBattleId, "state"],
+    queryKey: ["/api/battle", currentBattleId, "state"],
     enabled: !!currentBattleId,
   });
 
   // Fetch battle details
   const { data: battle, isLoading: battleLoading } = useQuery({
-    queryKey: ["/api/battles", currentBattleId],
+    queryKey: ["/api/battle", currentBattleId],
     enabled: !!currentBattleId,
   });
 
   // Fetch battle rounds
   const { data: rounds, isLoading: roundsLoading } = useQuery({
-    queryKey: ["/api/battles", currentBattleId, "rounds"],
+    queryKey: ["/api/battle", currentBattleId, "rounds"],
     enabled: !!currentBattleId,
   });
 
@@ -34,12 +34,12 @@ export function useBattleState(battleId?: string) {
       styleIntensity?: number;
       voiceSpeed?: number;
     }) => {
-      const res = await apiRequest("POST", "/api/battles", battleData);
+      const res = await apiRequest("POST", "/api/battle", battleData);
       return res.json();
     },
     onSuccess: (data: Battle) => {
       setCurrentBattleId(data.id);
-      queryClient.invalidateQueries({ queryKey: ["/api/battles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/battle"] });
     },
   });
 
@@ -47,12 +47,12 @@ export function useBattleState(battleId?: string) {
   const updateStateMutation = useMutation({
     mutationFn: async (updates: Partial<BattleState>) => {
       if (!currentBattleId) throw new Error("No active battle");
-      const res = await apiRequest("PATCH", `/api/battles/${currentBattleId}/state`, updates);
+      const res = await apiRequest("PATCH", `/api/battle/${currentBattleId}/state`, updates);
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: ["/api/battles", currentBattleId, "state"] 
+        queryKey: ["/api/battle", currentBattleId, "state"] 
       });
     },
   });
@@ -79,7 +79,7 @@ export function useBattleState(battleId?: string) {
       });
 
       try {
-        const res = await fetch(`/api/battles/${currentBattleId}/rounds`, {
+        const res = await fetch(`/api/battle/${currentBattleId}/round`, {
           method: "POST",
           body: formData,
           credentials: "include",
@@ -112,13 +112,13 @@ export function useBattleState(battleId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: ["/api/battles", currentBattleId] 
+        queryKey: ["/api/battle", currentBattleId] 
       });
       queryClient.invalidateQueries({ 
-        queryKey: ["/api/battles", currentBattleId, "state"] 
+        queryKey: ["/api/battle", currentBattleId, "state"] 
       });
       queryClient.invalidateQueries({ 
-        queryKey: ["/api/battles", currentBattleId, "rounds"] 
+        queryKey: ["/api/battle", currentBattleId, "rounds"] 
       });
     },
     onError: (error) => {
