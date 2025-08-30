@@ -51,7 +51,7 @@ function PaymentForm({ tier, paymentMethod, purchaseType, battleCount }: Payment
         });
       } else {
         const successMessage = purchaseType === 'battles' 
-          ? "Battle pack purchased! 4 battles added to your account."
+          ? "Battle pack purchased! 10 battles added to your account."
           : `Welcome to ${tier === 'premium' ? 'Premium' : 'Pro'}! Enjoy unlimited battles.`;
         
         toast({
@@ -96,8 +96,8 @@ function PaymentForm({ tier, paymentMethod, purchaseType, battleCount }: Payment
         ) : (
           purchaseType === 'battles' ? 
             (paymentMethod === 'cashapp' ? 
-              `Buy 4 Battles with Cash App ($ILLAITHEGPTSTORE) - $1.00` :
-              `Buy 4 Battles for $1.00`) :
+              `Buy 10 Battles with Cash App ($ILLAITHEGPTSTORE) - $1.00` :
+              `Buy 10 Battles for $1.00`) :
             (paymentMethod === 'cashapp' ? 
               `Pay with Cash App ($ILLAITHEGPTSTORE) - $${tier === 'premium' ? '9.99' : '19.99'}/month` :
               `Subscribe to ${tier === 'premium' ? 'Premium' : 'Pro'} - $${tier === 'premium' ? '9.99' : '19.99'}/month`)
@@ -146,7 +146,7 @@ export default function Subscribe() {
   const createBattlePack = useMutation({
     mutationFn: async () => {
       const response = await apiRequest('POST', '/api/purchase-battles', {
-        battleCount: 4,
+        battleCount: 10,
         paymentMethod
       });
       return response.json();
@@ -237,7 +237,7 @@ export default function Subscribe() {
                 data-testid="button-select-battles"
               >
                 <Zap className="mr-2 h-4 w-4" />
-                4 Battles for $1
+                10 Battles for $1
               </Button>
             </div>
           </div>
@@ -278,7 +278,7 @@ export default function Subscribe() {
               <Card className="bg-gray-800 border-amber-500/50 hover:border-amber-400 transition-colors max-w-md relative">
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <span className="bg-amber-500 text-black px-3 py-1 rounded-full text-sm font-semibold">
-                    25¢ PER BATTLE
+                    10¢ PER BATTLE
                   </span>
                 </div>
                 <CardHeader className="text-center">
@@ -290,14 +290,14 @@ export default function Subscribe() {
                     Quick battles, no commitment
                   </CardDescription>
                   <div className="text-4xl font-bold text-white">
-                    $1.00<span className="text-lg text-gray-400"> for 4 battles</span>
+                    $1.00<span className="text-lg text-gray-400"> for 10 battles</span>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <ul className="space-y-2 text-gray-300 text-center">
-                    <li>⚡ 4 instant battles</li>
+                    <li>⚡ 10 instant battles</li>
                     <li>🤖 All AI characters</li>
-                    <li>🎯 25¢ per battle</li>
+                    <li>🎯 10¢ per battle</li>
                     <li>💳 One-time payment</li>
                     <li>🚀 No subscription needed</li>
                   </ul>
@@ -313,7 +313,7 @@ export default function Subscribe() {
                         Setting up...
                       </>
                     ) : (
-                      'Buy 4 Battles for $1'
+                      'Buy 10 Battles for $1'
                     )}
                   </Button>
                 </CardContent>

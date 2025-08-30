@@ -73,10 +73,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/purchase-battles', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { battleCount = 4, paymentMethod = 'stripe' } = req.body; // Default 4 battles for $1
+      const { battleCount = 10, paymentMethod = 'stripe' } = req.body; // Default 10 battles for $1
       
-      if (battleCount !== 4) {
-        return res.status(400).json({ message: 'Only 4-battle packages available' });
+      if (battleCount !== 10) {
+        return res.status(400).json({ message: 'Only 10-battle packages available' });
       }
 
       let user = await storage.getUser(userId);
@@ -102,7 +102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.log(`💰 Creating battle purchase: 4 battles for $1.00`);
+      console.log(`💰 Creating battle purchase: 10 battles for $1.00`);
       
       // Configure payment method types
       const paymentMethodTypes: ('card' | 'cashapp')[] = paymentMethod === 'cashapp' 
@@ -122,8 +122,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...(paymentMethod === 'cashapp' && { cashapp_account: '$ILLAITHEGPTSTORE' })
         },
         description: paymentMethod === 'cashapp' 
-          ? `4 Battle Pack ($0.25 per battle) - Pay to $ILLAITHEGPTSTORE`
-          : `4 Battle Pack ($0.25 per battle)`,
+          ? `10 Battle Pack ($0.10 per battle) - Pay to $ILLAITHEGPTSTORE`
+          : `10 Battle Pack ($0.10 per battle)`,
       });
 
       console.log(`✅ Payment intent created: ${paymentIntent.id}`);
@@ -133,7 +133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentIntentId: paymentIntent.id,
         clientSecret: paymentIntent.client_secret,
         amount: 100,
-        battleCount: 4
+        battleCount: 10
       });
     } catch (error: any) {
       console.error('Battle purchase creation error:', error);
