@@ -45,6 +45,7 @@ export interface IStorage {
   updateBattleScore(battleId: string, userScore: number, aiScore: number): Promise<void>;
   completeBattle(battleId: string): Promise<void>;
   updateUserStripeInfo(userId: string, data: { stripeCustomerId?: string; stripeSubscriptionId?: string }): Promise<User>;
+  addUserBattles(userId: string, battleCount: number): Promise<User | null>;
 
   // Battle round processing
   addBattleRound(battleId: string, round: any): Promise<void>;
@@ -245,6 +246,26 @@ export class DatabaseStorage implements IStorage {
       .update(battles)
       .set({ userScore, aiScore })
       .where(eq(battles.id, battleId));
+  }
+
+  async addUserBattles(userId: string, battleCount: number): Promise<User | null> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const updatedBattles = (user.battlesRemaining || 0) + battleCount;
+    
+    const [updatedUser] = await db
+      .update(users)
+      .set({
+        battlesRemaining: updatedBattles,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    return updatedUser || null;
   }
 
   async updateUserStripeInfo(userId: string, data: { stripeCustomerId?: string; stripeSubscriptionId?: string }): Promise<User> {

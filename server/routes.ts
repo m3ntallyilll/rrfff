@@ -69,6 +69,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // One-time battle purchase
+  app.post('/api/purchase-battles', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { battleCount = 4, paymentMethod = 'stripe' } = req.body; // Default 4 battles for $1
+      
+      if (battleCount !== 4) {
+        return res.status(400).json({ message: 'Only 4-battle packages available' });
+      }
+
+      let user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      if (!user.email) {
+        throw new Error('No user email on file');
+      }
+
+      let customer;
+      if (user.stripeCustomerId) {
+        customer = await stripe.customers.retrieve(user.stripeCustomerId);
+      } else {
+        customer = await stripe.customers.create({
+          email: user.email,
+          name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+        });
+        
+        user = await storage.updateUserStripeInfo(userId, { 
+          stripeCustomerId: customer.id 
+        });
+      }
+
+      console.log(`💰 Creating battle purchase: 4 battles for $1.00`);
+      
+      // Configure payment method types
+      const paymentMethodTypes: ('card' | 'cashapp')[] = paymentMethod === 'cashapp' 
+        ? ['cashapp'] 
+        : ['card', 'cashapp'];
+
+      // Create one-time payment intent for $1.00 (100 cents)
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: 100, // $1.00 in cents
+        currency: 'usd',
+        customer: customer.id,
+        payment_method_types: paymentMethodTypes,
+        metadata: {
+          userId: userId,
+          battleCount: battleCount,
+          paymentMethod: paymentMethod,
+          ...(paymentMethod === 'cashapp' && { cashapp_account: '$ILLAITHEGPTSTORE' })
+        },
+        description: paymentMethod === 'cashapp' 
+          ? `4 Battle Pack ($0.25 per battle) - Pay to $ILLAITHEGPTSTORE`
+          : `4 Battle Pack ($0.25 per battle)`,
+      });
+
+      console.log(`✅ Payment intent created: ${paymentIntent.id}`);
+      console.log(`🔑 Client secret: ${!!paymentIntent.client_secret}`);
+
+      res.json({
+        paymentIntentId: paymentIntent.id,
+        clientSecret: paymentIntent.client_secret,
+        amount: 100,
+        battleCount: 4
+      });
+    } catch (error: any) {
+      console.error('Battle purchase creation error:', error);
+      return res.status(400).json({ error: { message: error.message } });
+    }
+  });
+
   // Stripe payment routes
   app.post('/api/create-subscription', isAuthenticated, async (req: any, res) => {
     try {
@@ -127,7 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔧 Creating subscription with price ID: ${priceId}`);
       
       // Configure payment method types based on selection
-      const paymentMethodTypes = paymentMethod === 'cashapp' 
+      const paymentMethodTypes: ('card' | 'cashapp')[] = paymentMethod === 'cashapp' 
         ? ['cashapp'] 
         : ['card', 'cashapp']; // Allow both card and CashApp for Stripe
 
@@ -186,7 +258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Stripe webhook for subscription updates
+  // Stripe webhook for payment updates (subscriptions + one-time purchases)
   app.post('/api/stripe-webhook', async (req, res) => {
     let event;
 
@@ -203,6 +275,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     // Handle the event
     switch (event.type) {
+      case 'payment_intent.succeeded':
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        
+        try {
+          // Check if this is a battle pack purchase
+          if (paymentIntent.metadata?.battleCount) {
+            const userId = paymentIntent.metadata.userId;
+            const battleCount = parseInt(paymentIntent.metadata.battleCount);
+            
+            if (userId && battleCount) {
+              // Add battles to user account
+              await storage.addUserBattles(userId, battleCount);
+              console.log(`✅ Added ${battleCount} battles to user ${userId} (Payment: ${paymentIntent.id})`);
+            }
+          }
+        } catch (error) {
+          console.error('Error processing battle pack purchase:', error);
+        }
+        break;
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':
         const subscription = event.data.object as Stripe.Subscription;

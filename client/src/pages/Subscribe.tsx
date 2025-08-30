@@ -6,19 +6,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Zap } from 'lucide-react';
 
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
   throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
 }
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-interface SubscriptionFormProps {
-  tier: 'premium' | 'pro';
+interface PaymentFormProps {
+  tier?: 'premium' | 'pro';
   paymentMethod: 'stripe' | 'cashapp';
+  purchaseType: 'subscription' | 'battles';
+  battleCount?: number;
 }
 
-function SubscriptionForm({ tier, paymentMethod }: SubscriptionFormProps) {
+function PaymentForm({ tier, paymentMethod, purchaseType, battleCount }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -48,9 +50,13 @@ function SubscriptionForm({ tier, paymentMethod }: SubscriptionFormProps) {
           variant: "destructive",
         });
       } else {
+        const successMessage = purchaseType === 'battles' 
+          ? "Battle pack purchased! 4 battles added to your account."
+          : `Welcome to ${tier === 'premium' ? 'Premium' : 'Pro'}! Enjoy unlimited battles.`;
+        
         toast({
           title: "Payment Successful",
-          description: `Welcome to ${tier === 'premium' ? 'Premium' : 'Pro'}! Enjoy unlimited battles.`,
+          description: successMessage,
         });
       }
     } catch (err) {
@@ -88,9 +94,13 @@ function SubscriptionForm({ tier, paymentMethod }: SubscriptionFormProps) {
             Processing...
           </>
         ) : (
-          paymentMethod === 'cashapp' ? 
-            `Pay with Cash App ($ILLAITHEGPTSTORE) - $${tier === 'premium' ? '9.99' : '19.99'}/month` :
-            `Subscribe to ${tier === 'premium' ? 'Premium' : 'Pro'} - $${tier === 'premium' ? '9.99' : '19.99'}/month`
+          purchaseType === 'battles' ? 
+            (paymentMethod === 'cashapp' ? 
+              `Buy 4 Battles with Cash App ($ILLAITHEGPTSTORE) - $1.00` :
+              `Buy 4 Battles for $1.00`) :
+            (paymentMethod === 'cashapp' ? 
+              `Pay with Cash App ($ILLAITHEGPTSTORE) - $${tier === 'premium' ? '9.99' : '19.99'}/month` :
+              `Subscribe to ${tier === 'premium' ? 'Premium' : 'Pro'} - $${tier === 'premium' ? '9.99' : '19.99'}/month`)
         )}
       </Button>
     </form>
@@ -100,6 +110,7 @@ function SubscriptionForm({ tier, paymentMethod }: SubscriptionFormProps) {
 export default function Subscribe() {
   const [tier, setTier] = useState<'premium' | 'pro'>('premium');
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'cashapp'>('stripe');
+  const [purchaseType, setPurchaseType] = useState<'subscription' | 'battles'>('subscription');
   const [clientSecret, setClientSecret] = useState<string>('');
   const { toast } = useToast();
 
@@ -132,10 +143,58 @@ export default function Subscribe() {
     },
   });
 
+  const createBattlePack = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/purchase-battles', {
+        battleCount: 4,
+        paymentMethod
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      console.log('🎉 Battle pack API response:', data);
+      console.log('🔑 Client secret received:', !!data.clientSecret);
+      setClientSecret(data.clientSecret);
+      toast({
+        title: "Payment Ready",
+        description: "Please complete your battle pack purchase below.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Purchase Error",
+        description: error.message || "Failed to initiate battle pack purchase. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleTierSelect = (selectedTier: 'premium' | 'pro') => {
     setTier(selectedTier);
     setClientSecret('');
-    createSubscription.mutate({ tier: selectedTier, paymentMethod });
+    if (purchaseType === 'subscription') {
+      createSubscription.mutate({ tier: selectedTier, paymentMethod });
+    }
+  };
+
+  const handlePurchaseTypeChange = (type: 'subscription' | 'battles') => {
+    setPurchaseType(type);
+    setClientSecret('');
+    if (type === 'battles') {
+      createBattlePack.mutate();
+    } else {
+      createSubscription.mutate({ tier, paymentMethod });
+    }
+  };
+
+  const handlePaymentMethodChange = (method: 'stripe' | 'cashapp') => {
+    setPaymentMethod(method);
+    setClientSecret('');
+    if (purchaseType === 'battles') {
+      createBattlePack.mutate();
+    } else {
+      createSubscription.mutate({ tier, paymentMethod: method });
+    }
   };
 
   if (!clientSecret) {
@@ -151,13 +210,45 @@ export default function Subscribe() {
             </p>
           </div>
 
+          {/* Purchase Type Selection */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-semibold text-white mb-4 text-center">Choose Purchase Type</h2>
+            <div className="flex justify-center gap-4">
+              <Button
+                variant={purchaseType === 'subscription' ? 'default' : 'outline'}
+                onClick={() => handlePurchaseTypeChange('subscription')}
+                className={`px-6 py-3 ${
+                  purchaseType === 'subscription'
+                    ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                    : 'border-purple-500 text-purple-400 hover:bg-purple-600/20'
+                }`}
+                data-testid="button-select-subscription"
+              >
+                📅 Monthly Subscription
+              </Button>
+              <Button
+                variant={purchaseType === 'battles' ? 'default' : 'outline'}
+                onClick={() => handlePurchaseTypeChange('battles')}
+                className={`px-6 py-3 ${
+                  purchaseType === 'battles'
+                    ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                    : 'border-amber-500 text-amber-400 hover:bg-amber-600/20'
+                }`}
+                data-testid="button-select-battles"
+              >
+                <Zap className="mr-2 h-4 w-4" />
+                4 Battles for $1
+              </Button>
+            </div>
+          </div>
+
           {/* Payment Method Selection */}
           <div className="mb-8">
             <h2 className="text-2xl font-semibold text-white mb-4 text-center">Choose Payment Method</h2>
             <div className="flex justify-center gap-4">
               <Button
                 variant={paymentMethod === 'stripe' ? 'default' : 'outline'}
-                onClick={() => setPaymentMethod('stripe')}
+                onClick={() => handlePaymentMethodChange('stripe')}
                 className={`px-6 py-3 ${
                   paymentMethod === 'stripe'
                     ? 'bg-purple-600 hover:bg-purple-700 text-white'
@@ -169,7 +260,7 @@ export default function Subscribe() {
               </Button>
               <Button
                 variant={paymentMethod === 'cashapp' ? 'default' : 'outline'}
-                onClick={() => setPaymentMethod('cashapp')}
+                onClick={() => handlePaymentMethodChange('cashapp')}
                 className={`px-6 py-3 ${
                   paymentMethod === 'cashapp'
                     ? 'bg-green-600 hover:bg-green-700 text-white'
@@ -182,7 +273,54 @@ export default function Subscribe() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          {purchaseType === 'battles' ? (
+            <div className="flex justify-center">
+              <Card className="bg-gray-800 border-amber-500/50 hover:border-amber-400 transition-colors max-w-md relative">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-amber-500 text-black px-3 py-1 rounded-full text-sm font-semibold">
+                    25¢ PER BATTLE
+                  </span>
+                </div>
+                <CardHeader className="text-center">
+                  <CardTitle className="text-amber-400 text-2xl flex items-center justify-center">
+                    <Zap className="mr-2 h-6 w-6" />
+                    Battle Pack
+                  </CardTitle>
+                  <CardDescription className="text-gray-300">
+                    Quick battles, no commitment
+                  </CardDescription>
+                  <div className="text-4xl font-bold text-white">
+                    $1.00<span className="text-lg text-gray-400"> for 4 battles</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <ul className="space-y-2 text-gray-300 text-center">
+                    <li>⚡ 4 instant battles</li>
+                    <li>🤖 All AI characters</li>
+                    <li>🎯 25¢ per battle</li>
+                    <li>💳 One-time payment</li>
+                    <li>🚀 No subscription needed</li>
+                  </ul>
+                  <Button
+                    onClick={() => createBattlePack.mutate()}
+                    disabled={createBattlePack.isPending}
+                    className="w-full bg-amber-600 hover:bg-amber-700"
+                    data-testid="button-purchase-battles"
+                  >
+                    {createBattlePack.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Setting up...
+                      </>
+                    ) : (
+                      'Buy 4 Battles for $1'
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
             {/* Premium Plan */}
             <Card className="bg-gray-800 border-purple-500/50 hover:border-purple-400 transition-colors">
               <CardHeader>
@@ -263,7 +401,8 @@ export default function Subscribe() {
                 </Button>
               </CardContent>
             </Card>
-          </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -303,7 +442,7 @@ export default function Subscribe() {
         </CardHeader>
         <CardContent>
           <Elements stripe={stripePromise} options={stripeOptions}>
-            <SubscriptionForm tier={tier} paymentMethod={paymentMethod} />
+            <PaymentForm tier={tier} paymentMethod={paymentMethod} purchaseType={purchaseType} battleCount={purchaseType === 'battles' ? 4 : undefined} />
           </Elements>
         </CardContent>
       </Card>
