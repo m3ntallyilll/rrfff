@@ -300,7 +300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stripe webhook for payment updates (subscriptions + one-time purchases)
-  app.post('/api/stripe-webhook', async (req, res) => {
+  app.post('/api/stripe-webhook', express.raw({type: 'application/json'}), async (req, res) => {
     let event;
 
     try {
@@ -507,11 +507,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Stripe webhook for payment success (simplified - remove for now to fix errors)
-  app.post("/api/stripe/webhook", async (req, res) => {
-    // Webhook handling disabled temporarily to fix auth issues
-    res.status(200).json({ received: true });
-  });
+  
 
   // Payment success redirect endpoint
   app.get("/api/payment/success", isAuthenticated, async (req: any, res) => {
