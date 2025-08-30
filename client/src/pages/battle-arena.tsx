@@ -156,13 +156,21 @@ export default function BattleArena() {
         if (result.audioUrl && result.audioUrl.length > 100) {
           console.log('🔥 Battle round complete - triggering auto-play');
           console.log('🔥 Battle state before update:', battleState);
+          
+          // Set isPlayingAudio to trigger avatar animation and auto-play
           updateBattleState({ isPlayingAudio: true });
           
-          // Force avatar to start speaking immediately
+          // Additional trigger after a short delay to ensure it sticks
           setTimeout(() => {
-            console.log('🔥 Setting isPlayingAudio to true again');
+            console.log('🔥 Setting isPlayingAudio to true again to ensure AI speaks back');
             updateBattleState({ isPlayingAudio: true });
-          }, 100);
+          }, 200);
+          
+          // Reset speaking state after reasonable time to allow for next round
+          setTimeout(() => {
+            console.log('🔄 Resetting battle state for next round');
+            updateBattleState({ isPlayingAudio: false, isAIResponding: false });
+          }, 8000); // 8 seconds should be enough for most AI responses
         } else {
           console.log('⚠️ No valid audio URL received:', result.audioUrl?.substring(0, 50));
         }
