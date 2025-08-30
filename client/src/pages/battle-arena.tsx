@@ -126,6 +126,12 @@ export default function BattleArena() {
       setIsTranscribing(false);
       updateBattleState({ isAIResponding: true });
 
+      console.log('🎯 SHERLOCK: About to submit round with current state:', {
+        liveTranscription: liveTranscription.length,
+        aiResponse: aiResponse.length,
+        battleState: battleState?.isAIResponding
+      });
+
       const result = await submitRound({ audio: recording.blob });
       
       if (result) {
@@ -144,8 +150,15 @@ export default function BattleArena() {
         }
         
         if (result.aiResponse) {
-          console.log('🤖 Setting AI response:', result.aiResponse.substring(0, 100) + '...');
-          setAiResponse(result.aiResponse);
+          console.log('🤖 SHERLOCK: Setting AI response:', result.aiResponse.substring(0, 100) + '...');
+          console.log('🎯 SHERLOCK: Previous aiResponse state:', aiResponse.length, 'chars');
+          
+          // CRITICAL FIX: Force component re-render by ensuring state change is detected
+          setAiResponse(""); // Clear first
+          setTimeout(() => {
+            setAiResponse(result.aiResponse);
+            console.log('🎯 SHERLOCK: AI response set in state:', result.aiResponse.length, 'chars');
+          }, 10);
         } else {
           console.log('⚠️ No AI response in result');
         }
