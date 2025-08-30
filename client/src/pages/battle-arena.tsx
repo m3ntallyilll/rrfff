@@ -126,12 +126,26 @@ export default function BattleArena() {
       const result = await submitRound({ audio: recording.blob });
       
       if (result) {
+        console.log('🎉 Full battle result received:', {
+          userText: result.userText?.substring(0, 50) + '...',
+          aiResponse: result.aiResponse?.substring(0, 50) + '...',
+          audioUrl: result.audioUrl?.substring(0, 50) + '...',
+          userScore: result.userScore,
+          aiScore: result.aiScore
+        });
+        
         // Update transcription if we got a better one from full processing
         if (result.userText && result.userText !== liveTranscription) {
+          console.log('🔄 Updating transcription:', result.userText);
           setLiveTranscription(result.userText);
         }
         
-        setAiResponse(result.aiResponse || "AI response generated");
+        if (result.aiResponse) {
+          console.log('🤖 Setting AI response:', result.aiResponse.substring(0, 100) + '...');
+          setAiResponse(result.aiResponse);
+        } else {
+          console.log('⚠️ No AI response in result');
+        }
         
         console.log('🎵 Setting current AI audio URL:', result.audioUrl?.substring(0, 100) + '...');
         console.log('🎵 Audio URL length:', result.audioUrl?.length || 0);

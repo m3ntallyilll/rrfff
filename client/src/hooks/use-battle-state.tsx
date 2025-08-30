@@ -87,11 +87,21 @@ export function useBattleState(battleId?: string) {
 
         if (!res.ok) {
           const errorText = await res.text();
-          console.error("Battle round failed:", res.status, errorText);
+          console.error("❌ Battle round failed:", res.status, errorText);
           throw new Error(`Battle round failed: ${res.statusText}`);
         }
 
-        return res.json();
+        const result = await res.json();
+        console.log("🎉 Battle round response received:", {
+          hasUserText: !!result.userText,
+          hasAiResponse: !!result.aiResponse,
+          hasAudioUrl: !!result.audioUrl,
+          userScore: result.userScore,
+          aiScore: result.aiScore,
+          keys: Object.keys(result)
+        });
+        
+        return result;
       } catch (error) {
         console.error("Battle round processing error:", error);
         if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
