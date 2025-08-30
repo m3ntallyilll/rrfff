@@ -158,13 +158,22 @@ export default function BattleArena() {
           console.log('🔥 Battle state before update:', battleState);
           updateBattleState({ isPlayingAudio: true });
           
-          // Force avatar to start speaking immediately
+          // Force avatar to start speaking immediately and ensure audio plays
           setTimeout(() => {
             console.log('🔥 Setting isPlayingAudio to true again');
             updateBattleState({ isPlayingAudio: true });
+            // Force audio element to play if it exists
+            const audioElements = document.querySelectorAll('audio');
+            audioElements.forEach(audio => {
+              if (audio.src.includes('data:audio') || audio.src.includes('blob:')) {
+                console.log('🎵 Force playing audio element:', audio.src.substring(0, 50));
+                audio.play().catch(e => console.log('🔊 Auto-play blocked:', e.message));
+              }
+            });
           }, 100);
         } else {
           console.log('⚠️ No valid audio URL received:', result.audioUrl?.substring(0, 50));
+          console.log('⚠️ This might be a TTS failure - check AI response text display');
         }
         
         toast({
@@ -524,6 +533,36 @@ export default function BattleArena() {
                   updateBattleState({ isPlayingAudio: isPlaying })
                 }
               />
+
+              {/* Manual AI Response Trigger */}
+              {aiResponse && currentAiAudio && (
+                <Card className="bg-battle-gray border-gray-700">
+                  <CardContent className="p-4">
+                    <Button
+                      onClick={() => {
+                        console.log('🎵 Manual AI response trigger');
+                        updateBattleState({ isPlayingAudio: true });
+                      }}
+                      className="w-full bg-gradient-to-r from-accent-red to-red-600 hover:from-red-500 hover:to-red-700"
+                      data-testid="button-play-ai-response"
+                    >
+                      <Play className="mr-2" size={16} />
+                      Play AI Response
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {/* Audio Debug Info */}
+              {aiResponse && !currentAiAudio && (
+                <Card className="bg-battle-gray border-gray-700">
+                  <CardContent className="p-4">
+                    <div className="text-sm text-yellow-400">
+                      ⚠️ AI responded but audio failed to generate
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Battle History */}
               <Card className="bg-battle-gray border-gray-700">

@@ -173,9 +173,22 @@ export function BattleAvatar({
             audioUrl={audioUrl}
             autoPlay={isAISpeaking}
             volume={1.0}
-            onPlay={() => console.log('🔊 TTS Audio started')}
-            onEnded={() => console.log('🔇 TTS Audio ended')}
+            onPlay={() => {
+              console.log('🔊 TTS Audio started');
+              setIsCurrentlySpeaking(true);
+            }}
+            onEnded={() => {
+              console.log('🔇 TTS Audio ended');
+              setIsCurrentlySpeaking(false);
+            }}
           />
+          
+          {/* Debug Audio Info */}
+          {audioUrl && (
+            <div className="absolute top-2 right-2 text-xs text-white bg-black/50 p-1 rounded">
+              Audio: {audioUrl.length > 100 ? '✅' : '❌'} ({audioUrl.length} chars)
+            </div>
+          )}
           
           {/* Subtle visual feedback when speaking */}
           {isAISpeaking && (
