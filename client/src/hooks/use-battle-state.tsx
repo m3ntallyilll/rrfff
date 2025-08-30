@@ -32,6 +32,7 @@ export function useBattleState(battleId?: string) {
       aiCharacterId?: string;
       lyricComplexity?: number;
       styleIntensity?: number;
+      voiceSpeed?: number;
     }) => {
       const res = await apiRequest("POST", "/api/battles", battleData);
       return res.json();
@@ -120,9 +121,10 @@ export function useBattleState(battleId?: string) {
     profanityFilter: boolean = true,
     aiCharacterId?: string,
     lyricComplexity?: number,
-    styleIntensity?: number
+    styleIntensity?: number,
+    voiceSpeed?: number
   ) => {
-    createBattleMutation.mutate({ difficulty, profanityFilter, aiCharacterId, lyricComplexity, styleIntensity });
+    createBattleMutation.mutate({ difficulty, profanityFilter, aiCharacterId, lyricComplexity, styleIntensity, voiceSpeed });
   };
 
   const updateBattleState = (updates: Partial<BattleState>) => {

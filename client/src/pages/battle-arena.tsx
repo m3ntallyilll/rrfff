@@ -23,6 +23,17 @@ export default function BattleArena() {
   const [profanityFilter, setProfanityFilter] = useState(false); // Default to uncensored for authentic battle rap
   const [lyricComplexity, setLyricComplexity] = useState(50); // 0-100 complexity slider
   const [styleIntensity, setStyleIntensity] = useState(50); // 0-100 style intensity slider
+  const [advancedSettings, setAdvancedSettings] = useState({
+    aiAggressiveness: 75,
+    responseTime: 3000,
+    analysisDepth: "enhanced" as const,
+    voiceSpeed: 1.0,
+    battleLength: 5
+  });
+
+  const handleAdvancedSettingsChange = (newSettings: typeof advancedSettings) => {
+    setAdvancedSettings(newSettings);
+  };
   const [battleTimer, setBattleTimer] = useState(105); // 1:45
   const [liveTranscription, setLiveTranscription] = useState("");
   const [aiResponse, setAiResponse] = useState("");
@@ -167,7 +178,7 @@ export default function BattleArena() {
     setSelectedCharacter(character);
     setShowCharacterSelector(false);
     // Start battle with selected character and complexity settings
-    startNewBattle(difficulty, profanityFilter, character.id, lyricComplexity, styleIntensity);
+    startNewBattle(difficulty, profanityFilter, character.id, lyricComplexity, styleIntensity, advancedSettings.voiceSpeed);
   };
 
   const handleDifficultyChange = (value: string) => {

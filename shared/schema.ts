@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, index } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, real, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from 'drizzle-orm';
@@ -27,6 +27,7 @@ export const battles = pgTable("battles", {
   aiVoiceId: text("ai_voice_id"),
   lyricComplexity: integer("lyric_complexity").default(50), // 0-100 complexity level
   styleIntensity: integer("style_intensity").default(50), // 0-100 style intensity level
+  voiceSpeed: real("voice_speed").default(1.0), // 0.5-2.0 voice speed multiplier
   rounds: jsonb("rounds").$type<Array<{
     id: string;
     battleId: string;

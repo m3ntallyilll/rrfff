@@ -203,6 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profanityFilter,
         lyricComplexity,
         styleIntensity,
+        voiceSpeed,
         aiCharacterName,
         aiCharacterId
       } = req.body;
@@ -223,6 +224,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (styleIntensity && (typeof styleIntensity !== 'number' || styleIntensity < 0 || styleIntensity > 100)) {
         return res.status(400).json({ message: "Style intensity must be between 0-100" });
+      }
+      
+      if (voiceSpeed && (typeof voiceSpeed !== 'number' || voiceSpeed < 0.5 || voiceSpeed > 2.0)) {
+        return res.status(400).json({ message: "Voice speed must be between 0.5-2.0" });
       }
       
       // SECURITY: Validate AI character selection
@@ -264,6 +269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profanityFilter: profanityFilter !== undefined ? profanityFilter : false,
         lyricComplexity: lyricComplexity || 50,
         styleIntensity: styleIntensity || 50,
+        voiceSpeed: voiceSpeed || 1.0,
         aiCharacterName: sanitizedCharacterName || 'MC Venom',
         aiCharacterId: aiCharacterId || 'venom',
         userScore: 0,
@@ -637,7 +643,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           characterName: character?.name || `MC ${characterId}`,
           gender: character?.gender || 'male',
           voiceStyle: (battle.styleIntensity || 50) > 70 ? 'aggressive' : 
-                     (battle.styleIntensity || 50) > 40 ? 'confident' : 'smooth'
+                     (battle.styleIntensity || 50) > 40 ? 'confident' : 'smooth',
+          speedMultiplier: battle.voiceSpeed || 1.0
         });
         
         // Convert to expected format
