@@ -60,11 +60,10 @@ export function useBattleState(battleId?: string) {
       return res.json();
     },
     onSuccess: () => {
-      // Don't refetch - let the UI stay stable
-      // queryClient.refetchQueries({ 
-      //   queryKey: ["/api/battle", currentBattleId, "state"],
-      //   exact: true 
-      // });
+      // Refresh battle state to show updated scores
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/battle", currentBattleId, "state"] 
+      });
     },
   });
 
@@ -123,10 +122,15 @@ export function useBattleState(battleId?: string) {
     },
     onSuccess: (data) => {
       console.log('🎯 Battle round completed successfully:', data);
-      // Update local cache with the new data without triggering refetches
+      // Update local cache with the new data and refresh queries to show updated scores
       if (data && currentBattleId) {
         queryClient.setQueryData(["/api/battle", currentBattleId, "rounds"], data.rounds);
         queryClient.setQueryData(["/api/battle", currentBattleId, "state"], data.battleState);
+        
+        // Force refresh of battle state to ensure scores display
+        queryClient.invalidateQueries({ 
+          queryKey: ["/api/battle", currentBattleId, "state"] 
+        });
       }
     },
     onError: (error) => {
