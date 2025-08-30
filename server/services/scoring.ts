@@ -69,21 +69,21 @@ export class ScoringService {
     
     // COMPREHENSIVE ANALYSIS based on actual rap battle criteria
     
-    // 1. BASIC REQUIREMENTS - severe penalties for minimal effort
-    if (words.length <= 3) {
-      console.log(`❌ Too few words (${words.length}) - major penalty`);
-      return 5; // Maximum 5/100 for lazy attempts
+    // 1. BASIC REQUIREMENTS - reasonable penalties for minimal effort
+    if (words.length <= 1) {
+      console.log(`❌ Too few words (${words.length}) - penalty applied`);
+      return 10; // Still give some credit for trying
     }
     
     const lines = text.split('\n').filter(line => line.trim());
-    if (lines.length <= 1) {
-      console.log(`❌ Only ${lines.length} line(s) - major penalty`);
-      return Math.max(5, words.length * 2); // Cap at very low score
-    }
     
-    // 2. LEXICAL DIVERSITY (vocabulary richness)
+    // Small bonus for more content, but don't punish short verses too harshly
+    let contentBonus = Math.min(15, words.length * 2);
+    if (words.length >= 8) contentBonus = 15; // Full bonus for 8+ words
+    
+    // 2. LEXICAL DIVERSITY (vocabulary richness) - More generous scoring
     const uniqueWords = new Set(words);
-    const lexicalDiversity = Math.min(15, (uniqueWords.size / words.length) * 40);
+    const lexicalDiversity = Math.min(15, Math.max(5, (uniqueWords.size / words.length) * 30 + 5));
     
     // 3. ADVANCED WORDPLAY DETECTION
     const wordplayScore = this.detectAdvancedWordplay(text);
@@ -104,11 +104,11 @@ export class ScoringService {
     const originalityScore = this.calculateOriginality(text);
     
     const totalScore = Math.round(
-      lexicalDiversity + wordplayScore + figurativeScore + 
+      contentBonus + lexicalDiversity + wordplayScore + figurativeScore + 
       punchlineScore + homonymScore + rhythmScore + originalityScore
     );
     
-    console.log(`🎭 Creativity breakdown: Vocab ${lexicalDiversity}/15, Wordplay ${wordplayScore}/20, Figurative ${figurativeScore}/15, Punchlines ${punchlineScore}/15, Homonyms ${homonymScore}/10, Rhythm ${rhythmScore}/10, Original ${originalityScore}/15`);
+    console.log(`🎭 Creativity breakdown: Content ${contentBonus}/15, Vocab ${lexicalDiversity}/15, Wordplay ${wordplayScore}/20, Figurative ${figurativeScore}/15, Punchlines ${punchlineScore}/50, Homonyms ${homonymScore}/10, Rhythm ${rhythmScore}/10, Original ${originalityScore}/15`);
     
     return Math.min(100, totalScore);
   }
@@ -621,14 +621,42 @@ export class ScoringService {
   }
 
   private wordsRhyme(word1: string, word2: string): boolean {
-    if (word1.length < 2 || word2.length < 2) return false;
+    if (word1.length < 1 || word2.length < 1 || word1 === word2) return false;
     
-    // Simple rhyme detection - check if last 2-3 characters match
-    const ending1 = word1.slice(-3);
-    const ending2 = word2.slice(-3);
+    // Enhanced rhyme detection
+    const clean1 = word1.toLowerCase().replace(/[^a-z]/g, '');
+    const clean2 = word2.toLowerCase().replace(/[^a-z]/g, '');
     
-    return ending1 === ending2 || 
-           word1.slice(-2) === word2.slice(-2);
+    if (clean1.length < 1 || clean2.length < 1) return false;
+    
+    // Perfect rhyme detection - check various ending patterns
+    if (clean1.length >= 3 && clean2.length >= 3) {
+      if (clean1.slice(-3) === clean2.slice(-3)) return true; // 3-char endings
+    }
+    if (clean1.length >= 2 && clean2.length >= 2) {
+      if (clean1.slice(-2) === clean2.slice(-2)) return true; // 2-char endings  
+    }
+    
+    // Single letter rhymes for short words
+    if (clean1.slice(-1) === clean2.slice(-1) && (clean1.length <= 2 || clean2.length <= 2)) {
+      return true;
+    }
+    
+    // Common rhyme patterns
+    const rhymePatterns = [
+      ['yo', 'go', 'so', 'no', 'flow', 'pro', 'show', 'know'],
+      ['man', 'can', 'ran', 'plan', 'fan', 'ban'],
+      ['ay', 'day', 'way', 'say', 'play', 'stay'],
+      ['ight', 'right', 'fight', 'night', 'sight', 'might']
+    ];
+    
+    for (const pattern of rhymePatterns) {
+      if (pattern.includes(clean1) && pattern.includes(clean2)) {
+        return true;
+      }
+    }
+    
+    return false;
   }
 
   private countSyllables(text: string): number {
@@ -697,11 +725,11 @@ export class ScoringService {
     return components;
   }
   
-  private calculateDynamicWeights(components: any): any {
+  private calculateDynamicWeights(components: any): { rhyme: number; flow: number; wordplay: number; battle: number } {
     // Identify what this rapper excels at and adjust weights accordingly
     // This creates dynamic battles where different techniques shine at different times
     
-    const strengths = [];
+    const strengths: string[] = [];
     const baseWeights = {
       rhyme: 0.30,
       flow: 0.25, 
@@ -722,12 +750,14 @@ export class ScoringService {
       const reduction = 0.10 / (4 - strengths.length);
       
       strengths.forEach(strength => {
-        adjustedWeights[strength] += boost;
+        if (strength in adjustedWeights) {
+          (adjustedWeights as any)[strength] += boost;
+        }
       });
       
       Object.keys(adjustedWeights).forEach(key => {
         if (!strengths.includes(key)) {
-          adjustedWeights[key] = Math.max(0.05, adjustedWeights[key] - reduction);
+          (adjustedWeights as any)[key] = Math.max(0.05, (adjustedWeights as any)[key] - reduction);
         }
       });
     }
