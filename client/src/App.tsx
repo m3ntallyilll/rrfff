@@ -9,7 +9,7 @@ import Landing from "@/pages/Landing";
 import Home from "@/pages/Home";
 import Subscribe from "@/pages/Subscribe";
 import Blog from "@/pages/Blog";
-import NewBattleArena from "@/pages/new-battle-arena";
+import BattleArena from "@/pages/battle-arena";
 import Tournaments from "@/pages/tournaments";
 import TournamentDetail from "@/pages/tournament-detail";
 import TournamentLeaderboard from "@/pages/tournament-leaderboard";
@@ -48,17 +48,17 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/subscribe" component={Subscribe} />
           <Route path="/blog" component={Blog} />
-          <Route path="/battle" component={NewBattleArena} />
-          <Route path="/battle/:id" component={NewBattleArena} />
+          <Route path="/battle" component={BattleArena} />
+          <Route path="/battle/:id" component={BattleArena} />
           <Route path="/tournaments" component={Tournaments} />
           <Route path="/tournaments/leaderboard" component={TournamentLeaderboard} />
           <Route path="/tournaments/history" component={TournamentHistory} />
           <Route path="/tournaments/brackets" component={TournamentBrackets} />
           <Route path="/tournament/:id" component={TournamentDetail} />
-          <Route path="/tournament/:tournamentId/battle/:battleId" component={NewBattleArena} />
+          <Route path="/tournament/:tournamentId/battle/:battleId" component={BattleArena} />
           <Route path="/fine-tuning" component={FineTuning} />
           <Route path="/settings" component={Settings} />
-          <Route path="/admin" component={AdminPage} />
+          <Route path="/admin" component={<AdminPage />} />
           <Route component={NotFound} />
         </>
       )}

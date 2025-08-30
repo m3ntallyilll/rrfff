@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useStripe, useElements, PaymentElement, Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useMutation } from '@tanstack/react-query';
@@ -8,29 +8,10 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { Loader2, Zap } from 'lucide-react';
 
-const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
-
-// Initialize Stripe promise outside component to avoid recreation
-// Create a safe Stripe promise that won't cause errors
-const createStripePromise = () => {
-  console.log('🔧 Stripe Key Check:', {
-    hasKey: !!STRIPE_PUBLIC_KEY,
-    keyPrefix: STRIPE_PUBLIC_KEY?.substring(0, 6),
-    keyLength: STRIPE_PUBLIC_KEY?.length
-  });
-  
-  if (!STRIPE_PUBLIC_KEY || !STRIPE_PUBLIC_KEY.startsWith('pk_')) {
-    console.error('❌ Invalid Stripe public key:', STRIPE_PUBLIC_KEY?.substring(0, 10) + '...');
-    return Promise.resolve(null);
-  }
-  
-  return loadStripe(STRIPE_PUBLIC_KEY).catch((error) => {
-    console.error('❌ Stripe loading failed:', error);
-    return null;
-  });
-};
-
-const stripePromise = createStripePromise();
+if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
+  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
+}
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 interface PaymentFormProps {
   tier?: 'premium' | 'pro';
@@ -47,16 +28,8 @@ function PaymentForm({ tier, paymentMethod, purchaseType, battleCount }: Payment
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    console.log('🎯 Payment submission:', { stripe: !!stripe, elements: !!elements });
 
     if (!stripe || !elements) {
-      console.error('❌ Stripe not loaded properly');
-      toast({
-        title: "Payment System Error",
-        description: "Payment system is not available. Please try again later.",
-        variant: "destructive",
-      });
       return;
     }
 
@@ -451,55 +424,15 @@ export default function Subscribe() {
     }
   };
 
-  // Show Cash App payment option if Stripe is not available
-  if (!STRIPE_PUBLIC_KEY || !stripePromise) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-gray-800 border-green-500/50">
-          <CardHeader>
-            <CardTitle className="text-green-400 text-2xl text-center">
-              Cash App Payment Available
-            </CardTitle>
-            <CardDescription className="text-gray-400 text-center">
-              Card payments temporarily unavailable. Use Cash App instead.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <div className="text-white">
-              <h3 className="text-xl font-semibold mb-2">💰 Pay with Cash App</h3>
-              <p className="text-gray-300">Send payment to: <span className="font-mono text-green-400">$ILLAITHEGPTSTORE</span></p>
-            </div>
-            <div className="space-y-2">
-              <div className="bg-amber-600/20 border border-amber-500 rounded-lg p-3">
-                <span className="text-amber-400 font-semibold">⚡ 10 Battles Pack - $1.00</span>
-              </div>
-              <div className="bg-purple-600/20 border border-purple-500 rounded-lg p-3">
-                <span className="text-purple-400 font-semibold">📅 Premium Plan - $9.99/month</span>
-              </div>
-              <div className="bg-amber-600/20 border border-amber-500 rounded-lg p-3">
-                <span className="text-amber-400 font-semibold">🏆 Pro Plan - $19.99/month</span>
-              </div>
-            </div>
-            <p className="text-sm text-gray-400">
-              Include your email in the payment note for instant activation
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-gray-800 border-purple-500/50">
         <CardHeader>
           <CardTitle className="text-white text-2xl text-center">
-            Complete Your {purchaseType === 'battles' ? 'Battle Pack Purchase' : 'Subscription'}
+            Complete Your Subscription
           </CardTitle>
           <CardDescription className="text-gray-400 text-center">
-            {purchaseType === 'battles' ? 
-              '10 Battles for $1.00' : 
-              (tier === 'premium' ? 'Premium Plan - $9.99/month' : 'Pro Plan - $19.99/month')}
+            {tier === 'premium' ? 'Premium Plan - $9.99/month' : 'Pro Plan - $19.99/month'}
           </CardDescription>
           <div className="text-center mt-2">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
@@ -509,7 +442,7 @@ export default function Subscribe() {
         </CardHeader>
         <CardContent>
           <Elements stripe={stripePromise} options={stripeOptions}>
-            <PaymentForm tier={tier} paymentMethod={paymentMethod} purchaseType={purchaseType} battleCount={purchaseType === 'battles' ? 10 : undefined} />
+            <PaymentForm tier={tier} paymentMethod={paymentMethod} purchaseType={purchaseType} battleCount={purchaseType === 'battles' ? 4 : undefined} />
           </Elements>
         </CardContent>
       </Card>

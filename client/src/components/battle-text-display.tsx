@@ -25,7 +25,6 @@ export function BattleTextDisplay({
 
   // Typewriter effect for AI response
   useEffect(() => {
-    
     // Show AI response immediately when available, regardless of isAIGenerating state
     if (aiResponse && aiResponse.trim()) {
       setCurrentCharIndex(0);
@@ -41,11 +40,9 @@ export function BattleTextDisplay({
           setDisplayedAIText(aiResponse.substring(0, prev + 1));
           return prev + 1;
         });
-      }, 20); // Even faster for immediate response
+      }, 30); // Faster speed for better responsiveness
 
       return () => clearInterval(interval);
-    } else {
-      setDisplayedAIText("");
     }
   }, [aiResponse]);
 

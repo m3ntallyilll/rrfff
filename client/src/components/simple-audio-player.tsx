@@ -43,7 +43,7 @@ export function SimpleAudioPlayer({
       });
 
       audio.addEventListener('ended', () => {
-        console.log('🔇 Audio playback ended - battle can continue');
+        console.log('🔇 Audio playback ended');
         onEnded?.();
       });
 

@@ -12,10 +12,6 @@ import { userTTSManager } from "./services/user-tts-manager";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { battleRateLimit, authRateLimit, paymentRateLimit } from "./middleware/security";
-import { validateBattleCreation, validatePayment, validateAPIKeys, validateAudioUpload } from "./middleware/validation";
-import { trackBattleCreated, trackBattleCompleted, trackPaymentAttempt, trackPaymentCompleted, trackUserSignup, trackUserLogin } from "./middleware/analytics";
-import { catchAsync } from "./middleware/error-handler";
 
 // Configure multer for audio uploads
 const upload = multer({
@@ -64,7 +60,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.send(sitemap);
   });
 
-  app.get('/robots.txt', (req, res: any) => {
+  app.get('/robots.txt', (req, res) => {
     const robots = `User-agent: *
 Allow: /
 Allow: /subscribe
@@ -81,8 +77,8 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
     res.send(robots);
   });
 
-  // Auth routes with rate limiting
-  app.get('/api/auth/user', authRateLimit, isAuthenticated, trackUserLogin, catchAsync(async (req: any, res) => {
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -91,7 +87,7 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
-  }));
+  });
 
   // Subscription management routes
   app.get('/api/subscription/tiers', (req, res) => {
@@ -119,7 +115,7 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
   });
 
   // One-time battle purchase
-  app.post('/api/purchase-battles', paymentRateLimit, isAuthenticated, validatePayment, trackPaymentAttempt, catchAsync(async (req: any, res) => {
+  app.post('/api/purchase-battles', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { battleCount = 10, paymentMethod = 'stripe' } = req.body; // Default 10 battles for $1
@@ -188,10 +184,10 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
       console.error('Battle purchase creation error:', error);
       return res.status(400).json({ error: { message: error.message } });
     }
-  }));
+  });
 
   // Stripe payment routes
-  app.post('/api/create-subscription', paymentRateLimit, isAuthenticated, validatePayment, trackPaymentAttempt, catchAsync(async (req: any, res) => {
+  app.post('/api/create-subscription', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { tier, paymentMethod = 'stripe' } = req.body; // 'premium' or 'pro', 'stripe' or 'cashapp'
@@ -271,7 +267,7 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
       console.error('Subscription creation error:', error);
       return res.status(400).json({ error: { message: error.message } });
     }
-  }));
+  });
 
   // Stripe webhook for payment updates (subscriptions + one-time purchases)
   app.post('/api/stripe-webhook', async (req, res) => {
@@ -328,6 +324,7 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
               subscriptionTier: tier,
               subscriptionStatus: subscription.status,
               stripeSubscriptionId: subscription.id,
+              battlesRemaining: isActive ? (tier === 'premium' ? 25 : -1) : 3,
             });
             
             console.log(`✅ Updated subscription for user ${user.id}: ${tier} (${subscription.status})`);
@@ -344,18 +341,6 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
   });
 
   // Battle management routes
-  app.get('/api/battles', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      // Get user's current active battle
-      const activeBattles = await storage.getUserActiveBattles(userId);
-      res.json(activeBattles);
-    } catch (error) {
-      console.error("Error fetching active battles:", error);
-      res.status(500).json({ message: "Failed to fetch active battles" });
-    }
-  });
-
   app.get('/api/battles/history', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -379,7 +364,7 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
   });
 
   // Create a new battle
-  app.post("/api/battle", battleRateLimit, isAuthenticated, validateBattleCreation, trackBattleCreated, catchAsync(async (req: any, res) => {
+  app.post("/api/battle", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { characterId, difficulty = "normal", customSettings = {} } = req.body;
@@ -396,7 +381,7 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
 
       const battleData = {
         userId,
-        aiCharacterId: characterId,
+        aiCharacter: characterId,
         difficulty,
         customSettings,
         status: "active" as const,
@@ -411,7 +396,7 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
       console.error("Error creating battle:", error);
       res.status(500).json({ message: error.message || "Failed to create battle" });
     }
-  }));
+  });
 
   // Get battle details
   app.get("/api/battle/:id", isAuthenticated, async (req: any, res) => {
@@ -431,7 +416,7 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
   });
 
   // Add a round to the battle
-  app.post("/api/battle/:id/round", battleRateLimit, isAuthenticated, upload.single('audio'), validateAudioUpload, catchAsync(async (req: any, res) => {
+  app.post("/api/battle/:id/round", isAuthenticated, upload.single('audio'), async (req: any, res) => {
     try {
       const { id } = req.params;
       
@@ -463,9 +448,9 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
 
       // Step 2: Generate AI response
       console.log(`🤖 Generating AI response...`);
-      const aiResponse = await groqService.generateRapResponse(
+      const aiResponse = await groqService.generateBattleVerse(
         transcription, 
-        battle.aiCharacterId || 'cypher-9000', 
+        battle.aiCharacter, 
         difficulty,
         customPrompt
       );
@@ -473,12 +458,12 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
 
       // Step 3: Get AI TTS
       console.log(`🎵 Generating AI voice...`);
-      const aiAudioPath = await userTTSManager.generateTTS(aiResponse, battle.aiCharacterId || 'cypher-9000', req.user.claims.sub);
+      const aiAudioPath = await userTTSManager.generateTTS(aiResponse, battle.aiCharacter, req.user.claims.sub);
       console.log(`✅ AI audio generated: ${!!aiAudioPath}`);
 
       // Step 4: Score the battle round
       console.log(`📊 Scoring battle round...`);
-      const scores = await scoringService.scoreRound(transcription, aiResponse);
+      const scores = await scoringService.scoreBattleRound(transcription, aiResponse);
       console.log(`✅ Scores - User: ${scores.userScore}, AI: ${scores.aiScore}`);
 
       // Step 5: Create round data
@@ -489,7 +474,7 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
         userScore: scores.userScore,
         aiScore: scores.aiScore,
         aiAudioPath: aiAudioPath || undefined,
-        analysis: scores.analysis || {},
+        analysis: scores.analysis,
         createdAt: new Date(),
       };
 
@@ -512,7 +497,7 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
       console.error("Error processing battle round:", error);
       res.status(500).json({ message: error.message || "Failed to process battle round" });
     }
-  }));
+  });
 
   // Complete a battle
   app.post("/api/battle/:id/complete", isAuthenticated, async (req: any, res) => {
@@ -681,7 +666,7 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
   });
 
   // API key management
-  app.get('/api/user/api-keys/status', isAuthenticated, catchAsync(async (req: any, res) => {
+  app.get('/api/user/api-keys/status', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const status = await storage.getUserAPIKeysStatus(userId);
@@ -690,9 +675,9 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
       console.error("Error fetching API key status:", error);
       res.status(500).json({ message: "Failed to fetch API key status" });
     }
-  }));
+  });
 
-  app.post('/api/user/api-keys', isAuthenticated, validateAPIKeys, catchAsync(async (req: any, res) => {
+  app.post('/api/user/api-keys', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { openaiApiKey, groqApiKey, preferredTtsService } = req.body;
@@ -708,7 +693,7 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
       console.error("Error updating API keys:", error);
       res.status(500).json({ message: "Failed to update API keys" });
     }
-  }));
+  });
 
   const httpServer = createServer(app);
 

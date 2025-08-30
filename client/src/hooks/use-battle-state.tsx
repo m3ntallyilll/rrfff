@@ -8,19 +8,19 @@ export function useBattleState(battleId?: string) {
 
   // Fetch battle state
   const { data: battleState, isLoading: stateLoading } = useQuery({
-    queryKey: ["/api/battle", currentBattleId, "state"],
+    queryKey: ["/api/battles", currentBattleId, "state"],
     enabled: !!currentBattleId,
   });
 
   // Fetch battle details
   const { data: battle, isLoading: battleLoading } = useQuery({
-    queryKey: ["/api/battle", currentBattleId],
+    queryKey: ["/api/battles", currentBattleId],
     enabled: !!currentBattleId,
   });
 
   // Fetch battle rounds
   const { data: rounds, isLoading: roundsLoading } = useQuery({
-    queryKey: ["/api/battle", currentBattleId, "rounds"],
+    queryKey: ["/api/battles", currentBattleId, "rounds"],
     enabled: !!currentBattleId,
   });
 
@@ -34,21 +34,12 @@ export function useBattleState(battleId?: string) {
       styleIntensity?: number;
       voiceSpeed?: number;
     }) => {
-      // Transform aiCharacterId to characterId for backend compatibility
-      const requestData = {
-        ...battleData,
-        characterId: battleData.aiCharacterId,
-      };
-      delete requestData.aiCharacterId;
-      
-      const res = await apiRequest("POST", "/api/battle", requestData);
+      const res = await apiRequest("POST", "/api/battles", battleData);
       return res.json();
     },
     onSuccess: (data: Battle) => {
-      console.log('🎯 Battle created successfully:', data.id);
       setCurrentBattleId(data.id);
-      // Don't invalidate all battle queries - only specific ones to avoid triggering reloads
-      queryClient.setQueryData(["/api/battle", data.id], data);
+      queryClient.invalidateQueries({ queryKey: ["/api/battles"] });
     },
   });
 
@@ -56,11 +47,13 @@ export function useBattleState(battleId?: string) {
   const updateStateMutation = useMutation({
     mutationFn: async (updates: Partial<BattleState>) => {
       if (!currentBattleId) throw new Error("No active battle");
-      const res = await apiRequest("PATCH", `/api/battle/${currentBattleId}/state`, updates);
+      const res = await apiRequest("PATCH", `/api/battles/${currentBattleId}/state`, updates);
       return res.json();
     },
     onSuccess: () => {
-      // Don't invalidate queries to prevent page reloads during battle
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/battles", currentBattleId, "state"] 
+      });
     },
   });
 
@@ -86,7 +79,7 @@ export function useBattleState(battleId?: string) {
       });
 
       try {
-        const res = await fetch(`/api/battle/${currentBattleId}/round`, {
+        const res = await fetch(`/api/battles/${currentBattleId}/rounds`, {
           method: "POST",
           body: formData,
           credentials: "include",
@@ -117,13 +110,16 @@ export function useBattleState(battleId?: string) {
         throw error;
       }
     },
-    onSuccess: (data) => {
-      console.log('🎯 Battle round completed successfully:', data);
-      // Update local cache with the new data without triggering reloads
-      if (data && currentBattleId) {
-        queryClient.setQueryData(["/api/battle", currentBattleId, "rounds"], data.rounds);
-        queryClient.setQueryData(["/api/battle", currentBattleId, "state"], data.battleState);
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/battles", currentBattleId] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/battles", currentBattleId, "state"] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/battles", currentBattleId, "rounds"] 
+      });
     },
     onError: (error) => {
       console.error("Battle round mutation error:", error);

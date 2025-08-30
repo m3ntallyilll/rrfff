@@ -60,8 +60,6 @@ export default function BattleArena() {
   // Fetch battle history
   const { data: battleHistory = [] } = useQuery({
     queryKey: ["/api/battles"],
-    staleTime: 5 * 60 * 1000, // Keep data fresh for 5 minutes
-    refetchOnWindowFocus: false, // Don't refetch on window focus
   });
 
   // Battle timer countdown
@@ -80,13 +78,12 @@ export default function BattleArena() {
     }
   }, [battleState?.timeRemaining, updateBattleState]);
 
-  // Initialize new battle on component mount (but don't trigger during active battles)
+  // Initialize new battle on component mount
   useEffect(() => {
-    if (!currentBattleId && !showCharacterSelector && !selectedCharacter && !isProcessing) {
-      console.log('🎯 No active battle detected, showing character selector');
+    if (!currentBattleId && !showCharacterSelector && !selectedCharacter) {
       setShowCharacterSelector(true);
     }
-  }, [currentBattleId, showCharacterSelector, selectedCharacter, isProcessing]);
+  }, [currentBattleId, showCharacterSelector, selectedCharacter]);
 
   const handleRecordingComplete = async (recording: { blob: Blob; duration: number; url: string }) => {
     try {
@@ -126,7 +123,6 @@ export default function BattleArena() {
       setIsTranscribing(false);
       updateBattleState({ isAIResponding: true });
 
-
       const result = await submitRound({ audio: recording.blob });
       
       if (result) {
@@ -145,7 +141,7 @@ export default function BattleArena() {
         }
         
         if (result.aiResponse) {
-          // Set AI response directly
+          console.log('🤖 Setting AI response:', result.aiResponse.substring(0, 100) + '...');
           setAiResponse(result.aiResponse);
         } else {
           console.log('⚠️ No AI response in result');
@@ -160,23 +156,21 @@ export default function BattleArena() {
         if (result.audioUrl && result.audioUrl.length > 100) {
           console.log('🔥 Battle round complete - triggering auto-play');
           console.log('🔥 Battle state before update:', battleState);
-          
-          // Set isPlayingAudio to trigger avatar animation and auto-play
           updateBattleState({ isPlayingAudio: true });
           
-          // Additional trigger after a short delay to ensure it sticks
+          // Force avatar to start speaking immediately
           setTimeout(() => {
-            console.log('🔥 Setting isPlayingAudio to true again to ensure AI speaks back');
+            console.log('🔥 Setting isPlayingAudio to true again');
             updateBattleState({ isPlayingAudio: true });
-          }, 200);
-          
-          // Don't auto-reset - let the battle continue naturally after AI speaks
+          }, 100);
         } else {
           console.log('⚠️ No valid audio URL received:', result.audioUrl?.substring(0, 50));
         }
         
-        // Don't show "Round Complete" toast immediately - let the battle continue
-        console.log('🎯 Round processed, scores updated:', { user: result.userScore, ai: result.aiScore });
+        toast({
+          title: "Round Complete!",
+          description: `Score: You ${result.userScore || 0} - AI ${result.aiScore || 0}`,
+        });
       }
     } catch (error) {
       toast({
@@ -275,7 +269,7 @@ export default function BattleArena() {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => { /* Navigate properly without page reload */ }}
+              onClick={() => window.location.href = '/fine-tuning'}
               className="bg-battle-gray hover:bg-gray-600 border-gray-600 mr-2"
               data-testid="button-fine-tuning"
               title="Fine-tune Custom Models"

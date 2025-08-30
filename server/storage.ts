@@ -18,7 +18,7 @@ import {
   SUBSCRIPTION_TIERS,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, lt, sql, desc } from "drizzle-orm";
+import { eq, and, gte, lt, sql } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -41,7 +41,6 @@ export interface IStorage {
   canUserStartBattle(userId: string): Promise<boolean>;
   createBattle(battle: any): Promise<Battle>;
   getBattle(id: string): Promise<Battle | undefined>;
-  getUserActiveBattles(userId: string): Promise<Battle[]>;
   getUserBattles(userId: string, limit?: number): Promise<Battle[]>;
   updateBattleScore(battleId: string, userScore: number, aiScore: number): Promise<void>;
   completeBattle(battleId: string): Promise<void>;
@@ -307,19 +306,6 @@ export class DatabaseStorage implements IStorage {
           .where(eq(users.id, battle.userId));
       }
     }
-  }
-
-  async getUserActiveBattles(userId: string): Promise<Battle[]> {
-    const activeBattles = await db
-      .select()
-      .from(battles)
-      .where(and(
-        eq(battles.userId, userId),
-        eq(battles.status, 'active')
-      ))
-      .orderBy(desc(battles.createdAt));
-
-    return activeBattles;
   }
 
   // Analytics
