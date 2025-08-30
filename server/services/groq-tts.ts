@@ -61,17 +61,26 @@ export class GroqTTSService {
   private applyRobotVoiceEffects(text: string, characterId: string): string {
     // Special robot voice processing for CYPHER-9000
     if (characterId === 'cypher') {
-      // Add robotic speech patterns and effects
+      // ENHANCED CYPHER-9000 VOICE EFFECTS - More aggressive and robotic
       let robotText = text;
       
-      // Add robotic pauses and emphasis
-      robotText = robotText.replace(/\./g, '. [pause]');
-      robotText = robotText.replace(/!/g, '. [emphasis]');
-      robotText = robotText.replace(/\?/g, '. [query]');
+      // Add intense robotic modulation and glitches
+      robotText = robotText.replace(/\./g, '. [digital_glitch]');
+      robotText = robotText.replace(/!/g, '! [system_surge] [emphasis]');
+      robotText = robotText.replace(/\?/g, '? [data_scan] [query_mode]');
       
-      // Add mechanical breathing/processing sounds
-      robotText = `[processing] ${robotText} [systems_online]`;
+      // Add rapid-fire robotic processing between verses
+      robotText = robotText.replace(/,/g, ', [micro_process]');
+      robotText = robotText.replace(/\band\b/g, '[sync] and [sync]');
+      robotText = robotText.replace(/\byou\b/g, '[target_acquired] you [locked]');
       
+      // Add CYPHER-9000 signature mechanical sounds
+      robotText = `[boot_sequence] [voice_modulator_engaged] ${robotText} [termination_protocol_active] [systems_nominal]`;
+      
+      // Add digital distortion markers for more robotic effect
+      robotText = robotText.replace(/[aeiou]/g, (match) => `[${match}_synthesized]`);
+      
+      console.log(`🤖 CYPHER-9000 ENHANCED VOICE FX: Added advanced robotic modulation`);
       return robotText;
     }
     return text;
@@ -125,7 +134,8 @@ export class GroqTTSService {
       console.log(`   - Speed: ${ttsOptions.speed}x (${this.getSpeedDescription(ttsOptions.speed)})`);
       console.log(`   - Style: ${voiceStyle}`);
       if (characterId === 'cypher') {
-        console.log(`   - 🤖 CYPHER-9000: Robotic effects active`);
+        console.log(`   - 🤖 CYPHER-9000: RAPID-FIRE TERMINATION PROTOCOL ACTIVE`);
+        console.log(`   - 🔊 Enhanced robotic modulation: 1.4x speed with digital effects`);
       }
 
       const response = await this.groq.audio.speech.create(ttsOptions);
@@ -178,7 +188,7 @@ export class GroqTTSService {
   private calculateDynamicSpeed(characterId: string, voiceStyle?: string, speedMultiplier: number = 1.0): number {
     // Base speeds for different characters
     const characterSpeeds: Record<string, number> = {
-      'cypher': 0.75,    // Slow, mechanical robot
+      'cypher': 1.4,     // FAST robotic delivery - rapid-fire termination protocol
       'venom': 0.9,      // Menacing, deliberate 
       'razor': 1.1,      // Quick, sharp delivery
       'silk': 1.0        // Smooth, natural pace
