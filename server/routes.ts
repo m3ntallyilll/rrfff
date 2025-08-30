@@ -385,7 +385,7 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
 
       const battleData = {
         userId,
-        aiCharacter: characterId,
+        aiCharacterId: characterId,
         difficulty,
         customSettings,
         status: "active" as const,
@@ -452,9 +452,9 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
 
       // Step 2: Generate AI response
       console.log(`🤖 Generating AI response...`);
-      const aiResponse = await groqService.generateBattleVerse(
+      const aiResponse = await groqService.generateRapResponse(
         transcription, 
-        battle.aiCharacter, 
+        battle.aiCharacterId || 'cypher-9000', 
         difficulty,
         customPrompt
       );
@@ -462,12 +462,12 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
 
       // Step 3: Get AI TTS
       console.log(`🎵 Generating AI voice...`);
-      const aiAudioPath = await userTTSManager.generateTTS(aiResponse, battle.aiCharacter, req.user.claims.sub);
+      const aiAudioPath = await userTTSManager.generateTTS(aiResponse, battle.aiCharacterId || 'cypher-9000', req.user.claims.sub);
       console.log(`✅ AI audio generated: ${!!aiAudioPath}`);
 
       // Step 4: Score the battle round
       console.log(`📊 Scoring battle round...`);
-      const scores = await scoringService.scoreBattleRound(transcription, aiResponse);
+      const scores = await scoringService.scoreRound(transcription, aiResponse);
       console.log(`✅ Scores - User: ${scores.userScore}, AI: ${scores.aiScore}`);
 
       // Step 5: Create round data
