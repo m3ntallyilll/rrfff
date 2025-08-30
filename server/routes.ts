@@ -241,15 +241,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         items: [{
           price_data: {
             currency: 'usd',
-            product_data: {
-              name: `${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan`,
-              description: `Rap Battle ${tier.charAt(0).toUpperCase() + tier.slice(1)} subscription with ${tierInfo.battlesPerDay === -1 ? 'unlimited' : tierInfo.battlesPerDay} battles per day`,
-            } as any,
+            product: `${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan`,
             recurring: {
               interval: 'month',
             },
             unit_amount: priceAmount,
-          } as any,
+          },
         }],
         payment_behavior: 'default_incomplete',
         payment_settings: {
