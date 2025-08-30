@@ -68,8 +68,9 @@ export default function Landing() {
               size="lg" 
               variant="outline" 
               className="border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white px-8 py-4 text-lg"
+              onClick={() => window.location.href = '/blog'}
             >
-              Watch Demo
+              Read Blog
             </Button>
           </div>
 
