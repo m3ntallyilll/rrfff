@@ -57,10 +57,11 @@ export default function BattleArena() {
     submitRound,
   } = useBattleState();
 
-  // Fetch battle history
-  const { data: battleHistory = [] } = useQuery({
-    queryKey: ["/api/battles"],
-  });
+  // Fetch battle history - disabled to prevent reloads
+  // const { data: battleHistory = [] } = useQuery({
+  //   queryKey: ["/api/battles"],
+  // });
+  const battleHistory = [];
 
   // Battle timer countdown
   useEffect(() => {
