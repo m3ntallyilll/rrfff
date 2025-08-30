@@ -34,7 +34,14 @@ export function useBattleState(battleId?: string) {
       styleIntensity?: number;
       voiceSpeed?: number;
     }) => {
-      const res = await apiRequest("POST", "/api/battle", battleData);
+      // Transform aiCharacterId to characterId for backend compatibility
+      const requestData = {
+        ...battleData,
+        characterId: battleData.aiCharacterId,
+      };
+      delete requestData.aiCharacterId;
+      
+      const res = await apiRequest("POST", "/api/battle", requestData);
       return res.json();
     },
     onSuccess: (data: Battle) => {

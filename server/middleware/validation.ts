@@ -38,13 +38,17 @@ export const validateBattleCreation = (req: Request, res: Response, next: NextFu
   const schema = z.object({
     characterId: z.string().min(1, 'Character ID is required'),
     difficulty: z.enum(['easy', 'normal', 'hard']).default('normal'),
+    profanityFilter: z.boolean().optional().default(false),
+    lyricComplexity: z.number().min(0).max(100).optional(),
+    styleIntensity: z.number().min(0).max(100).optional(),
+    voiceSpeed: z.number().min(0.5).max(2.0).optional(),
     customSettings: z.object({
       aiAggressiveness: z.number().min(0).max(100).optional(),
       responseTime: z.number().min(1000).max(10000).optional(),
       analysisDepth: z.enum(['basic', 'enhanced', 'expert']).optional(),
       voiceSpeed: z.number().min(0.5).max(2.0).optional(),
       battleLength: z.number().min(3).max(10).optional()
-    }).optional()
+    }).optional().default({})
   });
 
   try {

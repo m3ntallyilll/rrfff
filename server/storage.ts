@@ -18,7 +18,7 @@ import {
   SUBSCRIPTION_TIERS,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, lt, sql } from "drizzle-orm";
+import { eq, and, gte, lt, sql, desc } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -319,7 +319,7 @@ export class DatabaseStorage implements IStorage {
       ))
       .orderBy(desc(battles.createdAt));
 
-    return activeBattles.map(this.transformBattle);
+    return activeBattles;
   }
 
   // Analytics
