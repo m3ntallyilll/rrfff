@@ -209,7 +209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             user = await storage.updateUserStripeInfo(userId, { 
               stripeCustomerId: customer.id,
-              stripeSubscriptionId: null // Clear old subscription ID
+              stripeSubscriptionId: undefined // Clear old subscription ID
             });
           } else {
             throw error;
@@ -226,12 +226,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-          // Use actual Stripe price IDs created by setup script
-      const priceId = tier === 'premium' ? 
-        process.env.STRIPE_PREMIUM_PRICE_ID || 'price_1S1fdYE0KDhHKBCxa46JAd1e' : // $9.99/month Premium
-        process.env.STRIPE_PRO_PRICE_ID || 'price_1S1fdYE0KDhHKBCxCxmXMeXX'; // $19.99/month Pro
+          // Create dynamic pricing for live mode compatibility
+      const priceAmount = Math.round(tierInfo.price * 100); // Convert to cents
       
-      console.log(`🔧 Creating subscription with price ID: ${priceId}`);
+      console.log(`🔧 Creating subscription for ${tier} tier: $${tierInfo.price}/month`);
       
       // Configure payment method types based on selection
       const paymentMethodTypes: ('card' | 'cashapp')[] = paymentMethod === 'cashapp' 
@@ -241,7 +239,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const subscription = await stripe.subscriptions.create({
         customer: customer.id,
         items: [{
-          price: priceId,
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan`,
+              description: `Rap Battle ${tier.charAt(0).toUpperCase() + tier.slice(1)} subscription with ${tierInfo.battlesPerDay === -1 ? 'unlimited' : tierInfo.battlesPerDay} battles per day`,
+            } as any,
+            recurring: {
+              interval: 'month',
+            },
+            unit_amount: priceAmount,
+          } as any,
         }],
         payment_behavior: 'default_incomplete',
         payment_settings: {
@@ -251,6 +259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expand: ['latest_invoice.payment_intent'],
         metadata: {
           paymentMethod: paymentMethod,
+          tier: tier,
           ...(paymentMethod === 'cashapp' && { cashapp_account: '$ILLAITHEGPTSTORE' })
         },
         description: paymentMethod === 'cashapp' 
@@ -341,8 +350,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           if (user) {
             const subscriptionStatus = subscription.status === 'active' ? 'active' : 'inactive';
-            const subscriptionTier = subscription.status === 'active' ? 
-              (subscription.items.data[0]?.price?.unit_amount === 999 ? 'premium' : 'pro') : 'free';
+            
+            // Get tier from subscription metadata if available, otherwise infer from price
+            let subscriptionTier = 'free';
+            if (subscription.status === 'active') {
+              if (subscription.metadata?.tier) {
+                subscriptionTier = subscription.metadata.tier;
+              } else {
+                // Fallback: infer from price amount (999 = $9.99 Premium, 1999 = $19.99 Pro)
+                const unitAmount = subscription.items.data[0]?.price?.unit_amount;
+                subscriptionTier = unitAmount === 999 ? 'premium' : unitAmount === 1999 ? 'pro' : 'free';
+              }
+            }
             
             await storage.updateUserSubscription(user.id, {
               subscriptionStatus,

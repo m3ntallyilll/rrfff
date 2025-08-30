@@ -1,0 +1,176 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+9:36:08 PM [express] serving on port 5000
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+User not authenticated via Passport
+9:36:15 PM [express] GET /api/auth/user 401 in 51ms :: {"message":"Unauthorized"}
+9:36:18 PM [express] GET /api/auth/user 304 in 210ms :: {"id":"23051396","email":"illagencyus@gmail.…
+9:36:18 PM [express] GET /api/auth/user 304 in 92ms :: {"id":"23051396","email":"illagencyus@gmail.c…
+9:36:18 PM [express] GET /api/auth/user 304 in 91ms :: {"id":"23051396","email":"illagencyus@gmail.c…
+9:36:39 PM [express] GET /api/auth/user 304 in 171ms :: {"id":"23051396","email":"illagencyus@gmail.…
+🔄 Customer not found in current mode, creating new customer...
+🔧 Creating subscription with price ID: price_1S1fdYE0KDhHKBCxa46JAd1e
+Subscription creation error: StripeInvalidRequestError: No such price: 'price_1S1fdYE0KDhHKBCxa46JAd1e'; a similar object exists in test mode, but a live mode key was used to make this request.
+    at generateV1Error (file:///home/runner/workspace/node_modules/stripe/esm/Error.js:8:20)
+    at res.toJSON.then.StripeAPIError.message (file:///home/runner/workspace/node_modules/stripe/esm/RequestSender.js:105:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  type: 'StripeInvalidRequestError',
+  raw: {
+    code: 'resource_missing',
+    doc_url: 'https://stripe.com/docs/error-codes/resource-missing',
+    message: "No such price: 'price_1S1fdYE0KDhHKBCxa46JAd1e'; a similar object exists in test mode, but a live mode key was used to make this request.",
+    param: 'items[0][price]',
+    request_log_url: 'https://dashboard.stripe.com/logs/req_WzApvc3gSSzviW?t=1756589801',
+    type: 'invalid_request_error',
+    headers: {
+      server: 'nginx',
+      date: 'Sat, 30 Aug 2025 21:36:41 GMT',
+      'content-type': 'application/json',
+      'content-length': '440',
+      connection: 'keep-alive',
+      'access-control-allow-credentials': 'true',
+      'access-control-allow-methods': 'GET, HEAD, PUT, PATCH, POST, DELETE',
+      'access-control-allow-origin': '*',
+      'access-control-expose-headers': 'Request-Id, Stripe-Manage-Version, Stripe-Should-Retry, X-Stripe-External-Auth-Required, X-Stripe-Privileged-Session-Required',
+      'access-control-max-age': '300',
+      'cache-control': 'no-cache, no-store',
+      'content-security-policy': "base-uri 'none'; default-src 'none'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; script-src 'self' 'report-sample'; style-src 'self'; worker-src 'none'; upgrade-insecure-requests; report-uri https://q.stripe.com/csp-violation?q=kq5jTCwjH0LsikQ4iZ3muuHQBxIURuEGtQdoiR4iWCiL2vywAo2BXWtd14yKn35TRIuAYuTpfIrNCPam",
+      'idempotency-key': 'stripe-node-retry-4f8047da-81f9-40f7-98b4-a016c599bb0c',
+      'original-request': 'req_WzApvc3gSSzviW',
+      'request-id': 'req_WzApvc3gSSzviW',
+      'stripe-version': '2025-08-27.basil',
+      vary: 'Origin',
+      'x-stripe-priority-routing-enabled': 'true',
+      'x-stripe-routing-context-priority-tier': 'livemode-critical',
+      'x-wc': 'ABGHIJ',
+      'strict-transport-security': 'max-age=63072000; includeSubDomains; preload'
+    },
+    statusCode: 400,
+    requestId: 'req_WzApvc3gSSzviW'
+  },
+  rawType: 'invalid_request_error',
+  code: 'resource_missing',
+  doc_url: 'https://stripe.com/docs/error-codes/resource-missing',
+  param: 'items[0][price]',
+  detail: undefined,
+  headers: {
+    server: 'nginx',
+    date: 'Sat, 30 Aug 2025 21:36:41 GMT',
+    'content-type': 'application/json',
+    'content-length': '440',
+    connection: 'keep-alive',
+    'access-control-allow-credentials': 'true',
+    'access-control-allow-methods': 'GET, HEAD, PUT, PATCH, POST, DELETE',
+    'access-control-allow-origin': '*',
+    'access-control-expose-headers': 'Request-Id, Stripe-Manage-Version, Stripe-Should-Retry, X-Stripe-External-Auth-Required, X-Stripe-Privileged-Session-Required',
+    'access-control-max-age': '300',
+    'cache-control': 'no-cache, no-store',
+    'content-security-policy': "base-uri 'none'; default-src 'none'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; script-src 'self' 'report-sample'; style-src 'self'; worker-src 'none'; upgrade-insecure-requests; report-uri https://q.stripe.com/csp-violation?q=kq5jTCwjH0LsikQ4iZ3muuHQBxIURuEGtQdoiR4iWCiL2vywAo2BXWtd14yKn35TRIuAYuTpfIrNCPam",
+    'idempotency-key': 'stripe-node-retry-4f8047da-81f9-40f7-98b4-a016c599bb0c',
+    'original-request': 'req_WzApvc3gSSzviW',
+    'request-id': 'req_WzApvc3gSSzviW',
+    'stripe-version': '2025-08-27.basil',
+    vary: 'Origin',
+    'x-stripe-priority-routing-enabled': 'true',
+    'x-stripe-routing-context-priority-tier': 'livemode-critical',
+    'x-wc': 'ABGHIJ',
+    'strict-transport-security': 'max-age=63072000; includeSubDomains; preload'
+  },
+  requestId: 'req_WzApvc3gSSzviW',
+  statusCode: 400,
+  userMessage: undefined,
+  charge: undefined,
+  decline_code: undefined,
+  payment_intent: undefined,
+  payment_method: undefined,
+  payment_method_type: undefined,
+  setup_intent: undefined,
+  source: undefined
+}
+9:36:41 PM [express] POST /api/create-subscription 400 in 840ms :: {"error":{"message":"No such pric…
+🔧 Creating subscription with price ID: price_1S1fdYE0KDhHKBCxCxmXMeXX
+Subscription creation error: StripeInvalidRequestError: No such price: 'price_1S1fdYE0KDhHKBCxCxmXMeXX'; a similar object exists in test mode, but a live mode key was used to make this request.
+    at generateV1Error (file:///home/runner/workspace/node_modules/stripe/esm/Error.js:8:20)
+    at res.toJSON.then.StripeAPIError.message (file:///home/runner/workspace/node_modules/stripe/esm/RequestSender.js:105:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  type: 'StripeInvalidRequestError',
+  raw: {
+    code: 'resource_missing',
+    doc_url: 'https://stripe.com/docs/error-codes/resource-missing',
+    message: "No such price: 'price_1S1fdYE0KDhHKBCxCxmXMeXX'; a similar object exists in test mode, but a live mode key was used to make this request.",
+    param: 'items[0][price]',
+    request_log_url: 'https://dashboard.stripe.com/logs/req_YgExwuNBM4Fv8Q?t=1756589803',
+    type: 'invalid_request_error',
+    headers: {
+      server: 'nginx',
+      date: 'Sat, 30 Aug 2025 21:36:43 GMT',
+      'content-type': 'application/json',
+      'content-length': '440',
+      connection: 'keep-alive',
+      'access-control-allow-credentials': 'true',
+      'access-control-allow-methods': 'GET, HEAD, PUT, PATCH, POST, DELETE',
+      'access-control-allow-origin': '*',
+      'access-control-expose-headers': 'Request-Id, Stripe-Manage-Version, Stripe-Should-Retry, X-Stripe-External-Auth-Required, X-Stripe-Privileged-Session-Required',
+      'access-control-max-age': '300',
+      'cache-control': 'no-cache, no-store',
+      'content-security-policy': "base-uri 'none'; default-src 'none'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; script-src 'self' 'report-sample'; style-src 'self'; worker-src 'none'; upgrade-insecure-requests; report-uri https://q.stripe.com/csp-violation?q=kq5jTCwjH0LsikQ4iZ3muuHQBxIURuEGtQdoiR4iWCiL2vywAo2BXWtd14yKn35TRIuAYuTpfIrNCPam",
+      'idempotency-key': 'stripe-node-retry-bf897869-1ce7-4968-bcd8-b06533e889ff',
+      'original-request': 'req_YgExwuNBM4Fv8Q',
+      'request-id': 'req_YgExwuNBM4Fv8Q',
+      'stripe-version': '2025-08-27.basil',
+      vary: 'Origin',
+      'x-stripe-priority-routing-enabled': 'true',
+      'x-stripe-routing-context-priority-tier': 'livemode-critical',
+      'x-wc': 'ABGHIJ',
+      'strict-transport-security': 'max-age=63072000; includeSubDomains; preload'
+    },
+    statusCode: 400,
+    requestId: 'req_YgExwuNBM4Fv8Q'
+  },
+  rawType: 'invalid_request_error',
+  code: 'resource_missing',
+  doc_url: 'https://stripe.com/docs/error-codes/resource-missing',
+  param: 'items[0][price]',
+  detail: undefined,
+  headers: {
+    server: 'nginx',
+    date: 'Sat, 30 Aug 2025 21:36:43 GMT',
+    'content-type': 'application/json',
+    'content-length': '440',
+    connection: 'keep-alive',
+    'access-control-allow-credentials': 'true',
+    'access-control-allow-methods': 'GET, HEAD, PUT, PATCH, POST, DELETE',
+    'access-control-allow-origin': '*',
+    'access-control-expose-headers': 'Request-Id, Stripe-Manage-Version, Stripe-Should-Retry, X-Stripe-External-Auth-Required, X-Stripe-Privileged-Session-Required',
+    'access-control-max-age': '300',
+    'cache-control': 'no-cache, no-store',
+    'content-security-policy': "base-uri 'none'; default-src 'none'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; script-src 'self' 'report-sample'; style-src 'self'; worker-src 'none'; upgrade-insecure-requests; report-uri https://q.stripe.com/csp-violation?q=kq5jTCwjH0LsikQ4iZ3muuHQBxIURuEGtQdoiR4iWCiL2vywAo2BXWtd14yKn35TRIuAYuTpfIrNCPam",
+    'idempotency-key': 'stripe-node-retry-bf897869-1ce7-4968-bcd8-b06533e889ff',
+    'original-request': 'req_YgExwuNBM4Fv8Q',
+    'request-id': 'req_YgExwuNBM4Fv8Q',
+    'stripe-version': '2025-08-27.basil',
+    vary: 'Origin',
+    'x-stripe-priority-routing-enabled': 'true',
+    'x-stripe-routing-context-priority-tier': 'livemode-critical',
+    'x-wc': 'ABGHIJ',
+    'strict-transport-security': 'max-age=63072000; includeSubDomains; preload'
+  },
+  requestId: 'req_YgExwuNBM4Fv8Q',
+  statusCode: 400,
+  userMessage: undefined,
+  charge: undefined,
+  decline_code: undefined,
+  payment_intent: undefined,
+  payment_method: undefined,
+  payment_method_type: undefined,
+  setup_intent: undefined,
+  source: undefined
+}
+9:36:43 PM [express] POST /api/create-subscription 400 in 504ms :: {"error":{"message":"No such pric…
+9:37:11 PM [express] GET /api/auth/user 200 in 167ms :: {"id":"23051396","email":"illagencyus@gmail.…
+9:37:11 PM [express] GET /api/battles 304 in 43ms :: []
+9:37:14 PM [express] GET /api/auth/user 304 in 89ms :: {"id":"23051396","email":"illagencyus@gmail.c…
