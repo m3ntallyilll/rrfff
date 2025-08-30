@@ -22,7 +22,12 @@ export function CharacterSelector({ onCharacterSelect, selectedCharacter }: Char
                 ? "ring-2 ring-accent-gold bg-secondary-dark"
                 : "bg-card-dark hover:bg-secondary-dark"
             } border-gray-700`}
-            onClick={() => onCharacterSelect(character)}
+            onClick={(e) => {
+              // Only trigger if the click is not on the button
+              if (!(e.target as Element).closest('button')) {
+                onCharacterSelect(character);
+              }
+            }}
             data-testid={`character-${character.id}`}
           >
             <CardContent className="p-4 text-center">
@@ -97,6 +102,7 @@ export function CharacterSelector({ onCharacterSelect, selectedCharacter }: Char
 
               {/* Select Button */}
               <Button
+                type="button"
                 size="sm"
                 variant={selectedCharacter?.id === character.id ? "default" : "outline"}
                 className={
@@ -104,6 +110,11 @@ export function CharacterSelector({ onCharacterSelect, selectedCharacter }: Char
                     ? "bg-accent-gold text-black hover:bg-yellow-600"
                     : "border-gray-600 text-white hover:bg-secondary-dark"
                 }
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onCharacterSelect(character);
+                }}
                 data-testid={`button-select-${character.id}`}
               >
                 {selectedCharacter?.id === character.id ? "Selected" : "Battle"}

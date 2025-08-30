@@ -269,7 +269,7 @@ export default function BattleArena() {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => window.location.href = '/fine-tuning'}
+              onClick={() => { /* Navigate properly without page reload */ }}
               className="bg-battle-gray hover:bg-gray-600 border-gray-600 mr-2"
               data-testid="button-fine-tuning"
               title="Fine-tune Custom Models"
