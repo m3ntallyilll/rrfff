@@ -121,10 +121,13 @@ export function useBattleState(battleId?: string) {
         throw error;
       }
     },
-    onSuccess: () => {
-      // STOP ALL REFETCHES - they cause reloads and session confusion
-      // The UI will update from the mutation response data instead
-      console.log('🎯 Battle round completed - NOT triggering any cache updates');
+    onSuccess: (data) => {
+      console.log('🎯 Battle round completed successfully:', data);
+      // Update local cache with the new data without triggering refetches
+      if (data && currentBattleId) {
+        queryClient.setQueryData(["/api/battle", currentBattleId, "rounds"], data.rounds);
+        queryClient.setQueryData(["/api/battle", currentBattleId, "state"], data.battleState);
+      }
     },
     onError: (error) => {
       console.error("Battle round mutation error:", error);

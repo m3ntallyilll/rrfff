@@ -57,11 +57,12 @@ export default function BattleArena() {
     submitRound,
   } = useBattleState();
 
-  // Fetch battle history - disabled to prevent reloads
-  // const { data: battleHistory = [] } = useQuery({
-  //   queryKey: ["/api/battles"],
-  // });
-  const battleHistory = [];
+  // Fetch battle history
+  const { data: battleHistory = [] } = useQuery({
+    queryKey: ["/api/battles"],
+    staleTime: 5 * 60 * 1000, // Keep data fresh for 5 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+  });
 
   // Battle timer countdown
   useEffect(() => {
@@ -144,14 +145,7 @@ export default function BattleArena() {
         
         if (result.aiResponse) {
           console.log('🤖 Setting AI response:', result.aiResponse.substring(0, 100) + '...');
-          
-          // Clear any previous response first, then set new one
-          setAiResponse("");
-          
-          setTimeout(() => {
-            console.log('🔄 Now setting the actual AI response');
-            setAiResponse(result.aiResponse);
-          }, 50);
+          setAiResponse(result.aiResponse);
         } else {
           console.log('⚠️ No AI response in result');
         }
