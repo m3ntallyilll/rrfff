@@ -84,6 +84,7 @@ export class GroqTTSService {
       voiceStyle?: 'aggressive' | 'confident' | 'smooth' | 'intense' | 'playful';
       characterName?: string;
       gender?: string;
+      speedMultiplier?: number;
     } = {}
   ): Promise<{ audioUrl: string; duration: number }> {
     console.log(`🎤 Groq TTS generating for ${characterId}: "${text.substring(0, 50)}..."`);
@@ -115,7 +116,7 @@ export class GroqTTSService {
         voice: voice,
         input: cleanText,
         response_format: 'wav',
-        speed: characterId === 'cypher' ? 0.75 : 1.0,  // Much slower for robotic effect
+        speed: this.calculateDynamicSpeed(characterId, options.voiceStyle, options.speedMultiplier),  // Dynamic speed based on character and style
         // Add robotic voice modulation for CYPHER-9000
         ...(characterId === 'cypher' && {
           // Additional robotic voice parameters
@@ -126,12 +127,13 @@ export class GroqTTSService {
         })
       };
 
-      // Add special robot voice modulation for CYPHER-9000
+      // Log dynamic voice settings
+      console.log(`🎤 Voice Settings for ${characterId}:`);
+      console.log(`   - Voice: ${voice}`);
+      console.log(`   - Speed: ${ttsOptions.speed}x (${this.getSpeedDescription(ttsOptions.speed)})`);
+      console.log(`   - Style: ${voiceStyle}`);
       if (characterId === 'cypher') {
-        console.log(`🤖 CYPHER-9000 VOICE PROTOCOL: Processing with robotic effects`);
-        console.log(`   - Voice: ${voice} (Fritz-PlayAI deep authority)`);
-        console.log(`   - Speed: ${ttsOptions.speed}x (slower robotic delivery)`);
-        console.log(`   - Effects: Neural engine, neutral emotion, high stability`);
+        console.log(`   - 🤖 CYPHER-9000: Robotic effects active`);
       }
 
       const response = await this.groq.audio.speech.create(ttsOptions);
@@ -179,6 +181,42 @@ export class GroqTTSService {
       console.error('Groq TTS test failed:', error);
       return false;
     }
+  }
+  
+  private calculateDynamicSpeed(characterId: string, voiceStyle?: string, speedMultiplier: number = 1.0): number {
+    // Base speeds for different characters
+    const characterSpeeds: Record<string, number> = {
+      'cypher': 0.75,    // Slow, mechanical robot
+      'venom': 0.9,      // Menacing, deliberate 
+      'razor': 1.1,      // Quick, sharp delivery
+      'silk': 1.0        // Smooth, natural pace
+    };
+    
+    // Style modifiers
+    const styleModifiers: Record<string, number> = {
+      'aggressive': 1.2,  // Faster for aggressive style
+      'confident': 1.0,   // Normal speed
+      'smooth': 0.95,     // Slightly slower for smooth
+      'intense': 1.15,    // Faster for intensity
+      'playful': 1.1      // Upbeat tempo
+    };
+    
+    const baseSpeed = characterSpeeds[characterId] || 1.0;
+    const styleModifier = styleModifiers[voiceStyle || 'confident'] || 1.0;
+    
+    // Apply user speed multiplier (from frontend slider)
+    const finalSpeed = baseSpeed * styleModifier * speedMultiplier;
+    
+    // Clamp between reasonable limits
+    return Math.max(0.5, Math.min(2.0, finalSpeed));
+  }
+  
+  private getSpeedDescription(speed: number): string {
+    if (speed <= 0.7) return 'very slow/robotic';
+    if (speed <= 0.9) return 'slow/deliberate';
+    if (speed <= 1.1) return 'normal pace';
+    if (speed <= 1.3) return 'fast/energetic';
+    return 'very fast/rapid-fire';
   }
 }
 

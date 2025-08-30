@@ -9,6 +9,7 @@ export interface TTSGenerationOptions {
   characterName?: string;
   gender?: string;
   voiceStyle?: 'aggressive' | 'confident' | 'smooth' | 'intense' | 'playful';
+  speedMultiplier?: number;
 }
 
 export class UserTTSManager {
@@ -56,7 +57,8 @@ export class UserTTSManager {
             return await groqInstance.generateTTS(text, options.characterId, {
               voiceStyle: options.voiceStyle,
               characterName: options.characterName,
-              gender: options.gender
+              gender: options.gender,
+              speedMultiplier: options.speedMultiplier
             });
           } else {
             console.log(`⚠️ No Groq API key available for CYPHER-9000!`);
@@ -74,7 +76,8 @@ export class UserTTSManager {
           return await openaiInstance.generateTTS(text, options.characterId, {
             voiceStyle: options.voiceStyle,
             characterName: options.characterName,
-            gender: options.gender
+            gender: options.gender,
+            speedMultiplier: options.speedMultiplier
           });
         } catch (error: any) {
           console.log(`❌ User's OpenAI TTS failed: ${error.message}, falling back`);
@@ -91,7 +94,8 @@ export class UserTTSManager {
             return await groqInstance.generateTTS(text, options.characterId, {
               voiceStyle: options.voiceStyle,
               characterName: options.characterName,
-              gender: options.gender
+              gender: options.gender,
+              speedMultiplier: options.speedMultiplier
             });
           } else {
             console.log(`⚠️ No Groq API key available (user or system)`);
