@@ -53,7 +53,7 @@ function Router() {
           <Route path="/tournament/:tournamentId/battle/:battleId" component={BattleArena} />
           <Route path="/fine-tuning" component={FineTuning} />
           <Route path="/settings" component={Settings} />
-          <Route path="/admin" component={<AdminPage />} />
+          <Route path="/admin" component={AdminPage} />
           <Route component={NotFound} />
         </>
       )}
