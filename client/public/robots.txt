@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /subscribe
+Allow: /tournaments
+
+Disallow: /api/
+Disallow: /admin
+Disallow: /settings
+Disallow: /battle
+
+Sitemap: https://battlerapai.com/sitemap.xml
