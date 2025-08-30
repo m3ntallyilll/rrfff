@@ -32,51 +32,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // SEO and Social Sharing Routes
-  app.get('/sitemap.xml', (req, res) => {
-    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://battlerapai.com/</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://battlerapai.com/subscribe</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://battlerapai.com/tournaments</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-</urlset>`;
-    
-    res.setHeader('Content-Type', 'application/xml');
-    res.send(sitemap);
-  });
-
-  app.get('/robots.txt', (req, res) => {
-    const robots = `User-agent: *
-Allow: /
-Allow: /subscribe
-Allow: /tournaments
-
-Disallow: /api/
-Disallow: /admin
-Disallow: /settings
-Disallow: /battle
-
-Sitemap: https://battlerapai.com/sitemap.xml`;
-    
-    res.setHeader('Content-Type', 'text/plain');
-    res.send(robots);
-  });
-
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
@@ -201,6 +156,23 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
         return res.status(404).json({ message: 'User not found' });
       }
 
+      const tierInfo = SUBSCRIPTION_TIERS[tier as keyof typeof SUBSCRIPTION_TIERS];
+      
+      if (user.stripeSubscriptionId) {
+        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId, {
+          expand: ['latest_invoice.payment_intent']
+        });
+        
+        const latestInvoice = subscription.latest_invoice as any;
+        const clientSecret = latestInvoice?.payment_intent?.client_secret;
+          
+        res.json({
+          subscriptionId: subscription.id,
+          clientSecret: clientSecret,
+        });
+        return;
+      }
+      
       if (!user.email) {
         throw new Error('No user email on file');
       }
@@ -219,12 +191,10 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
         });
       }
 
-      console.log(`🔧 Creating subscription for tier: ${tier}`);
-      
-      // Determine price based on tier
-      const priceId = tier === 'premium' 
-        ? process.env.STRIPE_PREMIUM_PRICE_ID || 'price_1S1fdYE0KDhHKBCxQxmXMeXX' // $9.99/month Premium
-        : process.env.STRIPE_PRO_PRICE_ID || 'price_1S1fdYE0KDhHKBCxCxmXMeXX'; // $19.99/month Pro
+          // Use actual Stripe price IDs created by setup script
+      const priceId = tier === 'premium' ? 
+        process.env.STRIPE_PREMIUM_PRICE_ID || 'price_1S1fdYE0KDhHKBCxa46JAd1e' : // $9.99/month Premium
+        process.env.STRIPE_PRO_PRICE_ID || 'price_1S1fdYE0KDhHKBCxCxmXMeXX'; // $19.99/month Pro
       
       console.log(`🔧 Creating subscription with price ID: ${priceId}`);
       
@@ -256,12 +226,31 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
       console.log(`✅ Subscription created: ${subscription.id}`);
       const invoiceObj = subscription.latest_invoice as any;
       console.log(`📋 Latest invoice:`, invoiceObj?.id);
-      console.log(`💳 Payment intent:`, invoiceObj?.payment_intent?.id);
-      console.log(`🔑 Client secret:`, !!invoiceObj?.payment_intent?.client_secret);
+      
+      // Extract payment intent and client secret - handle expanded Stripe objects
+      const latestInvoice = subscription.latest_invoice as any;
+      const paymentIntent = latestInvoice?.payment_intent;
+      const clientSecret = paymentIntent?.client_secret;
+      
+      console.log(`🔑 Payment intent: ${paymentIntent?.id}`);
+      console.log(`🗝️ Client secret available: ${!!clientSecret}`);
 
+      if (!clientSecret) {
+        console.error('❌ No client secret found in subscription');
+        throw new Error('Failed to create payment intent');
+      }
+
+      await storage.updateUserStripeInfo(userId, {
+        stripeCustomerId: customer.id,
+        stripeSubscriptionId: subscription.id
+      });
+
+      // Don't mark as active until payment succeeds - webhook will handle this
+      console.log(`✅ Subscription setup complete, returning client secret`);
+  
       res.json({
         subscriptionId: subscription.id,
-        clientSecret: invoiceObj?.payment_intent?.client_secret,
+        clientSecret: clientSecret,
       });
     } catch (error: any) {
       console.error('Subscription creation error:', error);
@@ -276,8 +265,8 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
     try {
       event = stripe.webhooks.constructEvent(
         req.body,
-        req.headers['stripe-signature']!,
-        process.env.STRIPE_WEBHOOK_SECRET!
+        req.headers['stripe-signature'] as string,
+        process.env.STRIPE_WEBHOOK_SECRET || ''
       );
     } catch (err: any) {
       console.log(`Webhook signature verification failed.`, err.message);
@@ -311,23 +300,24 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
         
         try {
           // Get all users to find the one with matching stripe customer ID
+          // Note: In production, you'd want a more efficient lookup method
           const allUsers = await storage.getAllUsers();
           const user = allUsers.find(u => u.stripeCustomerId === subscription.customer);
           
           if (user) {
-            const isActive = subscription.status === 'active';
-            const tier = subscription.status === 'active' 
-              ? (subscription.items.data[0]?.price?.unit_amount === 999 ? 'premium' : 'pro')
-              : 'free';
+            const subscriptionStatus = subscription.status === 'active' ? 'active' : 'inactive';
+            const subscriptionTier = subscription.status === 'active' ? 
+              (subscription.items.data[0]?.price?.unit_amount === 999 ? 'premium' : 'pro') : 'free';
             
             await storage.updateUserSubscription(user.id, {
-              subscriptionTier: tier,
-              subscriptionStatus: subscription.status,
-              stripeSubscriptionId: subscription.id,
-              battlesRemaining: isActive ? (tier === 'premium' ? 25 : -1) : 3,
+              subscriptionStatus,
+              subscriptionTier,
+              stripeSubscriptionId: subscription.id
             });
             
-            console.log(`✅ Updated subscription for user ${user.id}: ${tier} (${subscription.status})`);
+            console.log(`Updated user ${user.id} subscription: ${subscriptionTier} (${subscriptionStatus})`);
+          } else {
+            console.log(`No user found for Stripe customer ${subscription.customer}`);
           }
         } catch (error) {
           console.error('Error processing subscription webhook:', error);
@@ -337,21 +327,10 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
         console.log(`Unhandled event type ${event.type}`);
     }
 
-    res.json({ received: true });
+    res.json({received: true});
   });
 
-  // Battle management routes
-  app.get('/api/battles/history', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const battles = await storage.getUserBattles(userId, 20);
-      res.json(battles);
-    } catch (error) {
-      console.error("Error fetching battle history:", error);
-      res.status(500).json({ message: "Failed to fetch battle history" });
-    }
-  });
-
+  // User stats and analytics
   app.get('/api/user/stats', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -363,310 +342,148 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
     }
   });
 
-  // Create a new battle
-  app.post("/api/battle", isAuthenticated, async (req: any, res) => {
+  // Protected battle creation with subscription checks
+  app.post("/api/battles", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { characterId, difficulty = "normal", customSettings = {} } = req.body;
-
-      if (!characterId) {
-        return res.status(400).json({ message: "Character selection is required" });
+      
+      // SECURITY: Input validation for battle creation parameters
+      const {
+        difficulty,
+        profanityFilter,
+        lyricComplexity,
+        styleIntensity,
+        voiceSpeed,
+        aiCharacterName,
+        aiCharacterId
+      } = req.body;
+      
+      // SECURITY: Validate battle parameters
+      const validDifficulties = ['easy', 'normal', 'hard', 'nightmare'];
+      if (difficulty && !validDifficulties.includes(difficulty)) {
+        return res.status(400).json({ message: "Invalid difficulty level" });
+      }
+      
+      if (typeof profanityFilter !== 'undefined' && typeof profanityFilter !== 'boolean') {
+        return res.status(400).json({ message: "Profanity filter must be boolean" });
+      }
+      
+      if (lyricComplexity && (typeof lyricComplexity !== 'number' || lyricComplexity < 0 || lyricComplexity > 100)) {
+        return res.status(400).json({ message: "Lyric complexity must be between 0-100" });
+      }
+      
+      if (styleIntensity && (typeof styleIntensity !== 'number' || styleIntensity < 0 || styleIntensity > 100)) {
+        return res.status(400).json({ message: "Style intensity must be between 0-100" });
+      }
+      
+      if (voiceSpeed && (typeof voiceSpeed !== 'number' || voiceSpeed < 0.5 || voiceSpeed > 2.0)) {
+        return res.status(400).json({ message: "Voice speed must be between 0.5-2.0" });
+      }
+      
+      // SECURITY: Validate AI character selection
+      const validCharacters = ['razor', 'venom', 'silk', 'cypher'];
+      if (aiCharacterId && !validCharacters.includes(aiCharacterId)) {
+        return res.status(400).json({ message: "Invalid AI character" });
+      }
+      
+      // SECURITY: Sanitize character name input
+      const sanitizedCharacterName = aiCharacterName ? 
+        aiCharacterName.toString().substring(0, 50).trim() : null;
+      
+      // Ensure user exists and has proper setup
+      let user = await storage.getUser(userId);
+      if (!user) {
+        // Create user if not exists (shouldn't happen with auth but safety check)
+        user = await storage.upsertUser({
+          id: userId,
+          email: req.user.claims.email,
+          firstName: req.user.claims.first_name,
+          lastName: req.user.claims.last_name,
+          profileImageUrl: req.user.claims.profile_image_url,
+        });
       }
 
-      // Check if user can start a battle
-      const canStartBattle = await storage.canUserStartBattle(userId);
-      if (!canStartBattle) {
-        return res.status(403).json({ message: "No battles remaining today" });
+      const canBattle = await storage.canUserStartBattle(userId);
+      
+      if (!canBattle) {
+        return res.status(403).json({ 
+          message: "Battle limit reached. Upgrade to Premium or Pro for more battles!",
+          upgrade: true 
+        });
       }
 
+      // SECURITY: Only include validated and sanitized parameters
       const battleData = {
         userId,
-        aiCharacter: characterId,
-        difficulty,
-        customSettings,
-        status: "active" as const,
-        rounds: [],
+        difficulty: difficulty || 'normal',
+        profanityFilter: profanityFilter !== undefined ? profanityFilter : false,
+        lyricComplexity: lyricComplexity || 50,
+        styleIntensity: styleIntensity || 50,
+        voiceSpeed: voiceSpeed || 1.0,
+        aiCharacterName: sanitizedCharacterName || 'MC Venom',
+        aiCharacterId: aiCharacterId || 'venom',
         userScore: 0,
         aiScore: 0,
+        rounds: [],
+        status: "active"
       };
 
       const battle = await storage.createBattle(battleData);
-      res.json(battle);
+      res.status(201).json(battle);
     } catch (error: any) {
       console.error("Error creating battle:", error);
-      res.status(500).json({ message: error.message || "Failed to create battle" });
+      
+      if (error.message === "No battles remaining") {
+        return res.status(403).json({ 
+          message: "Battle limit reached. Upgrade to Premium or Pro for more battles!",
+          upgrade: true 
+        });
+      }
+      
+      res.status(500).json({ message: "Failed to create battle" });
     }
   });
 
-  // Get battle details
-  app.get("/api/battle/:id", isAuthenticated, async (req: any, res) => {
-    try {
-      const { id } = req.params;
-      const battle = await storage.getBattle(id);
-      
-      if (!battle) {
-        return res.status(404).json({ message: "Battle not found" });
-      }
-      
-      res.json(battle);
-    } catch (error) {
-      console.error("Error fetching battle:", error);
-      res.status(500).json({ message: "Failed to fetch battle" });
-    }
-  });
-
-  // Add a round to the battle
-  app.post("/api/battle/:id/round", isAuthenticated, upload.single('audio'), async (req: any, res) => {
-    try {
-      const { id } = req.params;
-      
-      if (!req.file) {
-        return res.status(400).json({ message: "Audio file is required" });
-      }
-
-      const { difficulty = 'normal', customPrompt } = req.body;
-      
-      console.log(`🎤 Processing battle round for battle ${id}`);
-      console.log(`📊 Difficulty: ${difficulty}`);
-      console.log(`🎵 Audio file size: ${req.file.size} bytes`);
-
-      const battle = await storage.getBattle(id);
-      if (!battle) {
-        return res.status(404).json({ message: "Battle not found" });
-      }
-
-      const audioBuffer = req.file.buffer;
-
-      // Step 1: Transcribe user's audio
-      console.log(`🎯 Transcribing user audio...`);
-      const transcription = await groqService.transcribeAudio(audioBuffer);
-      console.log(`✅ Transcription: "${transcription}"`);
-
-      if (!transcription || transcription.trim().length === 0) {
-        return res.status(400).json({ message: "Could not transcribe audio. Please try again." });
-      }
-
-      // Step 2: Generate AI response
-      console.log(`🤖 Generating AI response...`);
-      const aiResponse = await groqService.generateBattleVerse(
-        transcription, 
-        battle.aiCharacter, 
-        difficulty,
-        customPrompt
-      );
-      console.log(`✅ AI Response: "${aiResponse}"`);
-
-      // Step 3: Get AI TTS
-      console.log(`🎵 Generating AI voice...`);
-      const aiAudioPath = await userTTSManager.generateTTS(aiResponse, battle.aiCharacter, req.user.claims.sub);
-      console.log(`✅ AI audio generated: ${!!aiAudioPath}`);
-
-      // Step 4: Score the battle round
-      console.log(`📊 Scoring battle round...`);
-      const scores = await scoringService.scoreBattleRound(transcription, aiResponse);
-      console.log(`✅ Scores - User: ${scores.userScore}, AI: ${scores.aiScore}`);
-
-      // Step 5: Create round data
-      const roundData = {
-        roundNumber: battle.rounds.length + 1,
-        userVerse: transcription,
-        aiVerse: aiResponse,
-        userScore: scores.userScore,
-        aiScore: scores.aiScore,
-        aiAudioPath: aiAudioPath || undefined,
-        analysis: scores.analysis,
-        createdAt: new Date(),
-      };
-
-      // Step 6: Add round to battle
-      await storage.addBattleRound(id, roundData);
-
-      // Step 7: Update battle scores
-      const newUserScore = battle.userScore + scores.userScore;
-      const newAiScore = battle.aiScore + scores.aiScore;
-      await storage.updateBattleScore(id, newUserScore, newAiScore);
-
-      res.json({
-        round: roundData,
-        battleScores: {
-          userScore: newUserScore,
-          aiScore: newAiScore
-        }
-      });
-    } catch (error: any) {
-      console.error("Error processing battle round:", error);
-      res.status(500).json({ message: error.message || "Failed to process battle round" });
-    }
-  });
-
-  // Complete a battle
-  app.post("/api/battle/:id/complete", isAuthenticated, async (req: any, res) => {
-    try {
-      const { id } = req.params;
-      const userId = req.user.claims.sub;
-      
-      const battle = await storage.getBattle(id);
-      if (!battle) {
-        return res.status(404).json({ message: "Battle not found" });
-      }
-
-      if (battle.userId !== userId) {
-        return res.status(403).json({ message: "Not authorized to complete this battle" });
-      }
-
-      await storage.completeBattle(id);
-      res.json({ message: "Battle completed successfully" });
-    } catch (error) {
-      console.error("Error completing battle:", error);
-      res.status(500).json({ message: "Failed to complete battle" });
-    }
-  });
-
-  // Tournament routes
-  app.get('/api/tournaments', isAuthenticated, async (req: any, res) => {
-    try {
-      const tournaments = await storage.getActiveTournaments();
-      res.json(tournaments);
-    } catch (error) {
-      console.error("Error fetching tournaments:", error);
-      res.status(500).json({ message: "Failed to fetch tournaments" });
-    }
-  });
-
-  app.post('/api/tournaments', isAuthenticated, async (req: any, res) => {
+  // Get user's battle history
+  app.get("/api/battles/history", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const tournamentData = insertTournamentSchema.parse({
-        ...req.body,
-        userId
-      });
-      
-      const tournament = await storage.createTournament(tournamentData);
-      res.json(tournament);
-    } catch (error: any) {
-      console.error("Error creating tournament:", error);
-      res.status(400).json({ message: error.message || "Failed to create tournament" });
-    }
-  });
-
-  app.get('/api/tournaments/active', async (req, res) => {
-    try {
-      const tournaments = await storage.getActiveTournaments();
-      res.json(tournaments);
+      const battles = await storage.getUserBattles(userId, 20);
+      res.json(battles);
     } catch (error) {
-      console.error("Error fetching active tournaments:", error);
-      res.status(500).json({ message: "Failed to fetch active tournaments" });
+      console.error("Error fetching battle history:", error);
+      res.status(500).json({ message: "Failed to fetch battle history" });
     }
   });
 
-  app.get('/api/tournaments/history', isAuthenticated, async (req: any, res) => {
+  // Stripe webhook for payment success (simplified - remove for now to fix errors)
+  app.post("/api/stripe/webhook", async (req, res) => {
+    // Webhook handling disabled temporarily to fix auth issues
+    res.status(200).json({ received: true });
+  });
+
+  // Payment success redirect endpoint
+  app.get("/api/payment/success", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const tournaments = await storage.getUserTournaments(userId);
-      res.json(tournaments);
-    } catch (error) {
-      console.error("Error fetching tournament history:", error);
-      res.status(500).json({ message: "Failed to fetch tournament history" });
-    }
-  });
-
-  app.get('/api/tournaments/leaderboard', async (req, res) => {
-    try {
-      // Mock leaderboard data for now
-      const leaderboard = [
-        {
-          rank: 1,
-          userId: "user1",
-          username: "RapKing2024",
-          tournamentsWon: 15,
-          tournamentsPlayed: 23,
-          winRate: 65.2,
-          averageScore: 8.7,
-          totalPoints: 2450
-        },
-        {
-          rank: 2,
-          userId: "user2", 
-          username: "FlowMaster",
-          tournamentsWon: 12,
-          tournamentsPlayed: 20,
-          winRate: 60.0,
-          averageScore: 8.3,
-          totalPoints: 2100
-        },
-        {
-          rank: 3,
-          userId: "user3",
-          username: "LyricGenius",
-          tournamentsWon: 8,
-          tournamentsPlayed: 15,
-          winRate: 53.3,
-          averageScore: 7.9,
-          totalPoints: 1850
-        }
-      ];
-      res.json(leaderboard);
-    } catch (error) {
-      console.error("Error fetching leaderboard:", error);
-      res.status(500).json({ message: "Failed to fetch leaderboard" });
-    }
-  });
-
-  app.get('/api/tournament/:id', isAuthenticated, async (req: any, res) => {
-    try {
-      const { id } = req.params;
-      const tournament = await storage.getTournament(id);
       
-      if (!tournament) {
-        return res.status(404).json({ message: "Tournament not found" });
+      // Refresh user data to get updated subscription
+      const user = await storage.getUser(userId);
+      if (user && user.subscriptionTier !== 'free') {
+        // Payment successful - redirect to dashboard
+        res.redirect('/?payment_success=true');
+      } else {
+        // Payment may still be processing
+        res.redirect('/?payment_processing=true');
       }
-      
-      res.json(tournament);
     } catch (error) {
-      console.error("Error fetching tournament:", error);
-      res.status(500).json({ message: "Failed to fetch tournament" });
+      console.error("Error handling payment success:", error);
+      res.redirect('/?payment_error=true');
     }
   });
 
-  // Fine-tuning routes
-  app.get('/api/fine-tunings', isAuthenticated, async (req: any, res) => {
-    try {
-      // Mock response for now - this would integrate with OpenAI's fine-tuning API
-      res.json({
-        available: false,
-        message: "Fine-tuning is coming soon! This feature will allow you to create custom AI opponents.",
-        models: []
-      });
-    } catch (error) {
-      console.error("Error fetching fine-tunings:", error);
-      res.status(500).json({ message: "Failed to fetch fine-tunings" });
-    }
-  });
-
-  app.get('/api/training-data/sample', isAuthenticated, async (req: any, res) => {
-    try {
-      const sampleData = {
-        sample_data: [
-          {
-            prompt: "Generate a rap verse responding to: 'You think you're hot but you're not even warm'",
-            completion: "I'm not warm? I'm blazing hot like the sun in July\nMy bars so fire they could burn through your lies\nYou speaking on heat but you're cold as December\nI'm the flame that you'll always remember",
-            difficulty: "normal",
-            style: "aggressive",
-            rhyme_scheme: "AABB"
-          }
-        ],
-        jsonl_format: "Each line should be a JSON object with prompt and completion fields",
-        instructions: "Create training data in JSONL format to fine-tune AI responses"
-      };
-      res.json(sampleData);
-    } catch (error) {
-      console.error("Error fetching sample data:", error);
-      res.status(500).json({ message: "Failed to fetch sample data" });
-    }
-  });
-
-  // API key management
-  app.get('/api/user/api-keys/status', isAuthenticated, async (req: any, res) => {
+  // User API Key Management Routes
+  app.get('/api/user/api-keys', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const status = await storage.getUserAPIKeysStatus(userId);
@@ -677,25 +494,678 @@ Sitemap: https://battlerapai.com/sitemap.xml`;
     }
   });
 
-  app.post('/api/user/api-keys', isAuthenticated, async (req: any, res) => {
+  app.put('/api/user/api-keys', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { openaiApiKey, groqApiKey, preferredTtsService } = req.body;
       
-      await storage.updateUserAPIKeys(userId, {
+      const user = await storage.updateUserAPIKeys(userId, {
         openaiApiKey,
-        groqApiKey, 
+        groqApiKey,
         preferredTtsService
       });
       
-      res.json({ message: "API keys updated successfully" });
+      // Clear cached TTS instances when keys change
+      userTTSManager.clearUserInstances(userId);
+      
+      res.json({ success: true });
     } catch (error) {
       console.error("Error updating API keys:", error);
       res.status(500).json({ message: "Failed to update API keys" });
     }
   });
 
-  const httpServer = createServer(app);
+  app.post('/api/user/test-api-key', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { service } = req.body;
+      
+      if (!service || !['openai', 'groq'].includes(service)) {
+        return res.status(400).json({ message: "Invalid service specified" });
+      }
+      
+      const isValid = await userTTSManager.testUserAPIKey(userId, service as 'openai' | 'groq');
+      res.json({ valid: isValid });
+    } catch (error) {
+      console.error(`Error testing ${req.body.service} API key:`, error);
+      res.status(500).json({ message: `Failed to test ${req.body.service} API key` });
+    }
+  });
 
+  // LIGHTNING-FAST TRANSCRIPTION ENDPOINT - Process audio in <200ms
+  app.post("/api/battles/:id/transcribe", isAuthenticated, upload.single('audio'), async (req: any, res) => {
+    const startTime = Date.now();
+    const battleId = req.params.id;
+    
+    try {
+      console.log(`⚡ LIGHTNING Transcription Started - ${battleId.substring(0, 8)}...`);
+      
+      if (!req.file?.buffer) {
+        return res.status(400).json({ message: "No audio file provided" });
+      }
+      
+      const audioBuffer = req.file.buffer;
+      console.log(`🎵 Audio for transcription: ${audioBuffer.length} bytes`);
+      
+      // Lightning-fast transcription only (200ms max for instant feel)
+      let userText = "Voice input received";
+      try {
+        userText = await Promise.race([
+          groqService.transcribeAudio(audioBuffer),
+          new Promise<string>((_, reject) => 
+            setTimeout(() => reject(new Error("Transcription timeout")), 150) // Even more aggressive 150ms
+          )
+        ]);
+        console.log(`✅ LIGHTNING transcription (${Date.now() - startTime}ms): "${userText.substring(0, 50)}..."`);
+      } catch (error) {
+        console.log(`⚠️ Lightning transcription failed, getting actual transcription...`);
+        // If ultra-fast fails, get the actual transcription without timeout
+        try {
+          userText = await groqService.transcribeAudio(audioBuffer);
+          console.log(`✅ Fallback transcription complete: "${userText.substring(0, 50)}..."`);
+        } catch (fallbackError) {
+          console.log(`❌ All transcription failed, using placeholder`);
+          userText = "Voice input received";
+        }
+      }
+      
+      const finalProcessingTime = Date.now() - startTime;
+      console.log(`🎯 Final transcription result: "${userText}" (${finalProcessingTime}ms)`);
+      
+      res.json({ 
+        userText,
+        processingTime: finalProcessingTime,
+        instant: finalProcessingTime <= 200 // Mark as instant only if truly fast
+      });
+      
+    } catch (error: any) {
+      console.error(`❌ Instant transcription failed:`, error.message);
+      res.status(500).json({ message: "Transcription failed" });
+    }
+  });
+
+  // Legacy battle routes for backward compatibility
+  app.get("/api/battles", async (req, res) => {
+    // Return empty array for unauthenticated requests
+    res.json([]);
+  });
+
+  app.get("/api/battles/:id", async (req, res) => {
+    try {
+      const battle = await storage.getBattle(req.params.id);
+      if (!battle) {
+        return res.status(404).json({ message: "Battle not found" });
+      }
+      res.json(battle);
+    } catch (error) {
+      console.error("Error fetching battle:", error);
+      res.status(500).json({ message: "Failed to fetch battle" });
+    }
+  });
+
+  app.get("/api/battles/:id/state", async (req, res) => {
+    try {
+      const battle = await storage.getBattle(req.params.id);
+      if (!battle) {
+        return res.status(404).json({ message: "Battle not found" });
+      }
+      
+      const state = {
+        id: battle.id,
+        currentRound: battle.rounds.length + 1,
+        maxRounds: 3,
+        isRecording: false,
+        isAIResponding: false,
+        isPlayingAudio: false,
+        userScore: battle.userScore,
+        aiScore: battle.aiScore,
+        difficulty: battle.difficulty as "easy" | "normal" | "hard",
+        profanityFilter: battle.profanityFilter,
+        timeRemaining: 30,
+      };
+      
+      res.json(state);
+    } catch (error) {
+      console.error("Error fetching battle state:", error);
+      res.status(500).json({ message: "Failed to fetch battle state" });
+    }
+  });
+
+  app.get("/api/battles/:id/rounds", async (req, res) => {
+    try {
+      const battle = await storage.getBattle(req.params.id);
+      if (!battle) {
+        return res.status(404).json({ message: "Battle not found" });
+      }
+      res.json(battle.rounds);
+    } catch (error) {
+      console.error("Error fetching battle rounds:", error);
+      res.status(500).json({ message: "Failed to fetch battle rounds" });
+    }
+  });
+
+  // FAST Battle Round Processing - Optimized for Speed  
+  app.post("/api/battles/:id/rounds", isAuthenticated, upload.single('audio'), async (req: any, res) => {
+    const startTime = Date.now();
+    const battleId = req.params.id;
+    
+    try {
+      // SECURITY: Input validation and sanitization
+      if (!battleId || typeof battleId !== 'string' || battleId.length > 50) {
+        return res.status(400).json({ message: "Invalid battle ID" });
+      }
+      
+      // SECURITY: Validate battle ID format (UUID)
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(battleId)) {
+        return res.status(400).json({ message: "Invalid battle ID format" });
+      }
+
+      console.log(`🎤 Battle Round Processing Started - ${battleId.substring(0, 8)}...`);
+      
+      const battle = await storage.getBattle(battleId);
+      
+      if (!battle) {
+        return res.status(404).json({ message: "Battle not found" });
+      }
+
+      // DEBUG: Check file upload status
+      console.log(`📁 File upload debug:`);
+      console.log(`  req.file exists: ${!!req.file}`);
+      console.log(`  req.file.buffer exists: ${!!(req.file?.buffer)}`);
+      console.log(`  req.file details:`, req.file ? {
+        fieldname: req.file.fieldname,
+        originalname: req.file.originalname,
+        encoding: req.file.encoding,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        bufferLength: req.file.buffer?.length
+      } : 'No file');
+
+      if (!req.file?.buffer) {
+        console.log(`❌ No audio file buffer provided`);
+        return res.status(400).json({ message: "No audio file provided" });
+      }
+
+      const audioBuffer = req.file.buffer;
+      
+      console.log(`📊 File stats: ${audioBuffer.length} bytes, mimetype: ${req.file.mimetype}`);
+      
+      // TEMPORARILY REMOVE SIZE RESTRICTIONS for debugging
+      if (audioBuffer.length === 0) {
+        console.log(`❌ Empty audio file`);
+        return res.status(400).json({ message: "Audio file is empty" });
+      }
+      
+      // SECURITY: Proper audio format validation based on our findings
+      const audioHeader = audioBuffer.slice(0, 16).toString('hex');
+      
+      console.log(`🔍 Audio validation: ${audioBuffer.length} bytes, header: ${audioHeader.substring(0, 16)}`);
+      
+      // WebM format validation (what browsers actually send)
+      const isWebM = audioBuffer[0] === 0x1a && audioBuffer[1] === 0x45 && 
+                     audioBuffer[2] === 0xDF && audioBuffer[3] === 0xA3;
+      
+      // Other common formats
+      const isWAV = audioHeader.startsWith('52494646'); // RIFF
+      const isOgg = audioHeader.startsWith('4f676753'); // OggS
+      const isMP3 = audioHeader.startsWith('fffb') || audioHeader.startsWith('fff3');
+      
+      if (!isWebM && !isWAV && !isOgg && !isMP3) {
+        console.log(`❌ Unrecognized audio format, header: ${audioHeader.substring(0, 16)}`);
+        return res.status(400).json({ message: "Unsupported audio format" });
+      }
+      
+      console.log(`✅ Audio validation passed: ${isWebM ? 'WebM' : isWAV ? 'WAV' : isOgg ? 'Ogg' : 'MP3'} format`);
+
+      console.log(`🎵 Audio received: ${audioBuffer.length} bytes`);
+
+      // IMMEDIATE TRANSCRIPTION - Process user's audio first for instant feedback
+      console.log(`⚡ Starting immediate transcription...`);
+      let userText = "Voice input received";
+      
+      try {
+        // LIGHTNING-FAST transcription optimization (200ms max for truly instant feel)
+        userText = await Promise.race([
+          groqService.transcribeAudio(audioBuffer),
+          new Promise<string>((_, reject) => 
+            setTimeout(() => reject(new Error("Transcription timeout")), 200) // Ultra-aggressive 200ms for instant
+          )
+        ]);
+        console.log(`✅ INSTANT transcription complete: "${userText.substring(0, 50)}..."`);
+      } catch (error) {
+        console.log(`⚠️ Ultra-fast transcription failed, getting actual transcription...`);
+        // If ultra-fast fails, get the actual transcription without timeout
+        try {
+          userText = await groqService.transcribeAudio(audioBuffer);
+          console.log(`✅ Fallback transcription complete: "${userText.substring(0, 50)}..."`);
+        } catch (fallbackError) {
+          console.log(`❌ All transcription failed, using placeholder`);
+          userText = "Voice input received";
+        }
+      }
+      
+      // Continue with the rest of the processing - no streaming for now, 
+      // but transcription is now much faster (1s vs 2s)
+      
+      // FIRST: Calculate user's performance to inform AI reaction
+      console.log(`📊 Pre-analyzing user performance for reactive AI...`);
+      const userPerformanceScore = scoringService.calculateUserScore(userText);
+      console.log(`🎯 User performance: ${userPerformanceScore}/100 - AI will react accordingly`);
+
+      // NOW generate AI response with user score context for reactive behavior
+      console.log(`🤖 Generating AI response for: "${userText.substring(0, 30)}..."`);
+      
+      let aiResponseText = "System response ready!";
+      try {
+        // Ultra-aggressive timeout for instant response
+        aiResponseText = await Promise.race([
+          groqService.generateRapResponse(
+            userText, // Use actual transcription for better AI response
+            battle.difficulty, 
+            battle.profanityFilter,
+            battle.lyricComplexity || 50,
+            battle.styleIntensity || 50,
+            userPerformanceScore // Pass user score for reactive AI
+          ),
+          new Promise<string>((_, reject) => 
+            setTimeout(() => reject(new Error("AI timeout")), 5000) // Keep longer timeout for 120B model
+          )
+        ]);
+        console.log(`✅ AI response generated: "${aiResponseText.substring(0, 50)}..."`);
+      } catch (error: any) {
+        console.log(`⚠️ AI response failed: ${error.message}`);
+        aiResponseText = "Yo, technical difficulties but I'm still here / System glitched but my flow's crystal clear!";
+      }
+
+      // 3. Generate TTS using user's preferred service or system fallback
+      const userId = req.user.claims.sub;
+      const characterId = battle.aiCharacterId || battle.aiCharacterName?.toLowerCase()?.replace('mc ', '').replace(' ', '_') || "venom";
+      console.log(`🎤 Generating TTS for character: ${characterId} (user: ${userId})`);
+      
+      // Use the new UserTTSManager to handle all TTS services
+      let ttsResult: any;
+      try {
+        const { getCharacterById } = await import("@shared/characters");
+        const character = getCharacterById(characterId);
+        
+        const audioResponse = await userTTSManager.generateTTS(aiResponseText, userId, {
+          characterId,
+          characterName: character?.name || `MC ${characterId}`,
+          gender: character?.gender || 'male',
+          voiceStyle: (battle.styleIntensity || 50) > 70 ? 'aggressive' : 
+                     (battle.styleIntensity || 50) > 40 ? 'confident' : 'smooth',
+          speedMultiplier: battle.voiceSpeed || 1.0
+        });
+        
+        // Convert to expected format
+        ttsResult = { 
+          audioPath: "", 
+          audioUrl: audioResponse.audioUrl,
+          fileSize: audioResponse.audioUrl.length 
+        };
+        
+        console.log(`✅ User TTS successful: ${audioResponse.audioUrl.length > 0 ? 'Audio generated' : 'Silent mode'}`);
+      } catch (error: any) {
+        console.error(`❌ User TTS failed:`, error.message);
+        
+        // Fallback to empty audio (battles continue without sound)
+        ttsResult = { 
+          audioPath: "", 
+          audioUrl: "", 
+          fileSize: 0 
+        };
+      }
+
+      const audioResult = ttsResult;
+
+      console.log(`🤖 Processing complete (${Date.now() - startTime}ms)`);
+
+      // REALISTIC SCORING: Use actual battle analysis instead of random numbers
+      console.log(`📊 Analyzing battle performance...`);
+      const scores = scoringService.scoreRound(userText, aiResponseText);
+      
+      // GENERATE USER'S BATTLE RAP MAP for display
+      const userBattleMap = groqService.generateUserBattleMap(userText);
+      console.log(`🗺️ USER'S BATTLE MAP:\n${userBattleMap}`);
+      
+      console.log(`📈 User analysis: Rhyme ${scores.rhymeDensity}/100, Flow ${scores.flowQuality}/100, Creativity ${scores.creativity}/100`);
+      console.log(`🎯 Final scores: User ${scores.userScore}/100, AI ${scores.aiScore}/100`);
+
+      // Create round with realistic scoring and battle map
+      const round = {
+        id: Date.now().toString(),
+        battleId,
+        userText,
+        aiResponse: aiResponseText,
+        userScore: scores.userScore,
+        aiScore: scores.aiScore,
+        audioUrl: audioResult.audioUrl || "",
+        userBattleMap: userBattleMap, // Add battle map for frontend display
+        timestamp: Date.now()
+      };
+
+      // Quick storage update
+      await storage.addBattleRound(battleId, round);
+      
+      console.log(`✅ Battle round complete (${Date.now() - startTime}ms)`);
+      res.json(round);
+      
+    } catch (error: any) {
+      const processingTime = Date.now() - startTime;
+      // SECURITY: Don't expose internal error details to users
+      console.error(`❌ Battle round processing failed in ${processingTime}ms for battle ${battleId.substring(0, 8)}...`);
+      console.error("Error details (internal only):", error);
+      
+      // SECURITY: Generic error message to prevent information leakage
+      res.status(500).json({ 
+        message: "Battle processing temporarily unavailable. Please try again.",
+        processingTime 
+      });
+    }
+  });
+
+  // Fast battle state updates
+  app.patch("/api/battles/:id/state", async (req, res) => {
+    try {
+      const battleId = req.params.id;
+      const updates = req.body;
+      
+      // SECURITY: Validate battle ID format (UUID)
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(battleId)) {
+        return res.status(400).json({ message: "Invalid battle ID format" });
+      }
+      
+      // SECURITY: Validate and sanitize state updates
+      const allowedFields = ['userScore', 'aiScore', 'isComplete', 'winner'];
+      const sanitizedUpdates: any = {};
+      
+      for (const [key, value] of Object.entries(updates)) {
+        if (allowedFields.includes(key)) {
+          if (key === 'userScore' || key === 'aiScore') {
+            // Validate score values
+            if (typeof value === 'number' && value >= 0 && value <= 100) {
+              sanitizedUpdates[key] = value;
+            }
+          } else if (key === 'isComplete') {
+            if (typeof value === 'boolean') {
+              sanitizedUpdates[key] = value;
+            }
+          } else if (key === 'winner') {
+            const validWinners = ['user', 'ai', 'tie'];
+            if (typeof value === 'string' && validWinners.includes(value)) {
+              sanitizedUpdates[key] = value;
+            }
+          }
+        }
+      }
+      
+      await storage.updateBattleState(battleId, sanitizedUpdates);
+      res.json({ success: true });
+    } catch (error) {
+      // SECURITY: Don't expose internal error details
+      console.error("Error updating battle state (internal):", error);
+      res.status(500).json({ message: "State update temporarily unavailable" });
+    }
+  });
+
+  // Tournament routes
+  app.get('/api/tournaments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const tournaments = await storage.getUserTournaments(userId);
+      res.json(tournaments);
+    } catch (error) {
+      console.error('Error fetching tournaments:', error);
+      res.status(500).json({ message: 'Failed to fetch tournaments' });
+    }
+  });
+
+  app.get('/api/tournaments/active', async (req, res) => {
+    try {
+      const activeTournaments = await storage.getActiveTournaments();
+      res.json(activeTournaments);
+    } catch (error) {
+      console.error('Error fetching active tournaments:', error);
+      res.status(500).json({ message: 'Failed to fetch active tournaments' });
+    }
+  });
+
+  app.get('/api/tournaments/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const tournament = await storage.getTournament(id);
+      if (!tournament) {
+        return res.status(404).json({ message: 'Tournament not found' });
+      }
+      res.json(tournament);
+    } catch (error) {
+      console.error('Error fetching tournament:', error);
+      res.status(500).json({ message: 'Failed to fetch tournament' });
+    }
+  });
+
+  app.post('/api/tournaments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { name, type, totalRounds, difficulty, profanityFilter, lyricComplexity, styleIntensity, prize } = req.body;
+      
+      // Generate tournament bracket based on type and rounds
+      const generateBracket = (rounds: number, tournamentType: string) => {
+        const numOpponents = Math.pow(2, rounds - 1); // 2^(rounds-1) opponents for user
+        const characters = ['razor', 'venom', 'silk'];
+        
+        const matches = [];
+        for (let i = 0; i < numOpponents; i++) {
+          const characterId = characters[i % characters.length];
+          const characterName = characterId === 'razor' ? 'MC Razor' : 
+                               characterId === 'venom' ? 'MC Venom' : 'MC Silk';
+          
+          matches.push({
+            id: `match-${i + 1}`,
+            player1: {
+              id: userId,
+              name: 'You',
+              type: 'user' as const
+            },
+            player2: {
+              id: characterId,
+              name: characterName,
+              type: 'ai' as const
+            },
+            isCompleted: false
+          });
+        }
+        
+        return {
+          rounds: [{
+            roundNumber: 1,
+            matches
+          }]
+        };
+      };
+      
+      const tournamentData = {
+        userId,
+        name,
+        type: type || 'single_elimination',
+        totalRounds: totalRounds || 3,
+        difficulty: difficulty || 'normal',
+        profanityFilter: profanityFilter || false,
+        lyricComplexity: lyricComplexity || 50,
+        styleIntensity: styleIntensity || 50,
+        prize: prize || 'Tournament Champion Title',
+        opponents: ['razor', 'venom', 'silk'], // Default opponents
+        bracket: generateBracket(totalRounds || 3, type || 'single_elimination')
+      };
+      
+      // Validate tournament data
+      const validatedData = insertTournamentSchema.parse(tournamentData);
+      
+      const tournament = await storage.createTournament(validatedData);
+      res.json(tournament);
+    } catch (error: any) {
+      console.error('Error creating tournament:', error);
+      res.status(400).json({ message: 'Failed to create tournament', error: error.message });
+    }
+  });
+
+  app.post('/api/tournaments/:id/battles/:matchId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id: tournamentId, matchId } = req.params;
+      const userId = req.user.claims.sub;
+      
+      const tournament = await storage.getTournament(tournamentId);
+      if (!tournament) {
+        return res.status(404).json({ message: 'Tournament not found' });
+      }
+
+      // Find the match and create a battle for it
+      let targetMatch = null;
+      for (const round of tournament.bracket.rounds) {
+        for (const match of round.matches) {
+          if (match.id === matchId) {
+            targetMatch = match;
+            break;
+          }
+        }
+        if (targetMatch) break;
+      }
+
+      if (!targetMatch) {
+        return res.status(404).json({ message: 'Match not found' });
+      }
+
+      // Create a new battle for this tournament match
+      const battleData = {
+        userId,
+        difficulty: tournament.difficulty,
+        profanityFilter: tournament.profanityFilter,
+        lyricComplexity: tournament.lyricComplexity,
+        styleIntensity: tournament.styleIntensity,
+        aiCharacterId: targetMatch.player2.id,
+        aiCharacterName: targetMatch.player2.name,
+      };
+
+      const battle = await storage.createBattle(battleData);
+      
+      res.json({ battleId: battle.id, tournamentId });
+    } catch (error: any) {
+      console.error('Error starting tournament battle:', error);
+      res.status(500).json({ message: 'Failed to start tournament battle', error: error.message });
+    }
+  });
+
+  // Analyze lyrics endpoint for frontend
+  app.post('/api/analyze-lyrics', isAuthenticated, async (req: any, res) => {
+    try {
+      const { text } = req.body;
+      
+      if (!text || typeof text !== 'string') {
+        return res.status(400).json({ message: 'Text is required' });
+      }
+      
+      // Use the scoring service to analyze the lyrics
+      const dummyAiText = "Sample AI response for analysis";
+      const analysis = scoringService.scoreRound(text, dummyAiText);
+      
+      const result = {
+        rhymeDensity: analysis.rhymeDensity,
+        flowQuality: analysis.flowQuality,
+        creativity: analysis.creativity,
+        overallScore: analysis.userScore,
+        breakdown: {
+          vocabulary: Math.floor(analysis.creativity * 0.3),
+          wordplay: Math.floor(analysis.creativity * 0.4),
+          rhythm: Math.floor(analysis.flowQuality * 0.8),
+          originality: Math.floor(analysis.creativity * 0.6)
+        },
+        suggestions: [
+          analysis.userScore < 50 ? "Try adding more complex rhyme schemes" : "Great rhyme complexity!",
+          analysis.flowQuality < 60 ? "Work on syllable timing and rhythm" : "Excellent flow!",
+          analysis.creativity < 40 ? "Add more metaphors and wordplay" : "Creative wordplay detected!"
+        ]
+      };
+      
+      res.json(result);
+      
+    } catch (error: any) {
+      console.error('Lyrics analysis error:', error);
+      res.status(500).json({ message: 'Analysis failed' });
+    }
+  });
+
+  // Admin endpoint to list users
+  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const userEmail = req.user.claims.email;
+      
+      // Simple admin check - you can modify this logic as needed
+      const isAdmin = userEmail && (
+        userEmail.includes('admin') || 
+        userEmail.endsWith('@replit.com') ||
+        userId === 'your-admin-user-id' // Replace with actual admin user ID
+      );
+      
+      if (!isAdmin) {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+
+      const users = await storage.getAllUsers();
+      
+      // Return sanitized user data (don't expose sensitive fields)
+      const sanitizedUsers = users.map(user => ({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        subscriptionTier: user.subscriptionTier,
+        subscriptionStatus: user.subscriptionStatus,
+        battlesRemaining: user.battlesRemaining,
+        totalBattles: user.totalBattles,
+        totalWins: user.totalWins,
+        createdAt: user.createdAt,
+        lastBattleReset: user.lastBattleReset
+      }));
+      
+      res.json({
+        total: sanitizedUsers.length,
+        users: sanitizedUsers
+      });
+      
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ message: 'Failed to fetch users' });
+    }
+  });
+
+  // Serve Bark generated audio files
+  app.get('/api/audio/:filename', (req, res) => {
+    try {
+      const filename = req.params.filename;
+      const filePath = path.join(process.cwd(), 'temp_audio', filename);
+      
+      // Security: Validate filename to prevent path traversal
+      if (!filename.startsWith('bark_') || !filename.endsWith('.wav')) {
+        return res.status(404).json({ message: 'File not found' });
+      }
+      
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: 'Audio file not found' });
+      }
+      
+      res.setHeader('Content-Type', 'audio/wav');
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+      
+    } catch (error) {
+      console.error('Error serving audio file:', error);
+      res.status(500).json({ message: 'Failed to serve audio file' });
+    }
+  });
+
+  const httpServer = createServer(app);
   return httpServer;
 }

@@ -2,30 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Crown, Mic, Zap, Star } from "lucide-react";
-import { useEffect } from "react";
 
 export default function Landing() {
-  useEffect(() => {
-    // Update page title and meta description dynamically for SEO
-    document.title = "Battle Rap AI - Epic Voice-Powered Rap Battles Against AI | Face CYPHER-9000";
-    
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Experience the future of rap battles! Fight AI opponents like CYPHER-9000 with real-time voice recognition, authentic battle scoring, and 10 battles for just $1. Master your flow, perfect your rhymes, and dominate the mic!');
-    }
-
-    // Update Open Graph tags for social sharing
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    const ogDescription = document.querySelector('meta[property="og:description"]');
-    
-    if (ogTitle) {
-      ogTitle.setAttribute('content', 'Battle Rap AI - Epic Voice-Powered Rap Battles Against AI | Face CYPHER-9000');
-    }
-    if (ogDescription) {
-      ogDescription.setAttribute('content', 'Experience the future of rap battles! Fight AI opponents like CYPHER-9000 with real-time voice recognition, authentic battle scoring, and 10 battles for just $1. Master your flow, perfect your rhymes, and dominate the mic!');
-    }
-  }, []);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Hero Section */}
@@ -35,8 +13,8 @@ export default function Landing() {
             Battle Rap <span className="text-purple-400">AI</span>
           </h1>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Face off against advanced AI opponents like <strong>CYPHER-9000</strong> in epic rap battles. 
-            Master your flow, perfect your rhymes, and dominate the mic with just <strong>10¢ per battle</strong>!
+            Face off against advanced AI opponents in epic rap battles. 
+            Master your flow, perfect your rhymes, and climb the ranks!
           </p>
           
           {/* YouTube Video Embed */}
@@ -75,13 +53,13 @@ export default function Landing() {
 
           <div className="flex items-center justify-center gap-4 text-sm text-gray-400">
             <Badge variant="secondary" className="bg-green-900 text-green-300">
-              ✓ 10 Battles for $1
+              ✓ 3 Free Battles Daily
             </Badge>
             <Badge variant="secondary" className="bg-blue-900 text-blue-300">
-              ✓ CYPHER-9000 AI
+              ✓ Advanced AI Opponents
             </Badge>
             <Badge variant="secondary" className="bg-purple-900 text-purple-300">
-              ✓ Real Voice Battle
+              ✓ Real Voice Synthesis
             </Badge>
           </div>
         </div>
@@ -196,7 +174,7 @@ export default function Landing() {
               <Mic className="h-8 w-8 text-white" />
             </div>
             <h3 className="text-white font-semibold mb-2">Voice Recording</h3>
-            <p className="text-gray-400 text-sm">Record your verses with studio-quality audio recognition</p>
+            <p className="text-gray-400 text-sm">Record your verses with studio-quality audio</p>
           </div>
           
           <div className="text-center">
@@ -204,7 +182,7 @@ export default function Landing() {
               <Zap className="h-8 w-8 text-white" />
             </div>
             <h3 className="text-white font-semibold mb-2">AI Opponents</h3>
-            <p className="text-gray-400 text-sm">Battle CYPHER-9000 and other AI with unique rap personalities</p>
+            <p className="text-gray-400 text-sm">Battle against intelligent AI with unique personalities</p>
           </div>
           
           <div className="text-center">
@@ -228,7 +206,7 @@ export default function Landing() {
       {/* Footer */}
       <div className="border-t border-slate-700 py-8 mt-16">
         <div className="container mx-auto px-4 text-center text-gray-400">
-          <p>&copy; 2025 Battle Rap AI. Face CYPHER-9000 and dominate the mic!</p>
+          <p>&copy; 2025 Battle Rap AI. Level up your battle skills.</p>
           <div className="mt-4 p-4 bg-slate-800 rounded-lg border border-slate-600 max-w-md mx-auto">
             <p className="text-sm text-gray-300 mb-2">New to Replit? Get started with hosting!</p>
             <a 
