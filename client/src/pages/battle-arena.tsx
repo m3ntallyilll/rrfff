@@ -133,18 +133,24 @@ export default function BattleArena() {
         
         setAiResponse(result.aiResponse || "AI response generated");
         
-        console.log('Setting current AI audio URL:', result.audioUrl?.substring(0, 100) + '...');
+        console.log('🎵 Setting current AI audio URL:', result.audioUrl?.substring(0, 100) + '...');
+        console.log('🎵 Audio URL length:', result.audioUrl?.length || 0);
+        console.log('🎵 Audio available:', !!result.audioUrl);
         setCurrentAiAudio(result.audioUrl);
         
         // Auto-play TTS immediately when available
-        if (result.audioUrl) {
+        if (result.audioUrl && result.audioUrl.length > 100) {
           console.log('🔥 Battle round complete - triggering auto-play');
+          console.log('🔥 Battle state before update:', battleState);
           updateBattleState({ isPlayingAudio: true });
           
           // Force avatar to start speaking immediately
           setTimeout(() => {
+            console.log('🔥 Setting isPlayingAudio to true again');
             updateBattleState({ isPlayingAudio: true });
           }, 100);
+        } else {
+          console.log('⚠️ No valid audio URL received:', result.audioUrl?.substring(0, 50));
         }
         
         toast({

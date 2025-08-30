@@ -19,6 +19,11 @@ export function SimpleAudioPlayer({
 
   useEffect(() => {
     if (audioUrl) {
+      console.log('🎵 SimpleAudioPlayer: New audio URL received');
+      console.log('🎵 Audio URL length:', audioUrl.length);
+      console.log('🎵 Audio URL format:', audioUrl.substring(0, 50) + '...');
+      console.log('🎵 Auto-play enabled:', autoPlay);
+      
       // Clean up previous audio
       if (audioRef.current) {
         audioRef.current.pause();
@@ -49,9 +54,17 @@ export function SimpleAudioPlayer({
       // Auto-play if enabled
       if (autoPlay) {
         console.log('🔥 Auto-playing audio immediately');
-        audio.play().catch(error => {
-          console.error('🔊 Auto-play failed:', error);
-        });
+        // Add slight delay to ensure audio is loaded
+        setTimeout(() => {
+          audio.play().catch(error => {
+            console.error('🔊 Auto-play failed:', error);
+            // Try manual playback as fallback
+            console.log('🔄 Retrying audio playback...');
+            setTimeout(() => {
+              audio.play().catch(e => console.error('🔊 Retry failed:', e));
+            }, 500);
+          });
+        }, 100);
       }
 
       return () => {
