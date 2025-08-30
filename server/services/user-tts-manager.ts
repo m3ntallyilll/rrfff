@@ -37,9 +37,22 @@ export class UserTTSManager {
     
     try {
       // Get user's TTS preferences and API keys
-      const user = await storage.getUser(userId);
+      let user;
+      try {
+        user = await storage.getUser(userId);
+      } catch (error) {
+        console.log(`⚠️ User ${userId} not found in database, using system defaults`);
+        user = null;
+      }
+      
       if (!user) {
-        throw new Error('User not found');
+        console.log(`🎯 No user preferences found, using system TTS`);
+        // Use system defaults for TTS when user not found
+        user = {
+          preferredTtsService: 'system',
+          openaiApiKey: null,
+          groqApiKey: null
+        };
       }
 
       const preferredService = user.preferredTtsService || 'system';
