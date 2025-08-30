@@ -8,7 +8,6 @@ import { SponsoredBanner } from "@/components/sponsored-banner";
 import Landing from "@/pages/Landing";
 import Home from "@/pages/Home";
 import Subscribe from "@/pages/Subscribe";
-import Blog from "@/pages/Blog";
 import BattleArena from "@/pages/battle-arena";
 import Tournaments from "@/pages/tournaments";
 import TournamentDetail from "@/pages/tournament-detail";
@@ -39,15 +38,11 @@ function Router() {
   return (
     <Switch>
       {!isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/blog" component={Blog} />
-        </>
+        <Route path="/" component={Landing} />
       ) : (
         <>
           <Route path="/" component={Home} />
           <Route path="/subscribe" component={Subscribe} />
-          <Route path="/blog" component={Blog} />
           <Route path="/battle" component={BattleArena} />
           <Route path="/battle/:id" component={BattleArena} />
           <Route path="/tournaments" component={Tournaments} />

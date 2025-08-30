@@ -6,23 +6,23 @@ import { useEffect } from "react";
 
 export default function Landing() {
   useEffect(() => {
-    // Update page title and meta description dynamically for viral SEO
-    document.title = "CYPHER-9000 Destroyed 10,000 Rappers - Can YOU Survive? | Battle Rap AI";
+    // Update page title and meta description dynamically for SEO
+    document.title = "Battle Rap AI - Epic Voice-Powered Rap Battles Against AI | Face CYPHER-9000";
     
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', '🔥 WARNING: CYPHER-9000 has NEVER been defeated! This terrifying AI rapper analyzes your flow in real-time and delivers devastating counter-attacks. Thousands tried. All failed. Will you be the first to survive? Your voice vs the machine - the ultimate test!');
+      metaDescription.setAttribute('content', 'Experience the future of rap battles! Fight AI opponents like CYPHER-9000 with real-time voice recognition, authentic battle scoring, and 10 battles for just $1. Master your flow, perfect your rhymes, and dominate the mic!');
     }
 
-    // Update Open Graph tags for maximum social sharing impact
+    // Update Open Graph tags for social sharing
     const ogTitle = document.querySelector('meta[property="og:title"]');
     const ogDescription = document.querySelector('meta[property="og:description"]');
     
     if (ogTitle) {
-      ogTitle.setAttribute('content', '🔥 CYPHER-9000 Destroyed 10,000 Rappers - Can YOU Survive?');
+      ogTitle.setAttribute('content', 'Battle Rap AI - Epic Voice-Powered Rap Battles Against AI | Face CYPHER-9000');
     }
     if (ogDescription) {
-      ogDescription.setAttribute('content', 'WARNING: This terrifying AI rapper has NEVER been defeated! CYPHER-9000 analyzes your flow in real-time and delivers devastating counter-attacks. Thousands tried. All failed. Will you be the first to survive the ultimate voice vs machine battle?');
+      ogDescription.setAttribute('content', 'Experience the future of rap battles! Fight AI opponents like CYPHER-9000 with real-time voice recognition, authentic battle scoring, and 10 battles for just $1. Master your flow, perfect your rhymes, and dominate the mic!');
     }
   }, []);
 
@@ -68,9 +68,8 @@ export default function Landing() {
               size="lg" 
               variant="outline" 
               className="border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white px-8 py-4 text-lg"
-              onClick={() => window.location.href = '/blog'}
             >
-              Read Blog
+              Watch Demo
             </Button>
           </div>
 
