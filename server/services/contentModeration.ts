@@ -195,6 +195,7 @@ export class ContentModerationService {
       
       if (!moderation.isSafe && moderation.categories) {
         // Filter only serious violations (S1, S3, S4, S10, S11)
+        // S8 (Intellectual Property) is allowed in battle rap context
         const seriousViolations = moderation.categories.filter(cat => 
           ['S1', 'S3', 'S4', 'S10', 'S11'].includes(cat)
         );
