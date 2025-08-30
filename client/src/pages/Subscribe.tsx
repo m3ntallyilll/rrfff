@@ -8,10 +8,11 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { Loader2, Zap } from 'lucide-react';
 
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
+const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+if (!STRIPE_PUBLIC_KEY) {
+  console.error('Missing VITE_STRIPE_PUBLIC_KEY environment variable');
 }
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePromise = STRIPE_PUBLIC_KEY ? loadStripe(STRIPE_PUBLIC_KEY) : null;
 
 interface PaymentFormProps {
   tier?: 'premium' | 'pro';
@@ -424,15 +425,34 @@ export default function Subscribe() {
     }
   };
 
+  if (!stripePromise) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-gray-800 border-red-500/50">
+          <CardHeader>
+            <CardTitle className="text-red-400 text-2xl text-center">
+              Payment Configuration Error
+            </CardTitle>
+            <CardDescription className="text-gray-400 text-center">
+              Stripe is not properly configured. Please contact support.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-gray-800 border-purple-500/50">
         <CardHeader>
           <CardTitle className="text-white text-2xl text-center">
-            Complete Your Subscription
+            Complete Your {purchaseType === 'battles' ? 'Battle Pack Purchase' : 'Subscription'}
           </CardTitle>
           <CardDescription className="text-gray-400 text-center">
-            {tier === 'premium' ? 'Premium Plan - $9.99/month' : 'Pro Plan - $19.99/month'}
+            {purchaseType === 'battles' ? 
+              '10 Battles for $1.00' : 
+              (tier === 'premium' ? 'Premium Plan - $9.99/month' : 'Pro Plan - $19.99/month')}
           </CardDescription>
           <div className="text-center mt-2">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
@@ -442,7 +462,7 @@ export default function Subscribe() {
         </CardHeader>
         <CardContent>
           <Elements stripe={stripePromise} options={stripeOptions}>
-            <PaymentForm tier={tier} paymentMethod={paymentMethod} purchaseType={purchaseType} battleCount={purchaseType === 'battles' ? 4 : undefined} />
+            <PaymentForm tier={tier} paymentMethod={paymentMethod} purchaseType={purchaseType} battleCount={purchaseType === 'battles' ? 10 : undefined} />
           </Elements>
         </CardContent>
       </Card>
