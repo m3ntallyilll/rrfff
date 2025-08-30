@@ -64,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.send(sitemap);
   });
 
-  app.get('/robots.txt', (req, res) => {
+  app.get('/robots.txt', (req, res: any) => {
     const robots = `User-agent: *
 Allow: /
 Allow: /subscribe

@@ -13,12 +13,19 @@ const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
 // Initialize Stripe promise outside component to avoid recreation
 // Create a safe Stripe promise that won't cause errors
 const createStripePromise = () => {
+  console.log('🔧 Stripe Key Check:', {
+    hasKey: !!STRIPE_PUBLIC_KEY,
+    keyPrefix: STRIPE_PUBLIC_KEY?.substring(0, 6),
+    keyLength: STRIPE_PUBLIC_KEY?.length
+  });
+  
   if (!STRIPE_PUBLIC_KEY || !STRIPE_PUBLIC_KEY.startsWith('pk_')) {
+    console.error('❌ Invalid Stripe public key:', STRIPE_PUBLIC_KEY?.substring(0, 10) + '...');
     return Promise.resolve(null);
   }
   
   return loadStripe(STRIPE_PUBLIC_KEY).catch((error) => {
-    console.error('Stripe loading failed:', error);
+    console.error('❌ Stripe loading failed:', error);
     return null;
   });
 };
@@ -40,8 +47,16 @@ function PaymentForm({ tier, paymentMethod, purchaseType, battleCount }: Payment
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log('🎯 Payment submission:', { stripe: !!stripe, elements: !!elements });
 
     if (!stripe || !elements) {
+      console.error('❌ Stripe not loaded properly');
+      toast({
+        title: "Payment System Error",
+        description: "Payment system is not available. Please try again later.",
+        variant: "destructive",
+      });
       return;
     }
 
