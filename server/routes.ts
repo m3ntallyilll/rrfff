@@ -118,28 +118,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         process.env.STRIPE_PREMIUM_PRICE_ID || 'price_1S1fdYE0KDhHKBCxa46JAd1e' : // $9.99/month Premium
         process.env.STRIPE_PRO_PRICE_ID || 'price_1S1fdYE0KDhHKBCxCxmXMeXX'; // $19.99/month Pro
       
+      console.log(`🔧 Creating subscription with price ID: ${priceId}`);
+      
       const subscription = await stripe.subscriptions.create({
         customer: customer.id,
         items: [{
           price: priceId,
         }],
         payment_behavior: 'default_incomplete',
+        payment_settings: {
+          save_default_payment_method: 'on_subscription',
+        },
         expand: ['latest_invoice.payment_intent'],
       });
+
+      console.log(`✅ Subscription created: ${subscription.id}`);
+      console.log(`📋 Latest invoice:`, subscription.latest_invoice?.id);
+      
+      // Extract payment intent and client secret
+      const paymentIntent = (subscription.latest_invoice as any)?.payment_intent;
+      const clientSecret = paymentIntent?.client_secret;
+      
+      console.log(`🔑 Payment intent: ${paymentIntent?.id}`);
+      console.log(`🗝️ Client secret available: ${!!clientSecret}`);
+
+      if (!clientSecret) {
+        console.error('❌ No client secret found in subscription');
+        throw new Error('Failed to create payment intent');
+      }
 
       await storage.updateUserStripeInfo(userId, {
         stripeCustomerId: customer.id,
         stripeSubscriptionId: subscription.id
       });
 
-      await storage.updateUserSubscription(userId, {
-        subscriptionStatus: 'active',
-        subscriptionTier: tier
-      });
+      // Don't mark as active until payment succeeds - webhook will handle this
+      console.log(`✅ Subscription setup complete, returning client secret`);
   
       res.json({
         subscriptionId: subscription.id,
-        clientSecret: (subscription.latest_invoice as any)?.payment_intent?.client_secret,
+        clientSecret: clientSecret,
       });
     } catch (error: any) {
       console.error('Subscription creation error:', error);

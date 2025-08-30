@@ -99,6 +99,8 @@ export default function Subscribe() {
       return response.json();
     },
     onSuccess: (data) => {
+      console.log('🎉 Subscription API response:', data);
+      console.log('🔑 Client secret received:', !!data.clientSecret);
       setClientSecret(data.clientSecret);
       toast({
         title: "Payment Ready",
@@ -220,6 +222,22 @@ export default function Subscribe() {
     );
   }
 
+  const stripeOptions = {
+    clientSecret,
+    appearance: {
+      theme: 'night' as const,
+      variables: {
+        colorPrimary: '#8b5cf6',
+        colorBackground: '#1f2937',
+        colorText: '#ffffff',
+        colorDanger: '#ef4444',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        spacingUnit: '4px',
+        borderRadius: '8px',
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-gray-800 border-purple-500/50">
@@ -232,7 +250,7 @@ export default function Subscribe() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Elements stripe={stripePromise} options={{ clientSecret }}>
+          <Elements stripe={stripePromise} options={stripeOptions}>
             <SubscriptionForm tier={tier} />
           </Elements>
         </CardContent>
