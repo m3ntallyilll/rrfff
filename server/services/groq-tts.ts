@@ -116,15 +116,7 @@ export class GroqTTSService {
         voice: voice,
         input: cleanText,
         response_format: 'wav',
-        speed: this.calculateDynamicSpeed(characterId, options.voiceStyle, options.speedMultiplier),  // Dynamic speed based on character and style
-        // Add robotic voice modulation for CYPHER-9000
-        ...(characterId === 'cypher' && {
-          // Additional robotic voice parameters
-          voice_engine: 'neural', // Use neural voice engine for better robot effects
-          emotion: 'neutral',     // Emotionless robot delivery
-          stability: 0.8,         // High stability for mechanical consistency
-          clarity: 0.9           // High clarity for robotic precision
-        })
+        speed: this.calculateDynamicSpeed(characterId, options.voiceStyle, options.speedMultiplier)  // Dynamic speed based on character and style
       };
 
       // Log dynamic voice settings
