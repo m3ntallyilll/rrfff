@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useStripe, useElements, PaymentElement, Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useMutation } from '@tanstack/react-query';
@@ -9,10 +9,11 @@ import { apiRequest } from '@/lib/queryClient';
 import { Loader2, Zap } from 'lucide-react';
 
 const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
-if (!STRIPE_PUBLIC_KEY) {
-  console.error('Missing VITE_STRIPE_PUBLIC_KEY environment variable');
-}
-const stripePromise = STRIPE_PUBLIC_KEY ? loadStripe(STRIPE_PUBLIC_KEY) : null;
+
+// Initialize Stripe promise outside component to avoid recreation
+const stripePromise = STRIPE_PUBLIC_KEY && STRIPE_PUBLIC_KEY.startsWith('pk_') 
+  ? loadStripe(STRIPE_PUBLIC_KEY)
+  : null;
 
 interface PaymentFormProps {
   tier?: 'premium' | 'pro';
@@ -425,18 +426,39 @@ export default function Subscribe() {
     }
   };
 
-  if (!stripePromise) {
+  // Show Cash App payment option if Stripe is not available
+  if (!STRIPE_PUBLIC_KEY || !stripePromise) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-gray-800 border-red-500/50">
+        <Card className="w-full max-w-md bg-gray-800 border-green-500/50">
           <CardHeader>
-            <CardTitle className="text-red-400 text-2xl text-center">
-              Payment Configuration Error
+            <CardTitle className="text-green-400 text-2xl text-center">
+              Cash App Payment Available
             </CardTitle>
             <CardDescription className="text-gray-400 text-center">
-              Stripe is not properly configured. Please contact support.
+              Card payments temporarily unavailable. Use Cash App instead.
             </CardDescription>
           </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <div className="text-white">
+              <h3 className="text-xl font-semibold mb-2">💰 Pay with Cash App</h3>
+              <p className="text-gray-300">Send payment to: <span className="font-mono text-green-400">$ILLAITHEGPTSTORE</span></p>
+            </div>
+            <div className="space-y-2">
+              <div className="bg-amber-600/20 border border-amber-500 rounded-lg p-3">
+                <span className="text-amber-400 font-semibold">⚡ 10 Battles Pack - $1.00</span>
+              </div>
+              <div className="bg-purple-600/20 border border-purple-500 rounded-lg p-3">
+                <span className="text-purple-400 font-semibold">📅 Premium Plan - $9.99/month</span>
+              </div>
+              <div className="bg-amber-600/20 border border-amber-500 rounded-lg p-3">
+                <span className="text-amber-400 font-semibold">🏆 Pro Plan - $19.99/month</span>
+              </div>
+            </div>
+            <p className="text-sm text-gray-400">
+              Include your email in the payment note for instant activation
+            </p>
+          </CardContent>
         </Card>
       </div>
     );
