@@ -3,6 +3,7 @@ import {
   battles,
   tournaments,
   tournamentBattles,
+  referrals,
   type User,
   type UpsertUser,
   type Battle,
@@ -11,6 +12,8 @@ import {
   type InsertTournament,
   type TournamentBattle,
   type InsertTournamentBattle,
+  type Referral,
+  type InsertReferral,
   type RoundScores,
   type TournamentBracket,
   type TournamentMatch,
@@ -18,7 +21,7 @@ import {
   SUBSCRIPTION_TIERS,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, lt, sql } from "drizzle-orm";
+import { eq, and, gte, lt, sql, desc } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -563,6 +566,39 @@ export class DatabaseStorage implements IStorage {
       hasValidGroq: !!(user.groqApiKey && user.groqApiKey.length > 0),
       preferredTtsService: user.preferredTtsService || 'system'
     };
+  }
+
+  // Referral system methods
+  async getUserByReferralCode(referralCode: string): Promise<User | null> {
+    try {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.referralCode, referralCode))
+        .limit(1);
+      
+      return user || null;
+    } catch (error) {
+      console.error('Error finding user by referral code:', error);
+      return null;
+    }
+  }
+
+  async createReferral(referral: InsertReferral): Promise<Referral> {
+    const [newReferral] = await db
+      .insert(referrals)
+      .values(referral)
+      .returning();
+    
+    return newReferral;
+  }
+
+  async getUserReferrals(userId: string): Promise<Referral[]> {
+    return await db
+      .select()
+      .from(referrals)
+      .where(eq(referrals.referrerId, userId))
+      .orderBy(desc(referrals.createdAt));
   }
 }
 

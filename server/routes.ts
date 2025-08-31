@@ -169,6 +169,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate referral code for user
+  app.post('/api/referral/generate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      if (user.referralCode) {
+        return res.json({ referralCode: user.referralCode });
+      }
+
+      // Generate unique referral code
+      const firstName = user.firstName || user.email?.split('@')[0] || 'USER';
+      const codeBase = firstName.slice(0, 3).toUpperCase();
+      const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase();
+      const referralCode = `${codeBase}${randomPart}`;
+
+      // Update user with referral code
+      await storage.updateUser(userId, { referralCode });
+
+      res.json({ referralCode });
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to generate referral code: ' + error.message });
+    }
+  });
+
+  // Join with referral code and award $1 credit
+  app.post('/api/referral/join', async (req, res) => {
+    try {
+      const { referralCode, newUserId } = req.body;
+      
+      if (!referralCode || !newUserId) {
+        return res.status(400).json({ message: 'Referral code and user ID required' });
+      }
+
+      // Find referrer by code
+      const referrer = await storage.getUserByReferralCode(referralCode);
+      if (!referrer) {
+        return res.status(404).json({ message: 'Invalid referral code' });
+      }
+
+      // Update new user with referrer info
+      await storage.updateUser(newUserId, { referredBy: referrer.id });
+
+      // Award $1.00 store credit to referrer
+      const currentCredit = parseFloat(referrer.storeCredit || '0');
+      const newCredit = (currentCredit + 1.00).toFixed(2);
+      await storage.updateUser(referrer.id, { storeCredit: newCredit });
+
+      // Create referral record
+      await storage.createReferral({
+        referrerId: referrer.id,
+        refereeId: newUserId,
+        referralCode,
+        status: 'completed',
+        creditAwarded: '1.00'
+      });
+
+      console.log(`💰 Referral complete: ${referrer.email} earned $1.00 credit`);
+      res.json({ 
+        success: true, 
+        creditAwarded: '1.00',
+        message: 'Referral completed! $1.00 credited to referrer.' 
+      });
+    } catch (error: any) {
+      console.error('Referral join error:', error);
+      res.status(500).json({ error: 'Failed to process referral: ' + error.message });
+    }
+  });
+
+  // Get user's referral stats
+  app.get('/api/referral/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const referrals = await storage.getUserReferrals(userId);
+      const totalEarnings = referrals.reduce((sum, ref) => sum + parseFloat(ref.creditAwarded || '0'), 0);
+
+      res.json({
+        referralCode: user.referralCode,
+        totalReferrals: referrals.length,
+        totalEarnings: totalEarnings.toFixed(2),
+        storeCredit: user.storeCredit,
+        referrals: referrals.map(ref => ({
+          id: ref.id,
+          status: ref.status,
+          creditAwarded: ref.creditAwarded,
+          createdAt: ref.createdAt
+        }))
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch referral stats: ' + error.message });
+    }
+  });
+
   // One-time payment intent (like ThcaStore's approach)
   app.post("/api/create-payment-intent", isAuthenticated, async (req: any, res) => {
     try {

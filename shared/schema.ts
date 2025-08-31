@@ -140,6 +140,8 @@ export const users = pgTable("users", {
   battlesRemaining: integer("battles_remaining").default(3), // Daily free battles
   lastBattleReset: timestamp("last_battle_reset").defaultNow(),
   storeCredit: decimal("store_credit", { precision: 10, scale: 2 }).notNull().default("0.00"), // Store credit balance
+  referralCode: varchar("referral_code"), // User's unique referral code
+  referredBy: varchar("referred_by"), // Who referred this user
   totalBattles: integer("total_battles").default(0),
   totalWins: integer("total_wins").default(0),
   // User-managed API keys for enhanced TTS services
@@ -194,6 +196,18 @@ export const tournamentBattles = pgTable("tournament_battles", {
   isCompleted: boolean("is_completed").notNull().default(false),
   winnerId: varchar("winner_id"), // user ID or character ID
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Referral system table
+export const referrals = pgTable("referrals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referrerId: varchar("referrer_id").references(() => users.id).notNull(), // User who made the referral
+  refereeId: varchar("referee_id").references(() => users.id), // User who was referred
+  referralCode: varchar("referral_code").notNull(), // The referral code used
+  status: varchar("status").notNull().default("pending"), // pending, completed, rewarded
+  creditAwarded: decimal("credit_awarded", { precision: 10, scale: 2 }).default("0.00"), // Amount of credit given
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"), // When the referral was completed
 });
 
 export interface TournamentBracket {
@@ -261,10 +275,18 @@ export const insertTournamentBattleSchema = createInsertSchema(tournamentBattles
   createdAt: true,
 });
 
+export const insertReferralSchema = createInsertSchema(referrals).omit({
+  id: true,
+  createdAt: true,
+  completedAt: true,
+});
+
 export type InsertTournament = z.infer<typeof insertTournamentSchema>;
 export type Tournament = typeof tournaments.$inferSelect;
 export type InsertTournamentBattle = z.infer<typeof insertTournamentBattleSchema>;
 export type TournamentBattle = typeof tournamentBattles.$inferSelect;
+export type InsertReferral = z.infer<typeof insertReferralSchema>;
+export type Referral = typeof referrals.$inferSelect;
 
 // Subscription tiers and pricing
 export const SUBSCRIPTION_TIERS = {
