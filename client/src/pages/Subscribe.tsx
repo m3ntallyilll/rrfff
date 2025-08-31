@@ -268,7 +268,7 @@ export default function Subscribe() {
                 }`}
                 data-testid="button-select-cashapp"
               >
-                💰 Cash App (Quick Pay)
+                💰 Cash App ($ILLAITHEGPTSTORE)
               </Button>
             </div>
           </div>
