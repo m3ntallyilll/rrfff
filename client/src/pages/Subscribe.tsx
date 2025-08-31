@@ -145,14 +145,15 @@ export default function Subscribe() {
 
   const createBattlePack = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('POST', '/api/purchase-battles', {
-        battleCount: 10,
-        paymentMethod
+      // Use ThcaStore's one-time payment approach
+      const response = await apiRequest('POST', '/api/create-payment-intent', {
+        amount: 1.00, // $1.00 for 10 battles
+        description: `10 Battle Pack ($0.10 per battle)`
       });
       return response.json();
     },
     onSuccess: (data) => {
-      console.log('🎉 Battle pack API response:', data);
+      console.log('🎉 One-time payment intent created:', data);
       console.log('🔑 Client secret received:', !!data.clientSecret);
       setClientSecret(data.clientSecret);
       toast({

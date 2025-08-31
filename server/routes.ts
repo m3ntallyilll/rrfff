@@ -158,6 +158,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Store credit balance route (like ThcaStore)
+  app.get('/api/store-credit/balance', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json({ balance: user?.storeCredit || 0 });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch store credit balance' });
+    }
+  });
+
+  // One-time payment intent (like ThcaStore's approach)
+  app.post("/api/create-payment-intent", isAuthenticated, async (req: any, res) => {
+    try {
+      const { amount, description = "Battle pack purchase" } = req.body;
+      const userId = req.user.claims.sub;
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        metadata: {
+          userId: userId,
+          type: "one_time_purchase"
+        },
+        description,
+      });
+      
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error: any) {
+      res.status(500).json({ 
+        message: "Error creating payment intent: " + error.message 
+      });
+    }
+  });
+
   // Stripe payment routes
   app.post('/api/create-subscription', isAuthenticated, async (req: any, res) => {
     try {
@@ -241,10 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         items: [{
           price_data: {
             currency: 'usd',
-            product_data: {
-              name: `${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan`,
-              description: `Rap Battle ${tier.charAt(0).toUpperCase() + tier.slice(1)} Subscription`
-            },
+            product: `${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan`,
             recurring: {
               interval: 'month',
             },

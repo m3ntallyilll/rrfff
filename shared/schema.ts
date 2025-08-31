@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, real, index } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, real, decimal, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from 'drizzle-orm';
@@ -139,6 +139,7 @@ export const users = pgTable("users", {
   subscriptionTier: varchar("subscription_tier").default("free"), // free, premium, pro
   battlesRemaining: integer("battles_remaining").default(3), // Daily free battles
   lastBattleReset: timestamp("last_battle_reset").defaultNow(),
+  storeCredit: decimal("store_credit", { precision: 10, scale: 2 }).notNull().default("0.00"), // Store credit balance
   totalBattles: integer("total_battles").default(0),
   totalWins: integer("total_wins").default(0),
   // User-managed API keys for enhanced TTS services
