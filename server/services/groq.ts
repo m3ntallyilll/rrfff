@@ -9,7 +9,14 @@ export class GroqService {
   constructor(apiKey?: string) {
     this.apiKey = apiKey || process.env.GROQ_API_KEY || process.env.GROQ_API_KEY_ENV_VAR || "";
     if (!this.apiKey) {
-      console.warn("⚠️ GROQ_API_KEY not provided - Groq services will be unavailable");
+      if (process.env.NODE_ENV === 'production') {
+        console.error("❌ CRITICAL: No Groq API key in production - AI battles will fail");
+        console.error("💡 Add GROQ_API_KEY to deployment environment or user keys");
+      } else {
+        console.warn("⚠️ GROQ_API_KEY not provided - Groq services will be unavailable");
+      }
+    } else {
+      console.log("✅ Groq API service configured");
     }
     this.rhymeEngine = new AdvancedRhymeEngine();
   }

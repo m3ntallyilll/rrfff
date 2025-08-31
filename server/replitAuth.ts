@@ -9,7 +9,12 @@ import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
 if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
+  if (process.env.NODE_ENV === 'production') {
+    console.error("❌ REPLIT_DOMAINS missing in production - authentication will fail");
+    console.error("💡 Add REPLIT_DOMAINS to your deployment environment variables");
+  } else {
+    throw new Error("Environment variable REPLIT_DOMAINS not provided");
+  }
 }
 
 const getOidcConfig = memoize(
@@ -32,7 +37,7 @@ export function getSession() {
     tableName: "sessions",
   });
   return session({
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET || 'fallback-secret-for-development',
     store: sessionStore,
     resave: true, // Force session save to avoid expiration
     saveUninitialized: true, // Save empty sessions

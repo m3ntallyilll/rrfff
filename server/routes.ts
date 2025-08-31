@@ -29,6 +29,24 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint for deployment monitoring
+  app.get('/api/health', (req, res) => {
+    const health = {
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      services: {
+        database: !!process.env.DATABASE_URL,
+        groq: !!process.env.GROQ_API_KEY,
+        openai: !!process.env.OPENAI_API_KEY,
+        stripe: !!process.env.STRIPE_SECRET_KEY,
+      }
+    };
+    
+    console.log('🏥 Health check:', health);
+    res.json(health);
+  });
+
   // Auth middleware
   await setupAuth(app);
 
