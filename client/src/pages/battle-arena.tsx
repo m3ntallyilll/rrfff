@@ -21,13 +21,13 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function BattleArena() {
   const [difficulty, setDifficulty] = useState<"easy" | "normal" | "hard">("normal");
   const [profanityFilter, setProfanityFilter] = useState(false); // Default to uncensored for authentic battle rap
-  const [lyricComplexity, setLyricComplexity] = useState(50); // 0-100 complexity slider
-  const [styleIntensity, setStyleIntensity] = useState(50); // 0-100 style intensity slider
+  const [lyricComplexity, setLyricComplexity] = useState(75); // Default to high quality
+  const [styleIntensity, setStyleIntensity] = useState(85); // Intense style for authenticity
   const [advancedSettings, setAdvancedSettings] = useState({
-    aiAggressiveness: 75,
-    responseTime: 3000,
+    aiAggressiveness: 90, // High aggression for competitive battles
+    responseTime: 2000, // Faster response for better UX
     analysisDepth: "enhanced" as const,
-    voiceSpeed: 1.0,
+    voiceSpeed: 1.1, // Slightly faster for energy
     battleLength: 5
   });
 

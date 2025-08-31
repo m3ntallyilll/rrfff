@@ -52,7 +52,11 @@ export function AudioControls({
       setAudioError(null);
       setAudioLoaded(false);
       
-      const audio = new Audio(audioUrl);
+      const audio = new Audio();
+      // Optimize audio loading for performance
+      audio.preload = 'metadata'; // Load faster
+      audio.crossOrigin = 'anonymous'; // Handle CORS
+      audio.src = audioUrl;
       audioRef.current = audio;
       
       const handleTimeUpdate = () => setCurrentTime(audio.currentTime);

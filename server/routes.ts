@@ -929,16 +929,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let userText = "Voice input received";
       
       try {
-        // LIGHTNING-FAST transcription optimization (200ms max for truly instant feel)
+        // OPTIMIZED transcription with proper timeout for deployment stability
         userText = await Promise.race([
           groqService.transcribeAudio(audioBuffer),
           new Promise<string>((_, reject) => 
-            setTimeout(() => reject(new Error("Transcription timeout")), 200) // Ultra-aggressive 200ms for instant
+            setTimeout(() => reject(new Error("Transcription timeout")), 3000) // 3s timeout for stability
           )
         ]);
-        console.log(`✅ INSTANT transcription complete: "${userText.substring(0, 50)}..."`);
+        console.log(`✅ FAST transcription complete: "${userText.substring(0, 50)}..."`);
       } catch (error) {
-        console.log(`⚠️ Ultra-fast transcription failed, getting actual transcription...`);
+        console.log(`⚠️ Fast transcription failed, using fallback...`);
         // If ultra-fast fails, get the actual transcription without timeout
         try {
           userText = await groqService.transcribeAudio(audioBuffer);
