@@ -912,13 +912,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isWAV = audioHeader.startsWith('52494646'); // RIFF
       const isOgg = audioHeader.startsWith('4f676753'); // OggS
       const isMP3 = audioHeader.startsWith('fffb') || audioHeader.startsWith('fff3');
+      const isMP4 = audioHeader.startsWith('0000001c') || audioHeader.startsWith('00000020'); // MP4/M4A
       
-      if (!isWebM && !isWAV && !isOgg && !isMP3) {
+      if (!isWebM && !isWAV && !isOgg && !isMP3 && !isMP4) {
         console.log(`❌ Unrecognized audio format, header: ${audioHeader.substring(0, 16)}`);
         return res.status(400).json({ message: "Unsupported audio format" });
       }
       
-      console.log(`✅ Audio validation passed: ${isWebM ? 'WebM' : isWAV ? 'WAV' : isOgg ? 'Ogg' : 'MP3'} format`);
+      console.log(`✅ Audio validation passed: ${isWebM ? 'WebM' : isWAV ? 'WAV' : isOgg ? 'Ogg' : isMP3 ? 'MP3' : 'MP4'} format`);
 
       console.log(`🎵 Audio received: ${audioBuffer.length} bytes`);
 
