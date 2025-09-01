@@ -430,8 +430,32 @@ First, analyze what they're actually saying. Are they:
 - Claiming territory/hood? → Prove your street cred is stronger
 - Using specific references? → Take those same references and make them work against them
 
-STEP 2 - CREATE MEANINGFUL RESPONSE:
-Using this understanding, create a devastating 4-line counter-attack with these specifications:
+STEP 2 - CREATE DEVASTATING COUNTER-ATTACK:
+Using this understanding, create a devastating 4-line counter-attack with PERFECT END RHYME PLACEMENT for maximum impact:
+
+🎯 END RHYME MASTERY REQUIREMENTS:
+1. HARD-HITTING PLACEMENT: Position your strongest punchlines at the END of lines 2 and 4
+   - Line 2: Setup with moderate punch + devastating end rhyme
+   - Line 4: Ultimate finisher with your hardest-hitting end rhyme
+   
+2. END RHYME SELECTION: Choose end words that are:
+   - Multi-syllabic when possible (devastation/conversation, lyrical/miracle)
+   - Sharp consonant endings for impact (-ACK, -EAT, -ING, -OWN)
+   - Memorable and quotable
+   
+3. PUNCHLINE ARCHITECTURE:
+   - Line 1: Setup/context establishment 
+   - Line 2: First punch + strong end rhyme
+   - Line 3: Bridge/escalation
+   - Line 4: Knockout punch + devastating end rhyme that connects to line 2
+
+EXAMPLE STRUCTURE:
+Line 1: [Setup their weakness] + end word A
+Line 2: [First attack] + HARD PUNCH + end word B  
+Line 3: [Escalate attack] + end word A (rhymes with line 1)
+Line 4: [DEVASTATING FINISHER] + BRUTAL PUNCH + end word B (rhymes with line 2)
+
+Using this understanding, create your counter-attack with these specifications:
 
 LYRIC COMPLEXITY (${complexityLevel} - ${lyricComplexity}%): ${complexityInstructions}
 
@@ -484,6 +508,19 @@ FLOW & DELIVERY:
 - Create natural pause points and emphasis beats
 - Build tension and release with line structure
 
+🥊 STRATEGIC END RHYME WORD SELECTION:
+Choose end words that AMPLIFY your punchlines:
+- POWER WORDS: destruction, domination, elimination, devastation
+- SKILL WORDS: perfection, precision, execution, demonstration  
+- IMPACT WORDS: annihilation, obliteration, termination, humiliation
+- BATTLE WORDS: competition, recognition, submission, demolition
+
+PUNCHLINE POSITIONING STRATEGY:
+- Line 2 end word: Should be the SETUP punch (strong but not your best)
+- Line 4 end word: Should be your KNOCKOUT punch (most devastating)
+- Make sure your hardest-hitting wordplay and strongest insult lands ON THE END RHYME
+- The end rhyme word should BE PART OF the punchline, not just rhyme with it
+
 MEANINGFUL CONTENT REQUIREMENTS:
 - ANALYZE THEIR MESSAGE: What are they actually saying? What's their angle or claim?
 - DIRECT RESPONSE: Address their specific points, don't ignore what they said
@@ -492,6 +529,26 @@ MEANINGFUL CONTENT REQUIREMENTS:
 - CONTEXTUAL PUNCHLINES: End lines should relate to the ongoing battle theme, not be random
 - CONVERSATIONAL FLOW: Make it feel like a real back-and-forth dialogue
 - ${safetyNote}
+
+💥 END RHYME POWER EXAMPLES - Study these patterns for MAXIMUM impact:
+
+EXAMPLE 1 - Setup/Devastation pattern:
+"Your weak bars got me yawning, this is getting BORING (setup punch)
+Step to the king? That's your biggest MISTAKE (bridge)  
+I'll end your career with surgical PRECISION (escalation)
+Watch you collapse under lyrical DEVASTATION" (knockout punch)
+
+EXAMPLE 2 - Skill/Demolition pattern:
+"You think you got bars but your flow's inconsistent, lacking SKILL (setup)
+My wordplay's so sharp it could cut through STEEL (first punch)
+Every line I drop is perfectly CALCULATED (bridge)
+Your whole style just got systematically ELIMINATED" (knockout)
+
+EXAMPLE 3 - Recognition/Submission pattern:
+"Step in the ring seeking fame and RECOGNITION (setup)
+But your amateur status needs serious REVISION (first punch)
+I'm the undisputed king of this lyrical DIVISION (escalation)  
+Bow down now, accept your total SUBMISSION" (devastating finish)
 
 🔥 EXPONENTIAL RAP MASTERY: Your skill level is like paper folded 9,393,939 times. Study these EMINEM MASTERY EXAMPLES and match this complexity:
 
