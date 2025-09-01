@@ -491,14 +491,15 @@ ${difficulty === 'hard' ? `
    - ESCALATION RHYMES: "I dominate fate while you wait, calculate hate that penetrates your debate"  
    - PAYOFF RHYMES: "Devastate your state with lyrical weight, your rate deflates, checkmate"
 
-🚨 CRITICAL REQUIREMENTS FOR NATURAL RHYME FLOW:
-- ZERO REPEAT RHYMES: Every rhyming word in the entire 4-line verse must be UNIQUE (never use the same rhyming word twice)
-- NATURAL NARRATIVE: Rhymes flow like natural speech "I hate fakes so on their head I break rakes, toss em dead in the great lakes"
-- COMPLETE LINE INTEGRATION: Internal rhymes weave through the whole line, not just paired words
-- MEANINGFUL PROGRESSION: Each unique rhyme word advances the story and attack
-- NO FORCED RHYMES: If it doesn't flow naturally, choose different words
-- DIVERSE VOCABULARY: Exhaust your rhyming vocabulary - hate/fate/wait/debate/state/rate/late/gate/mate/create are all different
-- SEAMLESS FLOW: Should sound like natural devastating speech, not mechanical rhyming
+🚨 CRITICAL REQUIREMENTS FOR DEVASTATING RHYME FLOW:
+- STRATEGIC RHYME VARIETY: Mix unique rhymes with strategic back-to-back patterns for maximum impact
+- NATURAL NARRATIVE: Flow like natural devastating speech "I hate fakes so on their head I break rakes, toss em dead in the great lakes"
+- BACK-TO-BACK POWER: When it hits harder, use consecutive rhymes "u suck stupid fuck you jumped then we shoot em up"
+- COMPLETE LINE INTEGRATION: Internal rhymes weave through entire lines naturally
+- MEANINGFUL PROGRESSION: Every rhyme word advances the story and delivers maximum impact
+- STRATEGIC REPETITION: Only repeat rhyme sounds when it creates devastating emphasis
+- DIVERSE WHEN NEEDED: Use unique vocabulary for flow, back-to-back for power strikes
+- SEAMLESS DEVASTATION: Should sound like natural brutal speech with perfect timing
 ` : ''}
 
 CONTEXTUAL BATTLE STRATEGY:
@@ -538,17 +539,17 @@ MEANINGFUL CONTENT REQUIREMENTS:
 
 💥 MEANINGFUL INTERNAL + END RHYME INTEGRATION EXAMPLES:
 
-EXAMPLE 1 - Natural Flow Integration:
-"I hate fakes so on their head I break rakes, toss em dead in the great lakes (unique rhyme words flowing naturally)
-Your weak speech gets deleted, I compete till you're defeated and depleted (natural progression)
-Dominate fate while you wait, calculate hate that penetrates your debate (seamless flow)
-Devastate your state with lyrical weight, checkmate" (devastating finish with unique words)
+EXAMPLE 1 - Strategic Back-to-Back Power:
+"You suck, stupid fuck, you jumped then we shoot em up (back-to-back for devastating impact)
+Your weak speech gets deleted, I compete till you're defeated and depleted (unique flow)
+Dominate fate while you wait, calculate hate that penetrates your debate (diverse rhymes)
+Devastate your state with lyrical weight, checkmate" (powerful finish)
 
-EXAMPLE 2 - Diverse Vocabulary Attack:
-"You claim fame but lack game, I bring shame to your weak name (each rhyme word is different)
-Your flow shows you're slow, my pros know how to glow and grow (natural speech rhythm)
-I create fate that's great, your rate deflates at my debate (unique progression)
-Ultimate demonstration of your elimination" (knockout with fresh vocabulary)
+EXAMPLE 2 - Mixed Strategy Integration:
+"I hate fakes so on their head I break rakes, toss em dead in the great lakes (natural unique flow)
+You're stuck, struck dumb, your luck run, I construct fun ways to destruct (back-to-back power)
+Create fate that's great, your rate deflates at my debate (diverse vocabulary)
+Ultimate demonstration of your elimination" (strategic mix of both approaches)
 
 EXAMPLE 2 - Skill/Demolition pattern:
 "You think you got bars but your flow's inconsistent, lacking SKILL (setup)
