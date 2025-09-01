@@ -500,11 +500,11 @@ ${difficulty === 'hard' ? `
 - MULTIPLE ACTIVE CHAINS: Run 2+ rhyme families simultaneously through the verse
 - STRATEGIC WEAVING: Internals from early lines resurface in later lines for complex patterns
 
-🔥 INTERNAL RHYME DENSITY:
-- MULTIPLE PER LINE: Pack 3-5 internal rhymes per line when possible
-- NATURAL FLOW: "I hate fakes so on their head I break rakes, toss em dead in the great lakes"
-- BACK-TO-BACK STRIKES: "u suck stupid fuck you jumped then we shoot em up" for devastating impact
-- MEANINGFUL PROGRESSION: Every rhyme advances the attack and story
+🔥 INTERNAL RHYME DENSITY - 100% MEANINGFUL:
+- ZERO FILLER WORDS: Every internal rhyme must be a real word that advances the attack
+- ACTUAL MEANING: "I hate fakes so on their head I break rakes, toss em dead in the great lakes" (hate=emotion, fakes=opponents, break=action, rakes=weapon, dead=result, lakes=location)
+- REAL ACTIONS: "u suck stupid fuck you jumped then we shoot em up" (suck=weakness, fuck=insult, jumped=tried, shoot=retaliate)
+- NO NONSENSE RHYMES: Eliminate words that only exist to rhyme - every word must serve the battle narrative
 
 🎪 JUGGLING EXECUTION:
 - Line 1: Establish A-chain internals + B-chain internals
