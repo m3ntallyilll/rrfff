@@ -543,11 +543,13 @@ PUNCHLINE POSITIONING STRATEGY:
 - The end rhyme word should BE PART OF the punchline, not just rhyme with it
 
 🚨 MANDATORY: EVERY SINGLE WORD MUST BE MEANINGFUL:
-- ZERO FILLER ANYWHERE: No "just", "so", "really", "kinda", "like", "you know" unless critical to meaning
-- EVERY WORD SERVES PURPOSE: Attack opponent, demonstrate skill, describe action, or build narrative
-- CONCRETE ACTIONS: Use specific verbs (destroy, eliminate, crush, dominate) not vague words
-- REAL DESCRIPTIONS: Use actual adjectives (weak, pathetic, inferior) not empty descriptors
-- BATTLE-FOCUSED: Every single word must either tear down opponent or build up your superiority
+- ZERO EMPTY FILLER: No meaningless words that add nothing ("really", "kinda", "you know")
+- CONNECTING WORDS ALLOWED: Use "so", "then", "with", "on", "in" when they connect meaningful rhymes grammatically
+- EVERY WORD SERVES PURPOSE: Attack opponent, demonstrate skill, describe action, build narrative, OR connect rhymes naturally
+- NATURAL FLOW PRIORITY: "I hate fakes so on their heads I break rakes" (so/on connect the rhymes meaningfully)
+- CONCRETE ACTIONS: Specific verbs (destroy, eliminate, crush, dominate) not vague words
+- REAL DESCRIPTIONS: Actual adjectives (weak, pathetic, inferior) not empty descriptors
+- BATTLE-FOCUSED: Every word either attacks opponent, builds superiority, OR makes the rhyme flow naturally
 
 MEANINGFUL CONTENT REQUIREMENTS:
 - ANALYZE THEIR MESSAGE: What are they actually saying? What's their angle or claim?
