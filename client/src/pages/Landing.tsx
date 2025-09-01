@@ -5,11 +5,11 @@ import { Crown, Mic, Zap, Star } from "lucide-react";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-20 text-center">
+      <section className="container mx-auto px-4 py-20 text-center" aria-labelledby="hero-title">
         <div className="mb-8">
-          <h1 className="text-6xl font-bold text-white mb-4">
+          <h1 id="hero-title" className="text-6xl font-bold text-white mb-4">
             Battle Rap <span className="text-purple-400">AI</span>
           </h1>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
@@ -24,11 +24,12 @@ export default function Landing() {
                 width="560"
                 height="315"
                 src="https://www.youtube.com/embed/0RspT9qVNpY?autoplay=1&mute=0&controls=1"
-                title="Battle Rap AI Demo"
+                title="Battle Rap AI Demo - Watch epic AI rap battles in action"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
                 className="max-w-full"
+                loading="lazy"
               />
             </div>
           </div>
@@ -63,7 +64,7 @@ export default function Landing() {
             </Badge>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Pricing Section */}
       <div className="container mx-auto px-4 py-16">
@@ -220,6 +221,6 @@ export default function Landing() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

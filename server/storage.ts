@@ -21,7 +21,11 @@ import {
   SUBSCRIPTION_TIERS,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, lt, sql, desc } from "drizzle-orm";
+import { eq, and, gte, lt, sql, desc, count, max } from "drizzle-orm";
+import NodeCache from 'node-cache';
+
+// Initialize cache with 10 minute TTL and 5 minute check period
+const cache = new NodeCache({ stdTTL: 600, checkperiod: 300 });
 
 // Interface for storage operations
 export interface IStorage {
@@ -329,6 +333,12 @@ export class DatabaseStorage implements IStorage {
     winRate: number;
     battlesThisMonth: number;
   }> {
+    // Cache user stats for 5 minutes
+    const cacheKey = `user_stats_${userId}`;
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      return cached as any;
+    }
     const user = await this.getUser(userId);
     if (!user) {
       return { totalBattles: 0, totalWins: 0, winRate: 0, battlesThisMonth: 0 };
@@ -347,12 +357,16 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    return {
+    const result = {
       totalBattles: user.totalBattles || 0,
       totalWins: user.totalWins || 0,
       winRate: user.totalBattles ? ((user.totalWins || 0) / user.totalBattles) * 100 : 0,
       battlesThisMonth: userBattles.length,
     };
+
+    // Cache the result for 5 minutes
+    cache.set(cacheKey, result);
+    return result;
   }
 
   // Battle round processing methods

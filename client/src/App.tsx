@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { SponsoredBanner } from "@/components/sponsored-banner";
+import { ErrorBoundary } from "@/components/error-boundary";
 import Landing from "@/pages/Landing";
 import Home from "@/pages/Home";
 import Subscribe from "@/pages/Subscribe";
@@ -64,15 +65,19 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <div className="min-h-screen bg-gradient-to-br from-primary-dark via-secondary-dark to-primary-dark">
-          <Toaster />
-          <SponsoredBanner interval={25000} enabled={true} />
-          <Router />
-        </div>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <div className="min-h-screen bg-gradient-to-br from-primary-dark via-secondary-dark to-primary-dark">
+            <Toaster />
+            <SponsoredBanner interval={25000} enabled={true} />
+            <ErrorBoundary>
+              <Router />
+            </ErrorBoundary>
+          </div>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
