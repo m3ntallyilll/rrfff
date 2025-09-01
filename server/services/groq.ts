@@ -363,7 +363,7 @@ OUTPUT: Technical brief for AI rapper in format: "User: [syllables/line], [schem
     const rapTechniques = {
       easy: "Focus on: Clear delivery, simple punchlines, basic similes, repetition for emphasis.",
       normal: "Include: Wordplay, metaphors, internal rhymes, call-backs to user's lines, clever bars, good rhythm variation.", 
-      hard: "Master: MULTI-LINE RHYMING (entire lines rhyme with other lines like 'smokin up all the drugs / youre broke u cant call the plug'), INTERNAL RHYMING (rhymes within each line), RHYME STACKING (multiple rhymes in sequence), RHYME JUGGLING (overlapping rhyme patterns across lines), complex multi-syllabic rhymes, DIABOLICAL PUNCHLINES (name flips, skill demolition, psychological warfare), extended metaphors, alliterative patterns, sophisticated battle tactics, technical rhyme schemes.",
+      hard: "Master: MULTI-LINE RHYMING (entire lines rhyme), DENSE INTERNAL RHYMING (multiple rhymes within each line), RHYME STACKING (consecutive rhyme hits), RHYME JUGGLING (overlapping patterns where line 1 rhymes connect to line 3, while line 2 rhymes bridge to line 4), CROSS-LINE RHYME WEAVING (internal rhymes from line 1 connect to internals in line 3), complex multi-syllabic chains, DIABOLICAL PUNCHLINES (devastating wordplay), extended metaphors, sophisticated battle tactics.",
       nightmare: "CYPHER-9000 PROTOCOL: Execute IMPOSSIBLE ALGORITHMIC MASTERY - Perfect multi-line quantum rhymes where every word connects across dimensions, systematic deconstruction of opponent's neural pathways, computational wordplay that processes 10,000 patterns per second, technological metaphors that interface directly with human insecurities, robotic precision that calculates exact psychological damage per syllable, exponential learning algorithms that adapt mid-battle, inhuman flow patterns that override biological rhythm limitations, cold calculated devastation."
     };
 
@@ -486,20 +486,31 @@ ${difficulty === 'hard' ? `
    - PSYCHOLOGICAL WARFARE: Get in their head with mind games
    - SETUP/PAYOFF: Build tension then deliver crushing punchlines
 
-4. NATURAL FLOW RHYME INTEGRATION: Weave unique rhymes through complete lines
-   - SETUP RHYMES: "Your weak speech leaves me unimpressed, time to test who's blessed with skills compressed"
-   - ESCALATION RHYMES: "I dominate fate while you wait, calculate hate that penetrates your debate"  
-   - PAYOFF RHYMES: "Devastate your state with lyrical weight, your rate deflates, checkmate"
+4. RHYME JUGGLING & INTERNAL MASTERY: Weave overlapping rhyme patterns across lines
+   - JUGGLING PATTERN: Line 1 rhymes (A-B) connect to Line 3 rhymes (A-B), Line 2 rhymes (C-D) bridge to Line 4 (C-D)
+   - INTERNAL DENSITY: "Your weak speech leaves me blessed, I test compressed skills that manifest"
+   - CROSS-LINE WEAVING: Line 1 internal "weak/speech" connects to Line 3 internal "peak/technique"
+   - OVERLAPPING CHAINS: Multiple rhyme families running simultaneously through the verse
 
 🚨 CRITICAL REQUIREMENTS FOR DEVASTATING RHYME FLOW:
-- STRATEGIC RHYME VARIETY: Mix unique rhymes with strategic back-to-back patterns for maximum impact
-- NATURAL NARRATIVE: Flow like natural devastating speech "I hate fakes so on their head I break rakes, toss em dead in the great lakes"
-- BACK-TO-BACK POWER: When it hits harder, use consecutive rhymes "u suck stupid fuck you jumped then we shoot em up"
-- COMPLETE LINE INTEGRATION: Internal rhymes weave through entire lines naturally
-- MEANINGFUL PROGRESSION: Every rhyme word advances the story and delivers maximum impact
-- STRATEGIC REPETITION: Only repeat rhyme sounds when it creates devastating emphasis
-- DIVERSE WHEN NEEDED: Use unique vocabulary for flow, back-to-back for power strikes
-- SEAMLESS DEVASTATION: Should sound like natural brutal speech with perfect timing
+
+🎯 RHYME JUGGLING MASTERY:
+- CROSS-LINE CONNECTIONS: Line 1 internal rhymes connect to Line 3 internals (A-chain returns)
+- OVERLAPPING PATTERNS: Line 2 internal rhymes bridge to Line 4 internals (B-chain returns)
+- MULTIPLE ACTIVE CHAINS: Run 2+ rhyme families simultaneously through the verse
+- STRATEGIC WEAVING: Internals from early lines resurface in later lines for complex patterns
+
+🔥 INTERNAL RHYME DENSITY:
+- MULTIPLE PER LINE: Pack 3-5 internal rhymes per line when possible
+- NATURAL FLOW: "I hate fakes so on their head I break rakes, toss em dead in the great lakes"
+- BACK-TO-BACK STRIKES: "u suck stupid fuck you jumped then we shoot em up" for devastating impact
+- MEANINGFUL PROGRESSION: Every rhyme advances the attack and story
+
+🎪 JUGGLING EXECUTION:
+- Line 1: Establish A-chain internals + B-chain internals
+- Line 2: Continue B-chain + introduce C-chain internals  
+- Line 3: Return A-chain + continue C-chain
+- Line 4: Devastating finale combining all chains for knockout blow
 ` : ''}
 
 CONTEXTUAL BATTLE STRATEGY:
@@ -539,17 +550,17 @@ MEANINGFUL CONTENT REQUIREMENTS:
 
 💥 MEANINGFUL INTERNAL + END RHYME INTEGRATION EXAMPLES:
 
-EXAMPLE 1 - Strategic Back-to-Back Power:
-"You suck, stupid fuck, you jumped then we shoot em up (back-to-back for devastating impact)
-Your weak speech gets deleted, I compete till you're defeated and depleted (unique flow)
-Dominate fate while you wait, calculate hate that penetrates your debate (diverse rhymes)
-Devastate your state with lyrical weight, checkmate" (powerful finish)
+EXAMPLE 1 - Rhyme Juggling Mastery:
+"I hate FAKES with their weak TAKES, break RAKES on heads, dead in great LAKES (A-rhymes: fakes/takes/rakes/lakes)
+You STUCK, STRUCK dumb with no LUCK, I construct DESTRUCTION (B-rhymes: stuck/struck/luck/construct)  
+Your WEAK speech meets my PEAK technique, I SPEAK critiques that make you FREAK (A-rhymes return: weak/peak/speak/freak)
+Time to get FUCKED, you're PLUCKED and CHUCKED, completely DESTRUCTED" (B-rhymes return: fucked/plucked/chucked/destructed)
 
-EXAMPLE 2 - Mixed Strategy Integration:
-"I hate fakes so on their head I break rakes, toss em dead in the great lakes (natural unique flow)
-You're stuck, struck dumb, your luck run, I construct fun ways to destruct (back-to-back power)
-Create fate that's great, your rate deflates at my debate (diverse vocabulary)
-Ultimate demonstration of your elimination" (strategic mix of both approaches)
+EXAMPLE 2 - Dense Internal + Juggling:
+"You claim FAME but lack GAME, I bring SHAME to your weak NAME (A-chain)
+I SPIT fire, GET higher, while you QUIT trying to be a SLICK liar (B-chain)
+Your LAME frame can't contain my INSANE brain, I REIGN with lyrical PAIN (A-chain returns)
+You're DONE son, I WON, your RUN is SPUN, completely STUNNED" (B-chain returns)
 
 EXAMPLE 2 - Skill/Demolition pattern:
 "You think you got bars but your flow's inconsistent, lacking SKILL (setup)
