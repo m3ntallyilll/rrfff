@@ -473,11 +473,12 @@ ${difficulty === 'hard' ? `
    - Example: "your flow is really wack today" / "I heard your girl don't want to stay"
    - Lines should rhyme with multiple syllables, not just end words
 
-2. MEANINGFUL INTERNAL RHYMING: Every internal rhyme must advance the attack and meaning
-   - BAD: "I SPIT fire, GET higher, while you QUIT trying" (random rhyming words)
-   - GOOD: "Your WEAK technique meets my PEAK physique, I SPEAK critique that leaves you CREEK without paddle"
-   - DEVASTATING: "I BREAK fakes with SNAKE takes, your FAKE stakes get CRUSHED by my RUSH of pure SKILL until you're STILL"
-   - Every internal rhyme must strengthen the punchline and add meaning to the attack
+2. MEANINGFUL INTERNAL RHYMING: Flow natural rhymes through the entire line with UNIQUE words
+   - BAD: "I BREAK fakes with SNAKE takes, your FAKE stakes" (repeating rhyme words)
+   - GOOD: "I hate fakes so on their head I break rakes, toss em dead in the great lakes"
+   - DEVASTATING: "Your weak speech gets deleted, I compete till you're defeated and depleted"
+   - PERFECT: "I dominate fate while you wait, calculate hate that devastates your weak debate"
+   - Every internal rhyme uses DIFFERENT words that flow naturally through the narrative
 
 3. DIABOLICAL PUNCHLINES: Use devastating wordplay categories
    - NAME FLIPS: Twist their identity cleverly
@@ -485,18 +486,19 @@ ${difficulty === 'hard' ? `
    - PSYCHOLOGICAL WARFARE: Get in their head with mind games
    - SETUP/PAYOFF: Build tension then deliver crushing punchlines
 
-4. MEANINGFUL RHYME INTEGRATION: Every rhyme must serve the battle narrative
-   - SETUP RHYMES: Internal rhymes that build the attack ("Your WEAK speak meets my PEAK technique")
-   - ESCALATION RHYMES: Internal rhymes that intensify the assault ("I BREAK fakes with SNAKE takes")  
-   - PAYOFF RHYMES: Internal rhymes that deliver the crushing blow ("CRUSH your RUSH with SKILL until you're STILL")
+4. NATURAL FLOW RHYME INTEGRATION: Weave unique rhymes through complete lines
+   - SETUP RHYMES: "Your weak speech leaves me unimpressed, time to test who's blessed with skills compressed"
+   - ESCALATION RHYMES: "I dominate fate while you wait, calculate hate that penetrates your debate"  
+   - PAYOFF RHYMES: "Devastate your state with lyrical weight, your rate deflates, checkmate"
 
-IMPLEMENTATION REQUIREMENTS FOR DEVASTATING INTEGRATION:
-- MANDATORY: Every internal rhyme must advance the meaning and attack strategy
-- NO FILLER RHYMES: Eliminate meaningless rhyming words that don't serve the battle
-- STRATEGIC LAYERING: Build rhyme schemes that create narrative progression
-- CONTEXTUAL POWER: Internal rhymes should reference the opponent's weaknesses directly
-- COMPOUND DEVASTATION: Stack meaningful rhymes to create overwhelming lyrical assault
-- PERFECT INTEGRATION: Rhymes feel natural while delivering maximum impact
+🚨 CRITICAL REQUIREMENTS FOR NATURAL RHYME FLOW:
+- ZERO REPEAT RHYMES: Every rhyming word in the entire 4-line verse must be UNIQUE (never use the same rhyming word twice)
+- NATURAL NARRATIVE: Rhymes flow like natural speech "I hate fakes so on their head I break rakes, toss em dead in the great lakes"
+- COMPLETE LINE INTEGRATION: Internal rhymes weave through the whole line, not just paired words
+- MEANINGFUL PROGRESSION: Each unique rhyme word advances the story and attack
+- NO FORCED RHYMES: If it doesn't flow naturally, choose different words
+- DIVERSE VOCABULARY: Exhaust your rhyming vocabulary - hate/fate/wait/debate/state/rate/late/gate/mate/create are all different
+- SEAMLESS FLOW: Should sound like natural devastating speech, not mechanical rhyming
 ` : ''}
 
 CONTEXTUAL BATTLE STRATEGY:
@@ -536,17 +538,17 @@ MEANINGFUL CONTENT REQUIREMENTS:
 
 💥 MEANINGFUL INTERNAL + END RHYME INTEGRATION EXAMPLES:
 
-EXAMPLE 1 - Devastating Integration Pattern:
-"Your WEAK speak makes me PEAK with technique so SLICK it's getting BORING (meaningful internal rhymes + setup)
-Every FAKE take gets a SNAKE break, your MISTAKE is challenging the king (escalation with purpose)
-I DROP shots with precision, your FLOP stops this lyrical MISSION (meaningful internal progression)  
-DEVASTATION meets your weak foundation, accept total SUBMISSION" (knockout with full integration)
+EXAMPLE 1 - Natural Flow Integration:
+"I hate fakes so on their head I break rakes, toss em dead in the great lakes (unique rhyme words flowing naturally)
+Your weak speech gets deleted, I compete till you're defeated and depleted (natural progression)
+Dominate fate while you wait, calculate hate that penetrates your debate (seamless flow)
+Devastate your state with lyrical weight, checkmate" (devastating finish with unique words)
 
-EXAMPLE 2 - Contextual Internal Rhyme Attack:
-"You CLAIM fame but your GAME'S lame, I TAME names with lyrical FLAMES (internal rhymes advance the attack)
-Every WORD heard gets you BURNED, lessons LEARNED from getting CHURNED (meaningful progression)
-My FLOW shows what true PROS know, your SLOW prose can't GROW or GLOW (skill-focused internal rhymes)
-Time to GO bro, final BLOW delivered with perfect DEVASTATION" (devastating finish)
+EXAMPLE 2 - Diverse Vocabulary Attack:
+"You claim fame but lack game, I bring shame to your weak name (each rhyme word is different)
+Your flow shows you're slow, my pros know how to glow and grow (natural speech rhythm)
+I create fate that's great, your rate deflates at my debate (unique progression)
+Ultimate demonstration of your elimination" (knockout with fresh vocabulary)
 
 EXAMPLE 2 - Skill/Demolition pattern:
 "You think you got bars but your flow's inconsistent, lacking SKILL (setup)
