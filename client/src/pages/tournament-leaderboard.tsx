@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { ArrowLeft, Crown, Trophy, Medal, Award } from "lucide-react";
-import leaderboardImage from "@assets/generated_images/Tournament_leaderboard_hall_3a679b72.png";
+const leaderboardImage = "/images/Tournament_leaderboard_hall_3a679b72.png";
 
 interface LeaderboardEntry {
   rank: number;

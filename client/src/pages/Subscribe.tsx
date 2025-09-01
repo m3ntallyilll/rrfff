@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { Loader2, Zap } from 'lucide-react';
-import subscribeImage from "@assets/generated_images/Premium_subscription_interface_c2661c50.png";
+const subscribeImage = "/images/Premium_subscription_interface_c2661c50.png";
 
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
   throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');

@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Brain, Upload, Download, CheckCircle, AlertCircle } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import fineTuningImage from "@assets/generated_images/AI_training_interface_dac1a3f8.png";
+const fineTuningImage = "/images/AI_training_interface_dac1a3f8.png";
 
 interface FineTuningJob {
   id: string;

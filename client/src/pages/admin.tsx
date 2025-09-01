@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/useAuth';
 import { Users, Crown, Zap } from 'lucide-react';
-import adminImage from "@assets/generated_images/Admin_dashboard_interface_39ab3175.png";
+const adminImage = "/images/Admin_dashboard_interface_39ab3175.png";
 
 interface User {
   id: string;

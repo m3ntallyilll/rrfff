@@ -15,7 +15,7 @@ import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import type { Tournament } from '@shared/schema';
-import tournamentImage from "@assets/generated_images/Tournament_championship_bracket_0fd32970.png";
+const tournamentImage = "/images/Tournament_championship_bracket_0fd32970.png";
 
 interface CreateTournamentForm {
   name: string;

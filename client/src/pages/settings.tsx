@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { APIKeyManager } from '@/components/api-key-manager';
 import { Settings2, Mic, Key, Shield } from 'lucide-react';
-import settingsImage from "@assets/generated_images/Audio_settings_interface_5e678558.png";
+const settingsImage = "/images/Audio_settings_interface_5e678558.png";
 
 export default function SettingsPage() {
   return (

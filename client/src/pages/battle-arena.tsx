@@ -17,7 +17,7 @@ import { AudioControls } from "@/components/audio-controls";
 import { LyricBreakdown } from "@/components/lyric-breakdown";
 import { formatDuration } from "@/lib/audio-utils";
 import { motion, AnimatePresence } from "framer-motion";
-import battleArenaImage from "@assets/generated_images/Epic_rap_battle_arena_5a01b4d4.png";
+const battleArenaImage = "/images/Epic_rap_battle_arena_5a01b4d4.png";
 
 export default function BattleArena() {
   const [difficulty, setDifficulty] = useState<"easy" | "normal" | "hard">("normal");

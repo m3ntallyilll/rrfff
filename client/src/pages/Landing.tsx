@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Crown, Mic, Zap, Star } from "lucide-react";
-import heroImage from "@assets/generated_images/AI_rap_battle_landing_872131b2.png";
+const heroImage = "/images/AI_rap_battle_landing_872131b2.png";
 
 export default function Landing() {
   return (
