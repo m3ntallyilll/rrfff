@@ -292,7 +292,7 @@ export default function BattleArena() {
       <main className="min-h-screen relative">
         {/* Battle Arena Background */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+          className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-15 z-0 pointer-events-none"
           style={{ backgroundImage: `url(${battleArenaImage})` }}
         />
         <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">

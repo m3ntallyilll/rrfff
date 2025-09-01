@@ -9,10 +9,10 @@ export default function Landing() {
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center" aria-labelledby="hero-title">
-        <div className="mb-8">
+        <div className="mb-8 relative">
           {/* Hero Background Image */}
           <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-15 z-0"
             style={{ backgroundImage: `url(${heroImage})` }}
           />
           <div className="relative z-10">

@@ -104,7 +104,7 @@ export default function Tournaments() {
     <div className="min-h-screen bg-black text-white p-4 relative">
       {/* Tournament Background */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-15"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-12 z-0 pointer-events-none"
         style={{ backgroundImage: `url(${tournamentImage})` }}
       />
       <div className="relative z-10 max-w-6xl mx-auto">

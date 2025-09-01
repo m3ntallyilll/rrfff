@@ -11,7 +11,7 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 relative" data-testid="page-settings">
       {/* Settings Background */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-12 z-0 pointer-events-none"
         style={{ backgroundImage: `url(${settingsImage})` }}
       />
       <div className="relative z-10 max-w-6xl mx-auto space-y-6">

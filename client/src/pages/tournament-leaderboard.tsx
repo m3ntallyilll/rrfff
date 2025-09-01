@@ -55,7 +55,7 @@ export default function TournamentLeaderboard() {
     <div className="min-h-screen bg-black text-white p-4 relative">
       {/* Leaderboard Background */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-12 z-0 pointer-events-none"
         style={{ backgroundImage: `url(${leaderboardImage})` }}
       />
       <div className="relative z-10 max-w-4xl mx-auto">

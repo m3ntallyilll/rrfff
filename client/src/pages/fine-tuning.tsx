@@ -113,7 +113,7 @@ export default function FineTuning() {
     <div className="container mx-auto py-8 space-y-6 relative">
       {/* Fine-tuning Background */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-5"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-8 z-0 pointer-events-none"
         style={{ backgroundImage: `url(${fineTuningImage})` }}
       />
       <div className="text-center space-y-2">

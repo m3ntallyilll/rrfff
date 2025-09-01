@@ -74,7 +74,7 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-6 relative">
       {/* Admin Background */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-12 z-0 pointer-events-none"
         style={{ backgroundImage: `url(${adminImage})` }}
       />
       <div className="relative z-10 max-w-7xl mx-auto">

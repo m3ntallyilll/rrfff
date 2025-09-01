@@ -204,7 +204,7 @@ export default function Subscribe() {
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4 relative">
         {/* Subscribe Background */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+          className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-12 z-0 pointer-events-none"
           style={{ backgroundImage: `url(${subscribeImage})` }}
         />
         <div className="relative z-10 max-w-4xl mx-auto">
