@@ -10,11 +10,11 @@ export default function Landing() {
       <section className="container mx-auto px-4 py-20 text-center" aria-labelledby="hero-title">
         <div className="mb-8">
           <h1 id="hero-title" className="text-6xl font-bold text-white mb-4">
-            Battle Rap <span className="text-purple-400">AI</span>
+            Battle Rap AI: Face Off Against the Future of <span className="text-purple-400">Flow</span>
           </h1>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Face off against advanced AI opponents in epic rap battles. 
-            Master your flow, perfect your rhymes, and climb the ranks!
+            Experience the ultimate voice-powered freestyle battles against advanced AI opponents with real-time rap scoring. 
+            Master your flow, perfect your rhymes, and climb the leaderboard in this revolutionary battle rap game online.
           </p>
           
           {/* YouTube Video Embed */}
@@ -47,8 +47,9 @@ export default function Landing() {
               size="lg" 
               variant="outline" 
               className="border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white px-8 py-4 text-lg"
+              onClick={() => window.location.href = '/tournaments'}
             >
-              Watch Demo
+              View Leaderboard
             </Button>
           </div>
 
@@ -66,8 +67,81 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* How It Works Section */}
+      <section className="container mx-auto px-4 py-16 bg-slate-800/50 rounded-2xl mx-4 mb-16">
+        <h2 className="text-4xl font-bold text-white text-center mb-12">
+          How AI Rap Battles Work
+        </h2>
+        <div className="grid md:grid-cols-3 gap-8 text-center">
+          <div className="space-y-4">
+            <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto">
+              <Mic className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-xl font-semibold text-white">1. Voice-Powered Input</h3>
+            <p className="text-gray-300">
+              Speak your bars directly into the mic with real-time voice recognition. 
+              Our advanced AI transcription captures every word, flow, and rhythm instantly.
+            </p>
+          </div>
+          <div className="space-y-4">
+            <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto">
+              <Zap className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-xl font-semibold text-white">2. AI Battle Response</h3>
+            <p className="text-gray-300">
+              Watch as our AI opponent analyzes your verse and fires back with devastating counter-attacks. 
+              Each AI has unique personalities and battle styles to keep you on your toes.
+            </p>
+          </div>
+          <div className="space-y-4">
+            <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto">
+              <Star className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-xl font-semibold text-white">3. Professional Scoring</h3>
+            <p className="text-gray-300">
+              Get instant feedback with our professional battle rap scoring system. 
+              Track rhyme density, flow quality, wordplay complexity, and crowd-pleasing punchlines.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Why RapBots Section */}
+      <section className="container mx-auto px-4 py-16">
+        <h2 className="text-4xl font-bold text-white text-center mb-12">
+          Why RapBots Reigns Supreme
+        </h2>
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <h3 className="text-2xl font-bold text-purple-400">Real-Time Battle Experience</h3>
+            <p className="text-gray-300 text-lg leading-relaxed">
+              Unlike traditional rap games, RapBots delivers authentic voice-powered freestyle battles. 
+              Our cutting-edge AI responds to your actual words, flow patterns, and battle tactics in real-time. 
+              No pre-written responses, no fake interactions – just pure, unfiltered battle rap competition.
+            </p>
+            <p className="text-gray-300 text-lg leading-relaxed">
+              Challenge AI opponents with distinct personalities: from aggressive street battlers to 
+              technical wordplay masters. Each battle tests different aspects of your rap skills, 
+              pushing you to adapt and evolve your style.
+            </p>
+          </div>
+          <div className="space-y-6">
+            <h3 className="text-2xl font-bold text-purple-400">Advanced Scoring & Analytics</h3>
+            <p className="text-gray-300 text-lg leading-relaxed">
+              Get detailed breakdowns of your performance with our professional battle rap scoring system. 
+              Track your rhyme schemes, internal rhymes, flow consistency, and wordplay complexity. 
+              See exactly where you excel and what areas need improvement.
+            </p>
+            <p className="text-gray-300 text-lg leading-relaxed">
+              Climb the global leaderboard and compete in tournaments. Monitor your win rate, 
+              battle history, and skill progression over time. Every battle makes you stronger.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing Section */}
-      <div className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 py-16">
         <h2 className="text-4xl font-bold text-white text-center mb-12">
           Choose Your Battle Plan
         </h2>
@@ -94,8 +168,11 @@ export default function Landing() {
                 <li className="text-gray-500">✗ Advanced analysis</li>
                 <li className="text-gray-500">✗ Premium voices</li>
               </ul>
-              <Button className="w-full mt-6 bg-gray-600 hover:bg-gray-700">
-                Current Plan
+              <Button 
+                className="w-full mt-6 bg-gray-600 hover:bg-gray-700"
+                onClick={() => window.location.href = '/api/login'}
+              >
+                Start Free
               </Button>
             </CardContent>
           </Card>
@@ -161,7 +238,7 @@ export default function Landing() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </section>
 
       {/* Features Section */}
       <div className="container mx-auto px-4 py-16">
@@ -199,7 +276,11 @@ export default function Landing() {
               <Crown className="h-8 w-8 text-white" />
             </div>
             <h3 className="text-white font-semibold mb-2">Tournaments</h3>
-            <p className="text-gray-400 text-sm">Compete in ranked battles and climb the leaderboard</p>
+            <p className="text-gray-400 text-sm">
+              <a href="/tournaments" className="text-purple-400 hover:text-purple-300 underline">
+                Compete in ranked battles
+              </a> and climb the leaderboard
+            </p>
           </div>
         </div>
       </div>
