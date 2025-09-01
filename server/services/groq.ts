@@ -500,11 +500,14 @@ ${difficulty === 'hard' ? `
 - MULTIPLE ACTIVE CHAINS: Run 2+ rhyme families simultaneously through the verse
 - STRATEGIC WEAVING: Internals from early lines resurface in later lines for complex patterns
 
-🔥 INTERNAL RHYME DENSITY - 100% MEANINGFUL:
-- ZERO FILLER WORDS: Every internal rhyme must be a real word that advances the attack
-- ACTUAL MEANING: "I hate fakes so on their head I break rakes, toss em dead in the great lakes" (hate=emotion, fakes=opponents, break=action, rakes=weapon, dead=result, lakes=location)
-- REAL ACTIONS: "u suck stupid fuck you jumped then we shoot em up" (suck=weakness, fuck=insult, jumped=tried, shoot=retaliate)
-- NO NONSENSE RHYMES: Eliminate words that only exist to rhyme - every word must serve the battle narrative
+🔥 100% MEANINGFUL WORD REQUIREMENT - ZERO FILLER ANYWHERE:
+- EVERY SINGLE WORD: Must advance the attack, describe actions, or build the narrative
+- NO THROWAWAY WORDS: Eliminate "just", "so", "then", "but" unless they serve critical meaning
+- ACTUAL MEANING: "I hate fakes so on their head I break rakes, toss em dead in the great lakes" 
+  (hate=real emotion, fakes=actual opponents, break=physical action, rakes=real weapon, dead=actual result, lakes=specific location)
+- REAL ACTIONS ONLY: "u suck stupid fuck you jumped then we shoot em up" 
+  (suck=specific weakness, stupid=intelligence attack, fuck=direct insult, jumped=attempted action, shoot=retaliation method)
+- BATTLE PURPOSE: Every word must either attack the opponent, demonstrate superiority, or build the devastating narrative
 
 🎪 JUGGLING EXECUTION:
 - Line 1: Establish A-chain internals + B-chain internals
@@ -538,6 +541,13 @@ PUNCHLINE POSITIONING STRATEGY:
 - Line 4 end word: Should be your KNOCKOUT punch (most devastating)
 - Make sure your hardest-hitting wordplay and strongest insult lands ON THE END RHYME
 - The end rhyme word should BE PART OF the punchline, not just rhyme with it
+
+🚨 MANDATORY: EVERY SINGLE WORD MUST BE MEANINGFUL:
+- ZERO FILLER ANYWHERE: No "just", "so", "really", "kinda", "like", "you know" unless critical to meaning
+- EVERY WORD SERVES PURPOSE: Attack opponent, demonstrate skill, describe action, or build narrative
+- CONCRETE ACTIONS: Use specific verbs (destroy, eliminate, crush, dominate) not vague words
+- REAL DESCRIPTIONS: Use actual adjectives (weak, pathetic, inferior) not empty descriptors
+- BATTLE-FOCUSED: Every single word must either tear down opponent or build up your superiority
 
 MEANINGFUL CONTENT REQUIREMENTS:
 - ANALYZE THEIR MESSAGE: What are they actually saying? What's their angle or claim?
