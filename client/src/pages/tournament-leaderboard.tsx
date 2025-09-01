@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { ArrowLeft, Crown, Trophy, Medal, Award } from "lucide-react";
+import leaderboardImage from "@assets/generated_images/Tournament_leaderboard_hall_3a679b72.png";
 
 interface LeaderboardEntry {
   rank: number;
@@ -51,8 +52,13 @@ export default function TournamentLeaderboard() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-black text-white p-4 relative">
+      {/* Leaderboard Background */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+        style={{ backgroundImage: `url(${leaderboardImage})` }}
+      />
+      <div className="relative z-10 max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center space-x-4 mb-8">
           <Button 

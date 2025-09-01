@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/useAuth';
 import { Users, Crown, Zap } from 'lucide-react';
+import adminImage from "@assets/generated_images/Admin_dashboard_interface_39ab3175.png";
 
 interface User {
   id: string;
@@ -70,8 +71,13 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-6 relative">
+      {/* Admin Background */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+        style={{ backgroundImage: `url(${adminImage})` }}
+      />
+      <div className="relative z-10 max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
           <p className="text-gray-400">Manage users and system overview</p>

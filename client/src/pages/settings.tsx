@@ -4,11 +4,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { APIKeyManager } from '@/components/api-key-manager';
 import { Settings2, Mic, Key, Shield } from 'lucide-react';
+import settingsImage from "@assets/generated_images/Audio_settings_interface_5e678558.png";
 
 export default function SettingsPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4" data-testid="page-settings">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 relative" data-testid="page-settings">
+      {/* Settings Background */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+        style={{ backgroundImage: `url(${settingsImage})` }}
+      />
+      <div className="relative z-10 max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center">
           <h1 className="text-4xl font-bold text-white mb-2 flex items-center justify-center gap-3">

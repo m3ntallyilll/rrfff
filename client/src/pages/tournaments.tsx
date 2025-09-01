@@ -15,6 +15,7 @@ import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import type { Tournament } from '@shared/schema';
+import tournamentImage from "@assets/generated_images/Tournament_championship_bracket_0fd32970.png";
 
 interface CreateTournamentForm {
   name: string;
@@ -100,8 +101,13 @@ export default function Tournaments() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-black text-white p-4 relative">
+      {/* Tournament Background */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-15"
+        style={{ backgroundImage: `url(${tournamentImage})` }}
+      />
+      <div className="relative z-10 max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>

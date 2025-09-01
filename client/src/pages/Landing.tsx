@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Crown, Mic, Zap, Star } from "lucide-react";
+import heroImage from "@assets/generated_images/AI_rap_battle_landing_872131b2.png";
 
 export default function Landing() {
   return (
@@ -9,10 +10,16 @@ export default function Landing() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center" aria-labelledby="hero-title">
         <div className="mb-8">
-          <h1 id="hero-title" className="text-6xl font-bold text-white mb-4">
-            Battle Rap AI: Face Off Against the Future of <span className="text-purple-400">Flow</span>
-          </h1>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          {/* Hero Background Image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
+            style={{ backgroundImage: `url(${heroImage})` }}
+          />
+          <div className="relative z-10">
+            <h1 id="hero-title" className="text-6xl font-bold text-white mb-4">
+              Battle Rap AI: Face Off Against the Future of <span className="text-purple-400">Flow</span>
+            </h1>
+            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
             Experience the ultimate voice-powered freestyle battles against advanced AI opponents with real-time rap scoring. 
             Master your flow, perfect your rhymes, and climb the leaderboard in this revolutionary battle rap game online.
           </p>
@@ -63,6 +70,7 @@ export default function Landing() {
             <Badge variant="secondary" className="bg-purple-900 text-purple-300">
               ✓ Real Voice Synthesis
             </Badge>
+          </div>
           </div>
         </div>
       </section>

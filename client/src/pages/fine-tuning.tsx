@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Brain, Upload, Download, CheckCircle, AlertCircle } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import fineTuningImage from "@assets/generated_images/AI_training_interface_dac1a3f8.png";
 
 interface FineTuningJob {
   id: string;
@@ -109,7 +110,12 @@ export default function FineTuning() {
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="container mx-auto py-8 space-y-6 relative">
+      {/* Fine-tuning Background */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-5"
+        style={{ backgroundImage: `url(${fineTuningImage})` }}
+      />
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold text-white flex items-center justify-center gap-2">
           <Brain className="h-8 w-8 text-accent-gold" />

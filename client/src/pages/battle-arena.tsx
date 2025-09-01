@@ -17,6 +17,7 @@ import { AudioControls } from "@/components/audio-controls";
 import { LyricBreakdown } from "@/components/lyric-breakdown";
 import { formatDuration } from "@/lib/audio-utils";
 import { motion, AnimatePresence } from "framer-motion";
+import battleArenaImage from "@assets/generated_images/Epic_rap_battle_arena_5a01b4d4.png";
 
 export default function BattleArena() {
   const [difficulty, setDifficulty] = useState<"easy" | "normal" | "hard">("normal");
@@ -288,8 +289,13 @@ export default function BattleArena() {
         </div>
       </header>
 
-      <main className="min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+      <main className="min-h-screen relative">
+        {/* Battle Arena Background */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+          style={{ backgroundImage: `url(${battleArenaImage})` }}
+        />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">
           {/* Character Selection Modal */}
           <AnimatePresence>
             {showCharacterSelector && (
