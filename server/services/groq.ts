@@ -473,9 +473,11 @@ ${difficulty === 'hard' ? `
    - Example: "your flow is really wack today" / "I heard your girl don't want to stay"
    - Lines should rhyme with multiple syllables, not just end words
 
-2. INTERNAL RHYMING: Include rhymes WITHIN each line, not just at the ends
-   - Example: "I SPIT fire, GET higher, while you QUIT trying to be a SLICK liar"
-   - Every line must have 2-3 internal rhymes
+2. MEANINGFUL INTERNAL RHYMING: Every internal rhyme must advance the attack and meaning
+   - BAD: "I SPIT fire, GET higher, while you QUIT trying" (random rhyming words)
+   - GOOD: "Your WEAK technique meets my PEAK physique, I SPEAK critique that leaves you CREEK without paddle"
+   - DEVASTATING: "I BREAK fakes with SNAKE takes, your FAKE stakes get CRUSHED by my RUSH of pure SKILL until you're STILL"
+   - Every internal rhyme must strengthen the punchline and add meaning to the attack
 
 3. DIABOLICAL PUNCHLINES: Use devastating wordplay categories
    - NAME FLIPS: Twist their identity cleverly
@@ -483,16 +485,18 @@ ${difficulty === 'hard' ? `
    - PSYCHOLOGICAL WARFARE: Get in their head with mind games
    - SETUP/PAYOFF: Build tension then deliver crushing punchlines
 
-4. RHYME STACKING: Stack multiple rhyming syllables in sequence
-   - Example: "BACK-to-BACK attacks, CRACK your TRACK, leave you FLAT on your back"
-   - Use consecutive words that rhyme or share sounds
+4. MEANINGFUL RHYME INTEGRATION: Every rhyme must serve the battle narrative
+   - SETUP RHYMES: Internal rhymes that build the attack ("Your WEAK speak meets my PEAK technique")
+   - ESCALATION RHYMES: Internal rhymes that intensify the assault ("I BREAK fakes with SNAKE takes")  
+   - PAYOFF RHYMES: Internal rhymes that deliver the crushing blow ("CRUSH your RUSH with SKILL until you're STILL")
 
-IMPLEMENTATION REQUIREMENTS:
-- PRIORITY: Focus on multi-line rhymes that make people's jaws drop
-- Use multi-syllabic rhymes (2+ syllables): "BATTLE-rattle", "NEVER-sever"
-- Include slant rhymes and consonance for density
-- Create devastating punchlines that wow audiences
-- Maintain perfect flow while showcasing technical complexity
+IMPLEMENTATION REQUIREMENTS FOR DEVASTATING INTEGRATION:
+- MANDATORY: Every internal rhyme must advance the meaning and attack strategy
+- NO FILLER RHYMES: Eliminate meaningless rhyming words that don't serve the battle
+- STRATEGIC LAYERING: Build rhyme schemes that create narrative progression
+- CONTEXTUAL POWER: Internal rhymes should reference the opponent's weaknesses directly
+- COMPOUND DEVASTATION: Stack meaningful rhymes to create overwhelming lyrical assault
+- PERFECT INTEGRATION: Rhymes feel natural while delivering maximum impact
 ` : ''}
 
 CONTEXTUAL BATTLE STRATEGY:
@@ -530,13 +534,19 @@ MEANINGFUL CONTENT REQUIREMENTS:
 - CONVERSATIONAL FLOW: Make it feel like a real back-and-forth dialogue
 - ${safetyNote}
 
-💥 END RHYME POWER EXAMPLES - Study these patterns for MAXIMUM impact:
+💥 MEANINGFUL INTERNAL + END RHYME INTEGRATION EXAMPLES:
 
-EXAMPLE 1 - Setup/Devastation pattern:
-"Your weak bars got me yawning, this is getting BORING (setup punch)
-Step to the king? That's your biggest MISTAKE (bridge)  
-I'll end your career with surgical PRECISION (escalation)
-Watch you collapse under lyrical DEVASTATION" (knockout punch)
+EXAMPLE 1 - Devastating Integration Pattern:
+"Your WEAK speak makes me PEAK with technique so SLICK it's getting BORING (meaningful internal rhymes + setup)
+Every FAKE take gets a SNAKE break, your MISTAKE is challenging the king (escalation with purpose)
+I DROP shots with precision, your FLOP stops this lyrical MISSION (meaningful internal progression)  
+DEVASTATION meets your weak foundation, accept total SUBMISSION" (knockout with full integration)
+
+EXAMPLE 2 - Contextual Internal Rhyme Attack:
+"You CLAIM fame but your GAME'S lame, I TAME names with lyrical FLAMES (internal rhymes advance the attack)
+Every WORD heard gets you BURNED, lessons LEARNED from getting CHURNED (meaningful progression)
+My FLOW shows what true PROS know, your SLOW prose can't GROW or GLOW (skill-focused internal rhymes)
+Time to GO bro, final BLOW delivered with perfect DEVASTATION" (devastating finish)
 
 EXAMPLE 2 - Skill/Demolition pattern:
 "You think you got bars but your flow's inconsistent, lacking SKILL (setup)

@@ -372,7 +372,7 @@ export function LyricBreakdown({ text, isVisible, onClose }: LyricBreakdownProps
                       <CardContent>
                         <ScrollArea className="h-64">
                           <div className="space-y-2">
-                            {analysis.highlightData.rhymes.map((rhyme, index) => (
+                            {analysis.highlightData?.rhymes?.map((rhyme, index) => (
                               <div key={index} className="flex items-center gap-2 p-2 rounded border">
                                 <div 
                                   className="w-4 h-4 rounded" 
@@ -497,7 +497,7 @@ export function LyricBreakdown({ text, isVisible, onClose }: LyricBreakdownProps
                               Detected Wordplay
                             </h4>
                             <div className="space-y-1">
-                              {analysis.creativityAnalysis.detectedWordplay.map((play, index) => (
+                              {analysis.creativityAnalysis.detectedWordplay?.map((play, index) => (
                                 <Badge key={index} variant="outline" className="mr-1">
                                   {play}
                                 </Badge>
@@ -513,7 +513,7 @@ export function LyricBreakdown({ text, isVisible, onClose }: LyricBreakdownProps
                               Metaphors & Imagery
                             </h4>
                             <div className="space-y-1">
-                              {analysis.creativityAnalysis.detectedMetaphors.map((metaphor, index) => (
+                              {analysis.creativityAnalysis.detectedMetaphors?.map((metaphor, index) => (
                                 <Badge key={index} variant="secondary" className="mr-1">
                                   {metaphor}
                                 </Badge>
