@@ -21,6 +21,11 @@ interface SFXConfig {
 interface SFXManagerHook {
   playRoundStartBell: () => void;
   playCrowdReaction: (intensity?: 'mild' | 'medium' | 'wild') => void;
+  playIntelligentCrowdReaction: (lyrics: string, context?: {
+    previousLyrics?: string;
+    battlePhase?: 'opening' | 'middle' | 'closing';
+    userPerformanceScore?: number;
+  }) => void;
   playEndingEffect: (type?: 'victory' | 'defeat' | 'draw') => void;
   stopAllSFX: () => void;
   config: SFXConfig;

@@ -63,6 +63,7 @@ export default function BattleArena() {
   const {
     playRoundStartBell,
     playCrowdReaction,
+    playIntelligentCrowdReaction,
     playEndingEffect,
     stopAllSFX,
     enableRealtimeCrowdReactions,
@@ -111,9 +112,9 @@ export default function BattleArena() {
     try {
       setIsTranscribing(true);
       
-      // 👥 CROWD REACTION - Trigger crowd reaction when user finishes their verse
-      console.log('👥 Triggering crowd reaction for completed verse');
-      playCrowdReaction('wild'); // Wild reaction for completed verses
+      // 👥 CROWD REACTION - Basic immediate reaction for recording completion
+      console.log('👥 Triggering immediate crowd reaction for completed verse');
+      playCrowdReaction('mild'); // Basic reaction while we wait for transcription
       
       // INSTANT TRANSCRIPTION: Get transcription immediately when recording stops
       console.log('🔥 Starting instant transcription...');
@@ -134,6 +135,16 @@ export default function BattleArena() {
             
             // Show transcription immediately
             setLiveTranscription(transcriptionData.userText || "Voice input processed");
+            
+            // 🧠 INTELLIGENT CROWD REACTION - Analyze transcribed lyrics for appropriate reaction
+            if (transcriptionData.userText) {
+              console.log('🧠 Triggering intelligent crowd reaction for:', transcriptionData.userText.substring(0, 50) + '...');
+              playIntelligentCrowdReaction(transcriptionData.userText, {
+                battlePhase: battleState?.currentRound === 1 ? 'opening' : 
+                           battleState?.currentRound === battleState?.maxRounds ? 'closing' : 'middle',
+                userPerformanceScore: battleState?.userScore
+              });
+            }
             
             toast({
               title: "Transcription Complete!",
