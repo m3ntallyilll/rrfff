@@ -91,17 +91,17 @@ export function useSFXManager(): SFXManagerHook {
     
     switch (type) {
       case 'round-bell':
-        audioUrl = '/public-objects/sfx/boxing-bell.mp3';
+        audioUrl = '/api/sfx/boxing-bell.mp3';
         break;
       case 'crowd-mild':
       case 'crowd-medium':
       case 'crowd-wild':
-        audioUrl = '/public-objects/sfx/crowd-reaction.mp3';
+        audioUrl = '/api/sfx/crowd-reaction.mp3';
         break;
       case 'ending-victory':
       case 'ending-defeat':
       case 'ending-draw':
-        audioUrl = '/public-objects/sfx/air-horn.mp3';
+        audioUrl = '/api/sfx/air-horn.mp3';
         break;
     }
 
