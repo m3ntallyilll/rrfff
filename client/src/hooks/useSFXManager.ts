@@ -282,15 +282,30 @@ export function useSFXManager(): SFXManagerHook {
   const triggerCrowdOnSpeech = useCallback(() => {
     speechDetectionRef.current = true;
     
-    // 🎯 REMOVED FAKE REACTIONS: No automatic crowd reactions on speech start
-    // Only AI analysis of actual lyrics will trigger reactions
-    console.log('🎤 User started recording - awaiting AI analysis for intelligent reactions');
+    // 🎯 ENHANCED: Enable mild real-time crowd reactions during speech
+    console.log('🎤 User started recording - enabling real-time crowd reactions');
     
-    // Reset speech detection after 5 seconds
+    // Trigger subtle crowd reaction when user gets into flow
+    if (config.crowdReactions.enabled && realtimeCrowdEnabled) {
+      setTimeout(() => {
+        console.log('🎆 Triggering mild crowd reaction for active speech');
+        playCrowdReaction('mild');
+      }, 2000); // Wait 2 seconds for user to get into flow
+      
+      // Optional: Add another subtle reaction after 5 seconds
+      setTimeout(() => {
+        if (speechDetectionRef.current) {
+          console.log('🎆 Triggering sustained crowd energy');
+          playCrowdReaction('mild');
+        }
+      }, 5000);
+    }
+    
+    // Reset speech detection after 8 seconds
     setTimeout(() => {
       speechDetectionRef.current = false;
-    }, 5000);
-  }, []);
+    }, 8000);
+  }, [config.crowdReactions.enabled, realtimeCrowdEnabled, playCrowdReaction]);
 
   // Cleanup on unmount
   useEffect(() => {
