@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface RecordingPanelProps {
   onRecordingComplete?: (recording: { blob: Blob; duration: number; url: string }) => void;
+  onRecordingStart?: () => void;
   profanityFilter: boolean;
   onProfanityFilterChange: (enabled: boolean) => void;
   lyricComplexity: number;
@@ -21,6 +22,7 @@ interface RecordingPanelProps {
 
 export function RecordingPanel({ 
   onRecordingComplete, 
+  onRecordingStart,
   profanityFilter, 
   onProfanityFilterChange,
   lyricComplexity,
@@ -69,7 +71,12 @@ export function RecordingPanel({
           whileTap={{ scale: disabled ? 1 : 0.95 }}
         >
           <Button
-            onClick={toggleRecording}
+            onClick={() => {
+              if (!isRecording && onRecordingStart) {
+                onRecordingStart();
+              }
+              toggleRecording();
+            }}
             disabled={disabled}
             className="relative w-24 h-24 bg-gradient-to-br from-accent-red to-red-600 hover:from-red-500 hover:to-red-700 rounded-full transition-all duration-300 focus:ring-4 focus:ring-accent-red focus:ring-opacity-50"
             data-testid="button-toggle-recording"

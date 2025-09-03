@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useBattleState } from "@/hooks/use-battle-state";
+import { useSFXManager } from "@/hooks/useSFXManager";
 import { RecordingPanel } from "@/components/recording-panel";
 import { BattleAvatar } from "@/components/battle-avatar";
 import { BattleTextDisplay } from "@/components/battle-text-display";
@@ -58,6 +59,18 @@ export default function BattleArena() {
     submitRound,
   } = useBattleState();
 
+  // SFX Manager for crowd reactions, bells, and air horns
+  const {
+    playRoundStartBell,
+    playCrowdReaction,
+    playEndingEffect,
+    stopAllSFX,
+    enableRealtimeCrowdReactions,
+    triggerCrowdOnSpeech,
+    isPlaying: isSFXPlaying,
+    currentlyPlaying: currentSFX
+  } = useSFXManager();
+
   // Fetch battle history
   const { data: battleHistory = [] } = useQuery({
     queryKey: ["/api/battles"],
@@ -70,6 +83,14 @@ export default function BattleArena() {
         const newTime = battleState.timeRemaining - 1;
         setBattleTimer(newTime);
         if (newTime <= 0) {
+          // 🏁 BATTLE ENDING - Play ending air horn effects
+          console.log('🏁 Battle ended - playing ending effects');
+          const userWon = (battleState?.userScore || 0) > (battleState?.aiScore || 0);
+          playEndingEffect(userWon ? 'victory' : 'defeat');
+          
+          // Disable real-time crowd reactions
+          enableRealtimeCrowdReactions(false);
+          
           // End battle
           updateBattleState({ timeRemaining: 0 });
         }
@@ -89,6 +110,10 @@ export default function BattleArena() {
   const handleRecordingComplete = async (recording: { blob: Blob; duration: number; url: string }) => {
     try {
       setIsTranscribing(true);
+      
+      // 👥 CROWD REACTION - Trigger crowd reaction when user finishes their verse
+      console.log('👥 Triggering crowd reaction for completed verse');
+      playCrowdReaction('wild'); // Wild reaction for completed verses
       
       // INSTANT TRANSCRIPTION: Get transcription immediately when recording stops
       console.log('🔥 Starting instant transcription...');
@@ -198,6 +223,14 @@ export default function BattleArena() {
     console.log('🎯 Character selected:', character.displayName);
     setSelectedCharacter(character);
     setShowCharacterSelector(false);
+    
+    // 🔔 ROUND START BELL - Play boxing bell when battle begins
+    console.log('🔔 Playing round start bell for new battle');
+    playRoundStartBell();
+    
+    // Enable real-time crowd reactions for this battle
+    enableRealtimeCrowdReactions(true);
+    
     // Start battle with selected character and complexity settings
     startNewBattle(difficulty, profanityFilter, character.id, lyricComplexity, styleIntensity, advancedSettings.voiceSpeed);
   };
@@ -406,6 +439,10 @@ export default function BattleArena() {
               {/* Recording Panel */}
               <RecordingPanel
                 onRecordingComplete={handleRecordingComplete}
+                onRecordingStart={() => {
+                  console.log('🎤 User started recording - triggering crowd on speech');
+                  triggerCrowdOnSpeech();
+                }}
                 profanityFilter={profanityFilter}
                 onProfanityFilterChange={setProfanityFilter}
                 lyricComplexity={lyricComplexity}

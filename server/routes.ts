@@ -2,6 +2,7 @@ import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
+import { ObjectStorageService } from "./objectStorage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { SUBSCRIPTION_TIERS, insertTournamentSchema } from "@shared/schema";
 import { groqService } from "./services/groq";
@@ -45,6 +46,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     console.log('🏥 Health check:', health);
     res.json(health);
+  });
+
+  // SFX Audio Files endpoint for serving public sound effects
+  app.get("/public-objects/:filePath(*)", async (req, res) => {
+    const filePath = req.params.filePath;
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const file = await objectStorageService.searchPublicObject(filePath);
+      if (!file) {
+        return res.status(404).json({ error: "SFX file not found" });
+      }
+      objectStorageService.downloadObject(file, res);
+    } catch (error) {
+      console.error("Error serving SFX file:", error);
+      return res.status(500).json({ error: "Failed to serve SFX file" });
+    }
   });
 
   // Auth middleware
