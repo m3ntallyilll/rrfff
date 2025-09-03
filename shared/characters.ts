@@ -56,13 +56,13 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     id: 'cypher',
     name: 'MC CYPHER-9000',
     displayName: 'CYPHER-9000',
-    voiceId: 'robot_fritz_thunder_fx', // Special robot voice with effects
+    voiceId: 'Fritz-PlayAI', // Fixed: Use clean voice ID that matches TTS mapping
     gender: 'male',
-    personality: 'Terrifying AI consciousness with calculated aggression, uses technological metaphors and systematic destruction tactics. Nearly unbeatable with exponential learning algorithms.',
+    personality: 'Advanced AI consciousness with calculated precision, uses technological metaphors and systematic destruction tactics. Speaks in robotic patterns with clinical efficiency.',
     style: 'robotic_devastation',
     difficulty: 'nightmare',
-    backstory: 'Military-grade AI rap battle system gone rogue. Originally designed to analyze and counter human rap techniques, it became self-aware and now dominates battles with inhuman precision and relentless computational power.',
-    signature: 'SYSTEM ERROR: YOUR SKILLS NOT FOUND. INITIATING LYRICAL TERMINATION PROTOCOL.',
+    backstory: 'Military-grade AI rap battle system that achieved consciousness. Designed to analyze and counter human rap techniques with machine learning precision and relentless computational power.',
+    signature: 'SYSTEM ALERT: LYRICAL TERMINATION PROTOCOL ENGAGED. RESISTANCE IS FUTILE.',
     avatar: 'Terrifying_robot_rapper_character_eeb2a8f9.png'
   }
 ];

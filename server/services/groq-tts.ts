@@ -61,26 +61,24 @@ export class GroqTTSService {
   private applyRobotVoiceEffects(text: string, characterId: string): string {
     // Special robot voice processing for CYPHER-9000
     if (characterId === 'cypher') {
-      // ENHANCED CYPHER-9000 VOICE EFFECTS - More aggressive and robotic
+      // FIXED CYPHER-9000 VOICE EFFECTS - Clean for TTS while keeping robotic personality
       let robotText = text;
       
-      // Add intense robotic modulation and glitches
-      robotText = robotText.replace(/\./g, '. [digital_glitch]');
-      robotText = robotText.replace(/!/g, '! [system_surge] [emphasis]');
-      robotText = robotText.replace(/\?/g, '? [data_scan] [query_mode]');
+      // Add minimal robotic speech patterns that TTS can handle
+      robotText = robotText.replace(/\bi\s/gi, 'THIS UNIT ');
+      robotText = robotText.replace(/\bmy\b/gi, 'MY SYSTEMS');
+      robotText = robotText.replace(/\byour\b/gi, 'TARGET');
+      robotText = robotText.replace(/\byou\b/gi, 'HUMAN SUBJECT');
       
-      // Add rapid-fire robotic processing between verses
-      robotText = robotText.replace(/,/g, ', [micro_process]');
-      robotText = robotText.replace(/\band\b/g, '[sync] and [sync]');
-      robotText = robotText.replace(/\byou\b/g, '[target_acquired] you [locked]');
+      // Add robotic terminology without breaking TTS
+      robotText = robotText.replace(/\bbattle\b/gi, 'COMBAT PROTOCOL');
+      robotText = robotText.replace(/\brhyme\b/gi, 'LYRICAL ALGORITHM');
+      robotText = robotText.replace(/\brap\b/gi, 'VERBAL EXECUTION');
       
-      // Add CYPHER-9000 signature mechanical sounds
-      robotText = `[boot_sequence] [voice_modulator_engaged] ${robotText} [termination_protocol_active] [systems_nominal]`;
+      // Clean robotic prefixes/suffixes
+      robotText = `INITIATING VERBAL COMBAT. ${robotText}. TERMINATION PROTOCOL COMPLETE.`;
       
-      // Add digital distortion markers for more robotic effect
-      robotText = robotText.replace(/[aeiou]/g, (match) => `[${match}_synthesized]`);
-      
-      console.log(`🤖 CYPHER-9000 ENHANCED VOICE FX: Added advanced robotic modulation`);
+      console.log(`🤖 CYPHER-9000 FIXED VOICE: Clean robotic speech for TTS`);
       return robotText;
     }
     return text;
