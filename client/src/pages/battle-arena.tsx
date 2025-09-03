@@ -264,8 +264,15 @@ export default function BattleArena() {
     console.log('🔔 Playing round start bell for new battle');
     playRoundStartBell();
     
-    // Enable real-time crowd reactions for this battle
+    // 🎤 FORCE ENABLE CROWD REACTIONS - Ensure they work for this battle
+    console.log('🎤 Real-time crowd reactions enabled');
     enableRealtimeCrowdReactions(true);
+    
+    // 🎯 TEST CROWD REACTION IMMEDIATELY
+    setTimeout(() => {
+      console.log('🎆 Testing crowd reaction system...');
+      playCrowdReaction('mild');
+    }, 3000);
     
     // Start battle with selected character and complexity settings
     startNewBattle(difficulty, profanityFilter, character.id, lyricComplexity, styleIntensity, advancedSettings.voiceSpeed);
