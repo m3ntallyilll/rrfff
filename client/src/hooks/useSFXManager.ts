@@ -286,15 +286,15 @@ export function useSFXManager(): SFXManagerHook {
   const triggerCrowdOnSpeech = useCallback(() => {
     speechDetectionRef.current = true;
     
-    // DISABLED: No longer trigger reactions just for starting to speak
-    // Reactions should only happen for clever/impressive content
-    console.log('🎤 User started recording - crowd reactions disabled for speech start');
+    // ✅ RE-ENABLED: Crowd reacts while user is speaking
+    console.log('🎤 User started recording - triggering crowd on speech');
+    playCrowdReaction('mild'); // Immediate mild reaction for speech start
     
     // Reset speech detection after 5 seconds
     setTimeout(() => {
       speechDetectionRef.current = false;
     }, 5000);
-  }, []);
+  }, [playCrowdReaction]);
 
   // Cleanup on unmount
   useEffect(() => {

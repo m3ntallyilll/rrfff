@@ -448,8 +448,8 @@ export default function BattleArena() {
                       BATTLE SCORE
                     </div>
                     <div className="text-xs text-gray-400">
-                      {battleState?.userScore > battleState?.aiScore ? "YOU LEAD" : 
-                       battleState?.aiScore > battleState?.userScore ? "AI LEADS" : "TIED"}
+                      {(battleState?.userScore || 0) > (battleState?.aiScore || 0) ? "YOU LEAD" : 
+                       (battleState?.aiScore || 0) > (battleState?.userScore || 0) ? "AI LEADS" : "TIED"}
                     </div>
                   </div>
                   
@@ -470,9 +470,9 @@ export default function BattleArena() {
                     <div className="text-xs text-gray-400">Round History:</div>
                     {rounds.map((round, index) => (
                       <div key={round.id} className="flex items-center space-x-1 text-xs">
-                        <span className="text-accent-blue">{round.userScore}</span>
+                        <span className="text-accent-blue">{round.scores?.userScore || 0}</span>
                         <span className="text-gray-500">vs</span>
-                        <span className="text-accent-red">{round.aiScore}</span>
+                        <span className="text-accent-red">{round.scores?.aiScore || 0}</span>
                         {index < rounds.length - 1 && <span className="text-gray-600">•</span>}
                       </div>
                     ))}
