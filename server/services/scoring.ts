@@ -710,38 +710,14 @@ export class ScoringService {
   // Excel at different techniques at different times while maintaining perfect balance
   
   private getDetailedComponents(text: string): any {
-    const components = {
-      // Core Rhyme Techniques (30% total)
-      endRhymes: this.calculateEndRhymes(text),
-      internalRhymes: this.calculateInternalRhymes(text), 
-      multiLineRhymes: this.calculateMultiLineRhymes(text),
-      multiSyllabicRhymes: this.calculateMultiSyllabicRhymes(text),
-      
-      // Flow & Delivery (25% total)
-      rhythm: this.analyzeRhythm(text),
-      syllableFlow: this.calculateSyllableFlow(text),
-      pacing: this.calculatePacing(text),
-      
-      // Wordplay Mastery (25% total)
-      punchlines: this.detectPunchlines(text),
-      wordplay: this.detectAdvancedWordplay(text),
-      homonyms: this.detectHomonyms(text),
-      metaphors: this.detectFigurativeLanguage(text),
-      
-      // Battle Technique (20% total)
-      battleTactics: this.detectBattleTactics(text),
-      psychologicalWarfare: this.detectPsychologicalWarfare(text),
-      personalAttacks: this.detectPersonalAttacks(text),
-      skillDemolition: this.detectSkillDemolition(text),
-      nameFlips: this.detectNameFlips(text),
-      setupPayoff: this.detectSetupPayoff(text.split('\n').filter(l => l.trim())),
-      
-      // Overall Quality
-      originality: this.calculateOriginality(text),
-      vocabulary: this.calculateVocabulary(text)
+    // SIMPLIFIED - Store text for use in calculateBalancedScore  
+    return {
+      text: text,
+      // Keep the working individual scores
+      rhyme: this.calculateRhymeDensity(text),
+      flow: this.calculateFlowQuality(text),
+      creativity: this.calculateCreativity(text)
     };
-    
-    return components;
   }
   
   private calculateDynamicWeights(components: any): { rhyme: number; flow: number; wordplay: number; battle: number } {
@@ -785,51 +761,19 @@ export class ScoringService {
   }
   
   private calculateBalancedScore(components: any, weights: any): number {
-    // Rhyme Component (weighted)
-    const rhymeScore = (
-      components.endRhymes * 0.25 + 
-      components.internalRhymes * 0.25 + 
-      components.multiLineRhymes * 0.30 + 
-      components.multiSyllabicRhymes * 0.20
-    );
+    // SIMPLIFIED AND ACCURATE SCORING - Fix the broken calculation
     
-    // Flow Component (weighted)
-    const flowScore = (
-      components.rhythm * 0.4 + 
-      components.syllableFlow * 0.4 + 
-      components.pacing * 0.2
-    );
+    // Get the core scores from existing methods (these work correctly)
+    const rhyme = this.calculateRhymeDensity(components.text || '');
+    const flow = this.calculateFlowQuality(components.text || '');  
+    const creativity = this.calculateCreativity(components.text || '');
     
-    // Wordplay Component (weighted)
-    const wordplayScore = (
-      components.punchlines * 0.35 +
-      components.wordplay * 0.25 +
-      components.homonyms * 0.20 +
-      components.metaphors * 0.20
-    );
+    // Combine scores with proper weighting
+    const combinedScore = (rhyme * 0.35) + (flow * 0.35) + (creativity * 0.30);
     
-    // Battle Component (weighted)
-    const battleScore = (
-      components.battleTactics * 0.20 +
-      components.psychologicalWarfare * 0.15 +
-      components.personalAttacks * 0.15 +
-      components.skillDemolition * 0.15 +
-      components.nameFlips * 0.15 +
-      components.setupPayoff * 0.20
-    );
+    console.log(`🎯 Score combination: Rhyme ${rhyme}/100 (35%), Flow ${flow}/100 (35%), Creativity ${creativity}/100 (30%) = ${Math.round(combinedScore)}/100`);
     
-    // Overall Quality Boost
-    const qualityMultiplier = 1 + ((components.originality + components.vocabulary) / 200);
-    
-    // Final balanced score
-    const totalScore = (
-      (rhymeScore * weights.rhyme) +
-      (flowScore * weights.flow) +
-      (wordplayScore * weights.wordplay) +
-      (battleScore * weights.battle)
-    ) * qualityMultiplier;
-    
-    return Math.max(0, Math.min(100, totalScore));
+    return Math.max(15, Math.min(100, Math.round(combinedScore)));
   }
   
   // Additional component calculators for perfect balance

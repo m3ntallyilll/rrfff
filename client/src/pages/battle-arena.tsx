@@ -427,28 +427,59 @@ export default function BattleArena() {
                 </div>
               </div>
               
-              {/* Battle Progress */}
-              <div className="flex justify-between items-center">
-                <div className="text-center">
-                  <div className="text-accent-blue font-semibold">YOU</div>
-                  <div className="text-2xl font-orbitron font-bold" data-testid="text-user-score">
-                    {battleState?.userScore || 0}
+              {/* Enhanced Battle Score Display */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="text-center bg-secondary-dark/50 rounded-lg px-6 py-4 border border-accent-blue/30">
+                    <div className="text-accent-blue font-semibold text-sm">YOU</div>
+                    <div className="text-3xl font-orbitron font-bold text-white" data-testid="text-user-score">
+                      {battleState?.userScore || 0}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      Round {battleState?.currentRound || 1} Score
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 mx-8 text-center">
+                    <Progress 
+                      value={getProgressPercentage()} 
+                      className="h-3 bg-battle-gray"
+                      data-testid="progress-battle-score"
+                    />
+                    <div className="text-center text-sm font-bold mt-2 text-accent-gold">
+                      BATTLE SCORE
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {battleState?.userScore > battleState?.aiScore ? "YOU LEAD" : 
+                       battleState?.aiScore > battleState?.userScore ? "AI LEADS" : "TIED"}
+                    </div>
+                  </div>
+                  
+                  <div className="text-center bg-secondary-dark/50 rounded-lg px-6 py-4 border border-accent-red/30">
+                    <div className="text-accent-red font-semibold text-sm">AI BOT</div>
+                    <div className="text-3xl font-orbitron font-bold text-white" data-testid="text-ai-score">
+                      {battleState?.aiScore || 0}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      Round {battleState?.currentRound || 1} Score
+                    </div>
                   </div>
                 </div>
-                <div className="flex-1 mx-8">
-                  <Progress 
-                    value={getProgressPercentage()} 
-                    className="h-2"
-                    data-testid="progress-battle-score"
-                  />
-                  <div className="text-center text-xs font-semibold mt-1">VS</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-accent-red font-semibold">AI BOT</div>
-                  <div className="text-2xl font-orbitron font-bold" data-testid="text-ai-score">
-                    {battleState?.aiScore || 0}
+                
+                {/* Round History */}
+                {rounds && rounds.length > 0 && (
+                  <div className="flex justify-center space-x-2">
+                    <div className="text-xs text-gray-400">Round History:</div>
+                    {rounds.map((round, index) => (
+                      <div key={round.id} className="flex items-center space-x-1 text-xs">
+                        <span className="text-accent-blue">{round.userScore}</span>
+                        <span className="text-gray-500">vs</span>
+                        <span className="text-accent-red">{round.aiScore}</span>
+                        {index < rounds.length - 1 && <span className="text-gray-600">•</span>}
+                      </div>
+                    ))}
                   </div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
