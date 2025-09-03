@@ -10,6 +10,7 @@ import { typecastService } from "./services/typecast";
 import { barkTTS } from "./services/bark";
 import { scoringService } from "./services/scoring";
 import { userTTSManager } from "./services/user-tts-manager";
+import { crowdReactionService } from "./services/crowdReactionService";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -1327,6 +1328,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Lyrics analysis error:', error);
       res.status(500).json({ message: 'Analysis failed' });
+    }
+  });
+
+  // INTELLIGENT CROWD REACTION ENDPOINT
+  app.post('/api/crowd-reaction/analyze', async (req, res) => {
+    try {
+      const { lyrics, context } = req.body;
+      
+      if (!lyrics || typeof lyrics !== 'string') {
+        return res.status(400).json({ error: 'Lyrics text is required' });
+      }
+
+      console.log(`🧠 Analyzing lyrics for crowd reaction: "${lyrics.substring(0, 50)}..."`);
+      
+      const analysis = await crowdReactionService.analyzeForCrowdReaction(lyrics, context);
+      
+      console.log(`🎭 Crowd reaction determined: ${analysis.reactionType} (${analysis.intensity}%) - ${analysis.reasoning}`);
+      
+      res.json(analysis);
+      
+    } catch (error) {
+      console.error('Error analyzing for crowd reaction:', error);
+      res.status(500).json({ error: 'Crowd reaction analysis failed' });
     }
   });
 

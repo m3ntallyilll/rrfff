@@ -301,9 +301,61 @@ export function useSFXManager(): SFXManagerHook {
     };
   }, [stopAllSFX]);
 
+  // Intelligent crowd reaction based on lyrical content
+  const playIntelligentCrowdReaction = useCallback(async (lyrics: string, context?: {
+    previousLyrics?: string;
+    battlePhase?: 'opening' | 'middle' | 'closing';
+    userPerformanceScore?: number;
+  }) => {
+    if (!config.crowdReactions.enabled) return;
+
+    try {
+      console.log(`🧠 Analyzing lyrics for intelligent crowd reaction: "${lyrics.substring(0, 50)}..."`);
+      
+      const response = await fetch('/api/crowd-reaction/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lyrics, context })
+      });
+      
+      if (!response.ok) {
+        console.warn('Failed to get intelligent crowd reaction, using default');
+        playCrowdReaction('medium');
+        return;
+      }
+      
+      const analysis = await response.json();
+      console.log(`🎤 Crowd analysis: ${analysis.reactionType} (${analysis.intensity}%) - ${analysis.reasoning}`);
+      
+      // Map reaction type to SFX intensity
+      const sfxIntensity = analysis.reactionType === 'silence' ? null :
+                          analysis.reactionType === 'wild_cheering' ? 'wild' :
+                          analysis.reactionType === 'hype' ? 'medium' : 'mild';
+      
+      if (sfxIntensity) {
+        // Apply intelligent timing
+        const delay = analysis.timing === 'immediate' ? 100 :
+                     analysis.timing === 'delayed' ? 800 : 400;
+        
+        setTimeout(() => {
+          console.log(`🎆 Intelligent crowd reaction triggered: ${sfxIntensity} (${analysis.reactionType})`);
+          playCrowdReaction(sfxIntensity);
+        }, delay);
+      } else {
+        console.log('🤫 Crowd stays silent - performance didn\'t land');
+      }
+      
+    } catch (error) {
+      console.error('Error with intelligent crowd reaction:', error);
+      // Fallback to basic reaction
+      playCrowdReaction('medium');
+    }
+  }, [config.crowdReactions, playCrowdReaction]);
+
   return {
     playRoundStartBell,
     playCrowdReaction,
+    playIntelligentCrowdReaction,
     playEndingEffect,
     stopAllSFX,
     config,
