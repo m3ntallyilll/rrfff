@@ -329,10 +329,17 @@ export function useSFXManager(): SFXManagerHook {
       const analysis = await response.json();
       console.log(`🎤 Crowd analysis: ${analysis.reactionType} (${analysis.intensity}%) - ${analysis.reasoning}`);
       
-      // Map reaction type to SFX intensity
+      // STRICT: Only trigger reactions for genuinely impressive content
       const sfxIntensity = analysis.reactionType === 'silence' ? null :
                           analysis.reactionType === 'wild_cheering' ? 'wild' :
-                          analysis.reactionType === 'hype' ? 'medium' : 'mild';
+                          analysis.reactionType === 'hype' ? 'medium' : 
+                          analysis.reactionType === 'mild_approval' ? 'mild' : null;
+      
+      // Double-check: Don't play reactions for low intensity scores
+      if (sfxIntensity && analysis.intensity < 40) {
+        console.log(`🤫 Crowd stays silent - intensity too low (${analysis.intensity}%)`);
+        return;
+      }
       
       if (sfxIntensity) {
         // Apply intelligent timing

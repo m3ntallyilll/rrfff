@@ -171,10 +171,14 @@ export function BattleAvatar({
           {/* Dedicated Audio Player for TTS */}
           <SimpleAudioPlayer 
             audioUrl={audioUrl}
-            autoPlay={isAISpeaking}
+            autoPlay={true}  // Always auto-play AI responses
             volume={1.0}
-            onPlay={() => console.log('🔊 TTS Audio started')}
-            onEnded={() => console.log('🔇 TTS Audio ended')}
+            onPlay={() => {
+              console.log('🔊 TTS Audio started - AI is now speaking');
+            }}
+            onEnded={() => {
+              console.log('🔇 TTS Audio ended - AI finished speaking');
+            }}
           />
           
           {/* Subtle visual feedback when speaking */}

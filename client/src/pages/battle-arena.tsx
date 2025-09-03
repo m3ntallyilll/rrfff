@@ -112,9 +112,7 @@ export default function BattleArena() {
     try {
       setIsTranscribing(true);
       
-      // 👥 CROWD REACTION - Basic immediate reaction for recording completion
-      console.log('👥 Triggering immediate crowd reaction for completed verse');
-      playCrowdReaction('mild'); // Basic reaction while we wait for transcription
+      // 🤫 NO AUTO-CROWD REACTIONS - Only intelligent analysis will trigger reactions
       
       // INSTANT TRANSCRIPTION: Get transcription immediately when recording stops
       console.log('🔥 Starting instant transcription...');
