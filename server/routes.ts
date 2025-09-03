@@ -93,8 +93,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { battleCount = 10, paymentMethod = 'stripe' } = req.body; // Default 10 battles for $1
       
-      if (battleCount !== 10) {
-        return res.status(400).json({ message: 'Only 10-battle packages available' });
+      // Available battle packages with pricing
+      const battlePackages = {
+        10: { price: 100, description: '10 battles for $1.00' }, // $0.10 per battle
+        1500: { price: 10000, description: '1,500 battles for $100.00' } // $0.067 per battle (15 battles per dollar)
+      };
+      
+      if (!battlePackages[battleCount as keyof typeof battlePackages]) {
+        const available = Object.keys(battlePackages).join(', ');
+        return res.status(400).json({ 
+          message: `Invalid battle count. Available packages: ${available} battles` 
+        });
       }
 
       let user = await storage.getUser(userId);
@@ -137,16 +146,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.log(`💰 Creating battle purchase: 10 battles for $1.00`);
+      const packageInfo = battlePackages[battleCount as keyof typeof battlePackages];
+      const amount = packageInfo.price;
+      const pricePerBattle = (amount / 100 / battleCount).toFixed(3);
+      
+      console.log(`💰 Creating battle purchase: ${battleCount} battles for $${(amount/100).toFixed(2)}`);
       
       // Configure payment method types
       const paymentMethodTypes: ('card' | 'cashapp')[] = paymentMethod === 'cashapp' 
         ? ['cashapp'] 
         : ['card', 'cashapp'];
 
-      // Create one-time payment intent for $1.00 (100 cents)
+      // Create one-time payment intent
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: 100, // $1.00 in cents
+        amount: amount, // Amount in cents
         currency: 'usd',
         customer: customer.id,
         payment_method_types: paymentMethodTypes,
@@ -154,11 +167,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: userId,
           battleCount: battleCount,
           paymentMethod: paymentMethod,
+          packageType: battleCount === 1500 ? 'mega_bundle' : 'standard',
           ...(paymentMethod === 'cashapp' && { cashapp_account: '$ILLAITHEGPTSTORE' })
         },
         description: paymentMethod === 'cashapp' 
-          ? `10 Battle Pack ($0.10 per battle) - Pay to $ILLAITHEGPTSTORE`
-          : `10 Battle Pack ($0.10 per battle)`,
+          ? `${battleCount} Battle Pack ($${pricePerBattle} per battle) - Pay to $ILLAITHEGPTSTORE`
+          : `${battleCount} Battle Pack ($${pricePerBattle} per battle)`,
       });
 
       console.log(`✅ Payment intent created: ${paymentIntent.id}`);
@@ -167,8 +181,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         paymentIntentId: paymentIntent.id,
         clientSecret: paymentIntent.client_secret,
-        amount: 100,
-        battleCount: 10
+        amount: amount,
+        battleCount: battleCount
       });
     } catch (error: any) {
       console.error('Battle purchase creation error:', error);

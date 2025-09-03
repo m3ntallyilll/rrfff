@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { Loader2, Zap } from 'lucide-react';
+import { Loader2, Zap, Crown } from 'lucide-react';
 const subscribeImage = "/images/Premium_subscription_interface_c2661c50.png";
 
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
@@ -145,11 +145,11 @@ export default function Subscribe() {
   });
 
   const createBattlePack = useMutation({
-    mutationFn: async () => {
-      // Use ThcaStore's one-time payment approach
-      const response = await apiRequest('POST', '/api/create-payment-intent', {
-        amount: 1.00, // $1.00 for 10 battles
-        description: `10 Battle Pack ($0.10 per battle)`
+    mutationFn: async (params: { battleCount: number }) => {
+      // Use new purchase-battles endpoint that supports multiple package sizes
+      const response = await apiRequest('POST', '/api/purchase-battles', {
+        battleCount: params.battleCount,
+        paymentMethod: paymentMethod
       });
       return response.json();
     },
@@ -183,7 +183,7 @@ export default function Subscribe() {
     setPurchaseType(type);
     setClientSecret('');
     if (type === 'battles') {
-      createBattlePack.mutate();
+      createBattlePack.mutate({ battleCount: 10 }); // Default to 10 battles
     } else {
       createSubscription.mutate({ tier, paymentMethod });
     }
@@ -281,38 +281,34 @@ export default function Subscribe() {
           </div>
 
           {purchaseType === 'battles' ? (
-            <div className="flex justify-center">
-              <Card className="bg-gray-800 border-amber-500/50 hover:border-amber-400 transition-colors max-w-md relative">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-amber-500 text-black px-3 py-1 rounded-full text-sm font-semibold">
-                    10¢ PER BATTLE
-                  </span>
-                </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Starter Pack */}
+              <Card className="bg-gray-800 border-blue-500/50 hover:border-blue-400 transition-colors">
                 <CardHeader className="text-center">
-                  <CardTitle className="text-amber-400 text-2xl flex items-center justify-center">
+                  <CardTitle className="text-blue-400 text-2xl flex items-center justify-center">
                     <Zap className="mr-2 h-6 w-6" />
-                    Battle Pack
+                    Starter Pack
                   </CardTitle>
                   <CardDescription className="text-gray-300">
-                    Quick battles, no commitment
+                    Perfect for trying out the game
                   </CardDescription>
-                  <div className="text-4xl font-bold text-white">
+                  <div className="text-3xl font-bold text-white">
                     $1.00<span className="text-lg text-gray-400"> for 10 battles</span>
                   </div>
+                  <p className="text-sm text-gray-400">$0.10 per battle</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <ul className="space-y-2 text-gray-300 text-center">
                     <li>⚡ 10 instant battles</li>
                     <li>🤖 All AI characters</li>
-                    <li>🎯 10¢ per battle</li>
                     <li>💳 One-time payment</li>
                     <li>🚀 No subscription needed</li>
                   </ul>
                   <Button
-                    onClick={() => createBattlePack.mutate()}
+                    onClick={() => createBattlePack.mutate({ battleCount: 10 })}
                     disabled={createBattlePack.isPending}
-                    className="w-full bg-amber-600 hover:bg-amber-700"
-                    data-testid="button-purchase-battles"
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    data-testid="button-purchase-battles-10"
                   >
                     {createBattlePack.isPending ? (
                       <>
@@ -321,6 +317,53 @@ export default function Subscribe() {
                       </>
                     ) : (
                       'Buy 10 Battles for $1'
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Mega Bundle */}
+              <Card className="bg-gray-800 border-amber-500/50 hover:border-amber-400 transition-colors relative">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-amber-500 text-black px-3 py-1 rounded-full text-sm font-semibold">
+                    MEGA VALUE
+                  </span>
+                </div>
+                <CardHeader className="text-center">
+                  <CardTitle className="text-amber-400 text-2xl flex items-center justify-center">
+                    <Crown className="mr-2 h-6 w-6" />
+                    Mega Bundle
+                  </CardTitle>
+                  <CardDescription className="text-gray-300">
+                    Massive savings for serious battlers
+                  </CardDescription>
+                  <div className="text-3xl font-bold text-white">
+                    $100.00<span className="text-lg text-gray-400"> for 1,500 battles</span>
+                  </div>
+                  <p className="text-sm text-green-400 font-semibold">Only $0.067 per battle!</p>
+                  <p className="text-xs text-gray-400">Save $50 vs individual packs</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <ul className="space-y-2 text-gray-300 text-center">
+                    <li>🔥 1,500 epic battles</li>
+                    <li>🤖 All AI characters</li>
+                    <li>💰 15 battles per dollar</li>
+                    <li>💳 One-time payment</li>
+                    <li>🎯 Best value option</li>
+                  </ul>
+                  <Button
+                    onClick={() => createBattlePack.mutate({ battleCount: 1500 })}
+                    disabled={createBattlePack.isPending}
+                    className="w-full bg-amber-600 hover:bg-amber-700"
+                    data-testid="button-purchase-battles-1500"
+                  >
+                    {createBattlePack.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Setting up...
+                      </>
+                    ) : (
+                      'Buy 1,500 Battles for $100'
                     )}
                   </Button>
                 </CardContent>
