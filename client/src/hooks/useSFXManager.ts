@@ -262,18 +262,14 @@ export function useSFXManager(): SFXManagerHook {
     console.log('🔧 SFX config updated:', newConfig);
   }, []);
 
-  // Real-time crowd reaction system
+  // 🎯 100% AI-POWERED Real-time crowd reaction system - NO RANDOM/FAKE REACTIONS
   const enableRealtimeCrowdReactions = useCallback((enabled: boolean) => {
     setRealtimeCrowdEnabled(enabled);
     
     if (enabled && config.crowdReactions.enabled) {
-      console.log('🎤 Real-time crowd reactions enabled');
-      // Set up interval for random crowd reactions during user speech
-      crowdTimerRef.current = setInterval(() => {
-        if (speechDetectionRef.current && Math.random() < 0.3) { // 30% chance during speech
-          playCrowdReaction('medium');
-        }
-      }, 2000); // Check every 2 seconds
+      console.log('🎤 100% AI-powered real-time crowd reactions enabled - NO fake reactions');
+      // REMOVED: All random/fake crowd reactions during speech
+      // Only intelligent AI analysis will trigger reactions
     } else {
       console.log('🔇 Real-time crowd reactions disabled');
       if (crowdTimerRef.current) {
@@ -281,20 +277,20 @@ export function useSFXManager(): SFXManagerHook {
         crowdTimerRef.current = null;
       }
     }
-  }, [config.crowdReactions.enabled, playCrowdReaction]);
+  }, [config.crowdReactions.enabled]);
 
   const triggerCrowdOnSpeech = useCallback(() => {
     speechDetectionRef.current = true;
     
-    // ✅ RE-ENABLED: Crowd reacts while user is speaking
-    console.log('🎤 User started recording - triggering crowd on speech');
-    playCrowdReaction('mild'); // Immediate mild reaction for speech start
+    // 🎯 REMOVED FAKE REACTIONS: No automatic crowd reactions on speech start
+    // Only AI analysis of actual lyrics will trigger reactions
+    console.log('🎤 User started recording - awaiting AI analysis for intelligent reactions');
     
     // Reset speech detection after 5 seconds
     setTimeout(() => {
       speechDetectionRef.current = false;
     }, 5000);
-  }, [playCrowdReaction]);
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {

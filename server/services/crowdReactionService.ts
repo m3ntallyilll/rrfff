@@ -44,11 +44,15 @@ ${context?.userPerformanceScore ? `PERFORMANCE SCORE: ${context.userPerformanceS
 ${context?.battlePhase ? `BATTLE PHASE: ${context.battlePhase}` : ''}
 
 Analyze for:
-- Punchlines and devastating bars
-- Complex wordplay and rhyme schemes  
-- Flow and delivery impact
-- Battle tactics and aggression
-- Crowd energy triggers
+- Punchlines and devastating bars (check for clever disses, metaphors, similes)
+- Complex wordplay and rhyme schemes (internal rhymes, multi-syllabic rhymes, homophones)
+- Flow and delivery impact (rhythm, cadence, syllable density)
+- Battle tactics and aggression (direct attacks, superiority claims, dominance)
+- Crowd energy triggers (hype words, audience engagement, quotable lines)
+- Technical skill display (alliteration, assonance, double entendres)
+- Surprise/shock value (unexpected twists, controversial content)
+- Cultural references and callbacks
+- Lyrical complexity and intelligence
 
 Respond with JSON:
 {
@@ -77,13 +81,53 @@ Respond with JSON:
       throw new Error('Invalid AI response format');
       
     } catch (error) {
-      console.warn('🤖 Groq crowd analysis failed, using pattern matching fallback:', (error as Error).message);
-      return this.fallbackPatternAnalysis(lyrics, context);
+      console.error('🤖 Groq crowd analysis failed - retrying with enhanced prompt:', (error as Error).message);
+      
+      // RETRY WITH SIMPLER, MORE RELIABLE PROMPT
+      try {
+        const retryPrompt = `As a battle rap crowd expert, analyze this lyric:
+"${lyrics}"
+
+Rate crowd reaction (0-100) and pick ONE type:
+- silence (0-20): weak, boring, or basic content with no impact
+- mild_approval (21-40): decent bars with some skill shown
+- hype (41-70): good wordplay, flow, or clever content
+- wild_cheering (71-90): devastating punchlines, complex wordplay, or jaw-dropping skill
+- booing (0-30): terrible performance, cringe, or offensive content
+- shocked_gasps (50-80): controversial, surprising, or unexpectedly clever content
+
+Consider battle rap crowd psychology: they want skill, cleverness, aggression, and entertainment.
+
+JSON only: {"reactionType":"wild_cheering","intensity":85,"reasoning":"devastating punchline","timing":"immediate"}`;
+
+        const retryResponse = await this.groqService.generateRapResponse(retryPrompt);
+        const retryAnalysis = JSON.parse(retryResponse.trim());
+        
+        if (retryAnalysis.reactionType && typeof retryAnalysis.intensity === 'number') {
+          return {
+            reactionType: retryAnalysis.reactionType,
+            intensity: Math.max(0, Math.min(100, retryAnalysis.intensity)),
+            reasoning: retryAnalysis.reasoning || 'AI analysis completed',
+            timing: retryAnalysis.timing || 'immediate'
+          };
+        }
+      } catch (retryError) {
+        console.error('🤖 AI retry also failed:', (retryError as Error).message);
+      }
+      
+      // ONLY IF BOTH AI ATTEMPTS FAIL: Return minimal response
+      return {
+        reactionType: 'silence',
+        intensity: 15,
+        reasoning: 'AI analysis unavailable - no reaction',
+        timing: 'immediate'
+      };
     }
   }
 
   /**
-   * Fallback pattern matching analysis when AI fails
+   * REMOVED: This fallback function is no longer used
+   * ALL reactions are now 100% AI-powered via Groq analysis
    */
   private fallbackPatternAnalysis(lyrics: string, context?: any): CrowdReactionAnalysis {
     const cleanLyrics = lyrics.toLowerCase().trim();
