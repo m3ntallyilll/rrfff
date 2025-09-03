@@ -40,7 +40,7 @@ export function useSFXManager(): SFXManagerHook {
   const [config, setConfig] = useState<SFXConfig>({
     crowdReactions: {
       enabled: true,
-      volume: 0.7,
+      volume: 0.35,  // Cut in half - much quieter 
       reactionTypes: ['cheer', 'wild', 'hype', 'reaction', 'crowd-going-wild']
     },
     roundBell: {
@@ -137,7 +137,7 @@ export function useSFXManager(): SFXManagerHook {
     }
 
     const ctx = audioContextRef.current;
-    const duration = type.includes('bell') ? 0.8 : type.includes('crowd') ? 0.6 : 2.0;
+    const duration = type.includes('bell') ? 0.8 : type.includes('crowd') ? 0.3 : 2.0;  // Cut crowd duration in half
 
     if (type === 'round-bell') {
       // Boxing bell: metallic ring
