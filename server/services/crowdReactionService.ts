@@ -5,10 +5,17 @@ export interface CrowdReactionAnalysis {
   timing: 'immediate' | 'delayed' | 'buildup';
 }
 
+import { GroqService } from './groq.js';
+
 export class CrowdReactionService {
+  private groqService: GroqService;
+
+  constructor() {
+    this.groqService = new GroqService();
+  }
   
   /**
-   * Analyzes rap lyrics in real-time to determine appropriate crowd reaction
+   * Analyzes rap lyrics using Groq AI to determine appropriate crowd reaction
    */
   async analyzeForCrowdReaction(lyrics: string, context?: {
     previousLyrics?: string;
@@ -27,6 +34,59 @@ export class CrowdReactionService {
         timing: 'immediate'
       };
     }
+
+    // Use Groq AI for intelligent crowd reaction analysis
+    try {
+      const prompt = `You are an expert battle rap crowd analyzer. Analyze these lyrics and determine the appropriate crowd reaction.
+
+LYRICS: "${lyrics}"
+${context?.userPerformanceScore ? `PERFORMANCE SCORE: ${context.userPerformanceScore}/100` : ''}
+${context?.battlePhase ? `BATTLE PHASE: ${context.battlePhase}` : ''}
+
+Analyze for:
+- Punchlines and devastating bars
+- Complex wordplay and rhyme schemes  
+- Flow and delivery impact
+- Battle tactics and aggression
+- Crowd energy triggers
+
+Respond with JSON:
+{
+  "reactionType": "silence|mild_approval|hype|wild_cheering|booing|shocked_gasps",
+  "intensity": 0-100,
+  "reasoning": "brief explanation",
+  "timing": "immediate|delayed|buildup"
+}`;
+
+      const response = await this.groqService.generateRapResponse(prompt);
+
+      // Parse JSON response
+      const analysis = JSON.parse(response.trim());
+      
+      // Validate response structure
+      if (analysis.reactionType && typeof analysis.intensity === 'number' && analysis.reasoning) {
+        return {
+          reactionType: analysis.reactionType,
+          intensity: Math.max(0, Math.min(100, analysis.intensity)),
+          reasoning: analysis.reasoning,
+          timing: analysis.timing || 'immediate'
+        };
+      }
+      
+      // Fallback if JSON parsing fails
+      throw new Error('Invalid AI response format');
+      
+    } catch (error) {
+      console.warn('🤖 Groq crowd analysis failed, using pattern matching fallback:', (error as Error).message);
+      return this.fallbackPatternAnalysis(lyrics, context);
+    }
+  }
+
+  /**
+   * Fallback pattern matching analysis when AI fails
+   */
+  private fallbackPatternAnalysis(lyrics: string, context?: any): CrowdReactionAnalysis {
+    const cleanLyrics = lyrics.toLowerCase().trim();
 
     // PUNCHLINE DETECTION - Triggers wild reactions
     const punchlineIndicators = [
