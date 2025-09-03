@@ -206,17 +206,25 @@ export default function BattleArena() {
         console.log('🎵 Audio available:', !!result.audioUrl);
         setCurrentAiAudio(result.audioUrl);
         
-        // Auto-play TTS immediately when available
+        // Auto-play TTS immediately when available with enhanced trigger
         if (result.audioUrl && result.audioUrl.length > 100) {
-          console.log('🔥 Battle round complete - triggering auto-play');
-          console.log('🔥 Battle state before update:', battleState);
+          console.log('🔥 Battle round complete - triggering enhanced auto-play');
+          console.log('🔥 Audio URL ready for playback:', result.audioUrl.substring(0, 100) + '...');
+          
+          // Immediately trigger audio playback state
           updateBattleState({ isPlayingAudio: true });
           
-          // Force avatar to start speaking immediately
+          // Enhanced audio playback trigger with multiple attempts
           setTimeout(() => {
-            console.log('🔥 Setting isPlayingAudio to true again');
+            console.log('🔥 Enhanced autoplay trigger - attempt 1');
             updateBattleState({ isPlayingAudio: true });
-          }, 100);
+            
+            // Additional trigger after ensuring audio component is ready
+            setTimeout(() => {
+              console.log('🔥 Enhanced autoplay trigger - attempt 2');
+              updateBattleState({ isPlayingAudio: true });
+            }, 200);
+          }, 50);
         } else {
           console.log('⚠️ No valid audio URL received:', result.audioUrl?.substring(0, 50));
         }
