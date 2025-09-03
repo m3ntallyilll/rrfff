@@ -95,16 +95,28 @@ export class CrowdReactionService {
     let reasoning = 'Standard verse delivery';
     let timing: CrowdReactionAnalysis['timing'] = 'immediate';
 
-    // High-impact punchlines get wild reactions
-    if (hasPunchline && wordplayCount > 0) {
+    // STRICT FILTERING: Only react to truly impressive content
+    // Filter out basic/simple phrases
+    const basicPhrases = ['you suck', 'that sucks', 'you bad', 'you weak', 'musik', 'fighting', 
+                         'po fighting', 'yo yo', 'yeah yeah', 'uh huh', 'come on', 'let me'];
+    const isBasicPhrase = basicPhrases.some(phrase => cleanLyrics.includes(phrase.toLowerCase()));
+    
+    if (isBasicPhrase && wordCount < 6) {
+      reactionType = 'silence';
+      intensity = 5;
+      reasoning = 'Basic phrase - no crowd reaction needed';
+      timing = 'immediate';
+    }
+    // High-impact punchlines get wild reactions (requires both punchline AND wordplay)
+    else if (hasPunchline && wordplayCount > 1) {
       reactionType = 'wild_cheering';
       intensity = 85 + Math.min(15, wordplayCount * 3);
-      reasoning = 'Devastating punchline with wordplay detected';
+      reasoning = 'Devastating punchline with complex wordplay detected';
       timing = 'delayed'; // Let the punchline land first
     }
     
-    // Complex wordplay gets appreciation
-    else if (wordplayCount >= 2) {
+    // Complex wordplay gets appreciation (increased threshold)
+    else if (wordplayCount >= 3) {
       reactionType = 'hype';
       intensity = 60 + Math.min(30, wordplayCount * 5);
       reasoning = `Complex wordplay detected (${wordplayCount} instances)`;
@@ -135,16 +147,24 @@ export class CrowdReactionService {
       timing = 'immediate';
     }
     
-    // Very good flow gets appreciation
-    else if (flowQuality > 75) {
+    // Very good flow gets appreciation (RAISED THRESHOLD)
+    else if (flowQuality > 85 && wordCount > 8) {
       reactionType = 'hype';
       intensity = Math.min(80, flowQuality);
       reasoning = 'Exceptional flow and rhythm detected';
       timing = 'buildup';
     }
     
+    // Default: Most content gets silence/no reaction
+    else {
+      reactionType = 'silence';
+      intensity = 10;
+      reasoning = 'Standard content - no crowd reaction needed';
+      timing = 'immediate';
+    }
+    
     // Poor performance gets silence or boos
-    else if (wordCount < 3 || flowQuality < 20) {
+    if (wordCount < 3 || flowQuality < 20) {
       reactionType = Math.random() > 0.7 ? 'booing' : 'silence';
       intensity = Math.max(10, 30 - wordCount * 5);
       reasoning = 'Weak performance detected';
