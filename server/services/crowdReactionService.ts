@@ -37,22 +37,24 @@ export class CrowdReactionService {
 
     // Use Groq AI for intelligent crowd reaction analysis
     try {
-      const prompt = `You are an expert battle rap crowd analyzer. Analyze these lyrics and determine the appropriate crowd reaction.
+      const prompt = `You are an expert battle rap crowd analyzer with knowledge of legendary battle rap characters. Analyze these lyrics and determine the appropriate crowd reaction.
 
 LYRICS: "${lyrics}"
 ${context?.userPerformanceScore ? `PERFORMANCE SCORE: ${context.userPerformanceScore}/100` : ''}
 ${context?.battlePhase ? `BATTLE PHASE: ${context.battlePhase}` : ''}
 
+Consider legendary battle rap personas like: Ghost H.H. Holmes, The Destroyer Thor, Thunderstrike Frank Lucas, The Silent Jack the Ripper, The Impaler Richard Ramirez, Bloodletter Saddam Hussein, The Reaper Bugsy Siegel, Shadow Pablo Escobar, Iron Al Capone, Dark Whitey Bulger, and hundreds of other deadly personas.
+
 Analyze for:
-- Punchlines and devastating bars (check for clever disses, metaphors, similes)
+- Punchlines and devastating bars (check for clever disses, metaphors, similes worthy of legends)
 - Complex wordplay and rhyme schemes (internal rhymes, multi-syllabic rhymes, homophones)
-- Flow and delivery impact (rhythm, cadence, syllable density)
-- Battle tactics and aggression (direct attacks, superiority claims, dominance)
+- Flow and delivery impact (rhythm, cadence, syllable density matching legendary personas)
+- Battle tactics and aggression (direct attacks, superiority claims, dominance like The Destroyer or The Reaper)
 - Crowd energy triggers (hype words, audience engagement, quotable lines)
 - Technical skill display (alliteration, assonance, double entendres)
 - Surprise/shock value (unexpected twists, controversial content)
-- Cultural references and callbacks
-- Lyrical complexity and intelligence
+- Cultural references and callbacks to legendary figures
+- Lyrical complexity and intelligence that would impress battle rap legends
 
 Respond with JSON:
 {
@@ -85,18 +87,19 @@ Respond with JSON:
       
       // RETRY WITH SIMPLER, MORE RELIABLE PROMPT
       try {
-        const retryPrompt = `As a battle rap crowd expert, analyze this lyric:
+        const retryPrompt = `As a battle rap crowd expert familiar with legendary personas like Ghost H.H. Holmes, The Destroyer Thor, Thunderstrike Frank Lucas, The Silent Jack the Ripper, The Impaler Richard Ramirez, Bloodletter Saddam Hussein, The Reaper Bugsy Siegel, Iron Al Capone, and Shadow Pablo Escobar, analyze this lyric:
+
 "${lyrics}"
 
 Rate crowd reaction (0-100) and pick ONE type:
-- silence (0-20): weak, boring, or basic content with no impact
-- mild_approval (21-40): decent bars with some skill shown
-- hype (41-70): good wordplay, flow, or clever content
-- wild_cheering (71-90): devastating punchlines, complex wordplay, or jaw-dropping skill
-- booing (0-30): terrible performance, cringe, or offensive content
-- shocked_gasps (50-80): controversial, surprising, or unexpectedly clever content
+- silence (0-20): weak, boring, or basic content with no impact (not worthy of the legends)
+- mild_approval (21-40): decent bars with some skill shown (beginner level)
+- hype (41-70): good wordplay, flow, or clever content (getting closer to legendary status)
+- wild_cheering (71-90): devastating punchlines, complex wordplay, or jaw-dropping skill (worthy of The Destroyer, The Reaper, or Thunderstrike level)
+- booing (0-30): terrible performance, cringe, or offensive content (insulting to the legends)
+- shocked_gasps (50-80): controversial, surprising, or unexpectedly clever content (Shadow or Ghost level surprise)
 
-Consider battle rap crowd psychology: they want skill, cleverness, aggression, and entertainment.
+Consider battle rap crowd psychology: they want skill, cleverness, aggression, and entertainment worthy of legendary battle rap personas.
 
 JSON only: {"reactionType":"wild_cheering","intensity":85,"reasoning":"devastating punchline","timing":"immediate"}`;
 
