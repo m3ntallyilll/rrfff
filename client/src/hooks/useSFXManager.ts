@@ -75,8 +75,57 @@ export function useSFXManager(): SFXManagerHook {
     initializeWebAudio();
   }, []);
 
-  // Generate programmatic sound effects using Web Audio API
-  const generateSFX = useCallback((type: string, volume: number) => {
+  // Play audio files from object storage or fallback to Web Audio API
+  const playAudioFile = useCallback(async (type: string, volume: number) => {
+    console.log(`🔊 Playing SFX: ${type} at volume ${volume}`);
+    setIsPlaying(true);
+    setCurrentlyPlaying(type);
+
+    // Try to load from object storage first
+    let audioUrl = '';
+    
+    switch (type) {
+      case 'round-bell':
+        audioUrl = '/public-objects/sfx/boxing-bell.mp3';
+        break;
+      case 'crowd-mild':
+      case 'crowd-medium':
+      case 'crowd-wild':
+        audioUrl = '/public-objects/sfx/crowd-reaction.mp3';
+        break;
+      case 'ending-victory':
+      case 'ending-defeat':
+      case 'ending-draw':
+        audioUrl = '/public-objects/sfx/air-horn.mp3';
+        break;
+    }
+
+    try {
+      // Try to play the uploaded audio file
+      const audio = new Audio(audioUrl);
+      audio.volume = volume;
+      
+      audio.onended = () => {
+        setIsPlaying(false);
+        setCurrentlyPlaying(null);
+        console.log(`✅ SFX completed: ${type}`);
+      };
+      
+      audio.onerror = () => {
+        console.log(`⚠️ Audio file not found: ${audioUrl}, falling back to generated sound`);
+        generateFallbackSFX(type, volume);
+      };
+      
+      await audio.play();
+      
+    } catch (error) {
+      console.log(`⚠️ Failed to play audio file, using fallback sound`);
+      generateFallbackSFX(type, volume);
+    }
+  }, []);
+
+  // Fallback Web Audio API generation
+  const generateFallbackSFX = useCallback((type: string, volume: number) => {
     if (!audioContextRef.current) {
       console.warn('⚠️ Web Audio API not available');
       return;
@@ -84,10 +133,6 @@ export function useSFXManager(): SFXManagerHook {
 
     const ctx = audioContextRef.current;
     const duration = type.includes('bell') ? 0.8 : type.includes('crowd') ? 1.5 : 2.0;
-    
-    setIsPlaying(true);
-    setCurrentlyPlaying(type);
-    console.log(`🔊 Generating SFX: ${type} at volume ${volume}`);
 
     if (type === 'round-bell') {
       // Boxing bell: metallic ring
@@ -163,30 +208,29 @@ export function useSFXManager(): SFXManagerHook {
     setTimeout(() => {
       setIsPlaying(false);
       setCurrentlyPlaying(null);
-      console.log(`✅ SFX completed: ${type}`);
+      console.log(`✅ SFX completed: ${type} (fallback)`);
     }, duration * 1000);
-    
   }, []);
 
   const playRoundStartBell = useCallback(() => {
     if (!config.roundBell.enabled) return;
     console.log('🔔 Playing round start bell');
-    generateSFX('round-bell', config.roundBell.volume);
-  }, [config.roundBell, generateSFX]);
+    playAudioFile('round-bell', config.roundBell.volume);
+  }, [config.roundBell, playAudioFile]);
 
   const playCrowdReaction = useCallback((intensity: 'mild' | 'medium' | 'wild' = 'medium') => {
     if (!config.crowdReactions.enabled) return;
     
     console.log(`👥 Playing crowd reaction: ${intensity}`);
-    generateSFX(`crowd-${intensity}`, config.crowdReactions.volume);
-  }, [config.crowdReactions, generateSFX]);
+    playAudioFile(`crowd-${intensity}`, config.crowdReactions.volume);
+  }, [config.crowdReactions, playAudioFile]);
 
   const playEndingEffect = useCallback((type: 'victory' | 'defeat' | 'draw' = 'victory') => {
     if (!config.endingEffects.enabled) return;
     
     console.log(`🏁 Playing ending effect: ${type}`);
-    generateSFX(`ending-${type}`, config.endingEffects.volume);
-  }, [config.endingEffects, generateSFX]);
+    playAudioFile(`ending-${type}`, config.endingEffects.volume);
+  }, [config.endingEffects, playAudioFile]);
 
   const stopAllSFX = useCallback(() => {
     console.log('🔇 Stopping all SFX');
