@@ -177,7 +177,16 @@ export default function BattleArena() {
         
         if (result.aiResponse) {
           console.log('🤖 Setting AI response:', result.aiResponse.substring(0, 100) + '...');
+          console.log('🤖 AI response length:', result.aiResponse.length);
+          console.log('🤖 Current aiResponse state before setting:', aiResponse?.substring(0, 50) + '...');
+          
+          // Clear AI responding state FIRST
+          updateBattleState({ isAIResponding: false });
+          
+          // Then set the AI response
           setAiResponse(result.aiResponse);
+          
+          console.log('🤖 AI response state should be updated now');
           
           // 🎆 Trigger crowd reaction for AI response if it's clever/impressive
           if (result.aiResponse && result.aiResponse.length > 20) {
@@ -189,6 +198,7 @@ export default function BattleArena() {
           }
         } else {
           console.log('⚠️ No AI response in result');
+          updateBattleState({ isAIResponding: false });
         }
         
         console.log('🎵 Setting current AI audio URL:', result.audioUrl?.substring(0, 100) + '...');
