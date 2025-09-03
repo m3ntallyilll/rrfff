@@ -607,8 +607,21 @@ export class ScoringService {
     const userWeights = this.calculateDynamicWeights(userComponents);
     const aiWeights = this.calculateDynamicWeights(aiComponents);
     
-    const userScore = Math.round(this.calculateBalancedScore(userComponents, userWeights));
-    const aiScore = Math.round(this.calculateBalancedScore(aiComponents, aiWeights));
+    // Use more generous scoring that takes individual component scores into account
+    const userBalancedScore = this.calculateBalancedScore(userComponents, userWeights);
+    const aiBalancedScore = this.calculateBalancedScore(aiComponents, aiWeights);
+    
+    // Apply minimum score boost for short verses
+    const wordCount = userVerse.split(/\s+/).filter(w => w.length > 0).length;
+    let minUserScore = 15; // Base minimum
+    if (wordCount <= 4) {
+      minUserScore = Math.max(20, wordCount * 5); // 20-40 for very short
+    } else if (wordCount <= 8) {
+      minUserScore = Math.max(15, wordCount * 3); // 15-24 for short
+    }
+    
+    const userScore = Math.round(Math.max(minUserScore, userBalancedScore));
+    const aiScore = Math.round(aiBalancedScore);
 
     return {
       userScore,
