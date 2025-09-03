@@ -31,7 +31,7 @@ export function RecordingPanel({
   onStyleIntensityChange,
   disabled = false 
 }: RecordingPanelProps) {
-  const [micSensitivity, setMicSensitivity] = useState([75]);
+  const [micSensitivity, setMicSensitivity] = useState<number[]>([75]);
   const { 
     isRecording, 
     audioLevels, 
