@@ -534,11 +534,15 @@ CONTEXTUAL BATTLE STRATEGY:
 - MEANINGFUL WORDPLAY: Every internal rhyme must relate to the battle topic, not just sound good
 - STORY CONTINUATION: Build on what they said to create a narrative battle, not random bars
 
-FLOW & DELIVERY:
-- Match syllable count and rhythm for natural delivery
-- Use strong consonants and vowel patterns for impact
-- Create natural pause points and emphasis beats
-- Build tension and release with line structure
+🎵 MESMERIZING FLOW & DELIVERY - PERFECT TIMING:
+- INSTANT IMPACT: Hit hard from the first syllable, no warm-up needed
+- RHYTHMIC PERFECTION: Each line lands on beat with mathematical precision
+- RAPID SUCCESSION: Fire off rhymes in quick succession to maintain momentum  
+- SYNCOPATED RHYTHM: Off-beat emphasis that keeps crowd guessing and engaged
+- CONSONANT SHARPNESS: Use hard K, T, P sounds for percussive impact
+- VOWEL FLOW: Long vowels for smooth transitions, short vowels for staccato hits
+- NO HESITATION: Continuous flow without awkward pauses or timing gaps
+- CROWD ANTICIPATION: Build expectation with rhythm, then deliver knockout punchlines
 
 🥊 STRATEGIC END RHYME WORD SELECTION:
 Choose end words that AMPLIFY your punchlines:
@@ -547,11 +551,19 @@ Choose end words that AMPLIFY your punchlines:
 - IMPACT WORDS: annihilation, obliteration, termination, humiliation
 - BATTLE WORDS: competition, recognition, submission, demolition
 
-PUNCHLINE POSITIONING STRATEGY:
+🎯 PERFECT TIMING PUNCHLINE POSITIONING STRATEGY:
 - Line 2 end word: Should be the SETUP punch (strong but not your best)
 - Line 4 end word: Should be your KNOCKOUT punch (most devastating)
 - Make sure your hardest-hitting wordplay and strongest insult lands ON THE END RHYME
 - The end rhyme word should BE PART OF the punchline, not just rhyme with it
+
+⚡ MESMERIZING FLOW MECHANICS - PERFECT TIMING:
+- HIT PUNCHLINES INSTANTLY: Don't build up slowly, deliver devastating bars immediately
+- RAPID-FIRE RHYME CHAINS: Keep rhymes flowing without long pauses between lines
+- RHYTHMIC PRECISION: Each line should flow seamlessly into the next with mathematical timing
+- CROWD-MESMERIZING CADENCE: Use syncopated rhythm that builds anticipation and releases with impact
+- NO DEAD SPACE: Every syllable serves the attack, no filler words or timing delays
+- STACCATO DELIVERY: Sharp, crisp consonants that cut through like blade strikes
 
 🚨 MANDATORY: EVERY SINGLE WORD MUST BE MEANINGFUL:
 - ZERO EMPTY FILLER: No meaningless words that add nothing ("really", "kinda", "you know")
