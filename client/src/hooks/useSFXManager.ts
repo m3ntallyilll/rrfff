@@ -137,7 +137,7 @@ export function useSFXManager(): SFXManagerHook {
     }
 
     const ctx = audioContextRef.current;
-    const duration = type.includes('bell') ? 0.8 : type.includes('crowd') ? 1.5 : 2.0;
+    const duration = type.includes('bell') ? 0.8 : type.includes('crowd') ? 0.6 : 2.0;
 
     if (type === 'round-bell') {
       // Boxing bell: metallic ring

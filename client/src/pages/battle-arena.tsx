@@ -180,6 +180,15 @@ export default function BattleArena() {
         if (result.aiResponse) {
           console.log('🤖 Setting AI response:', result.aiResponse.substring(0, 100) + '...');
           setAiResponse(result.aiResponse);
+          
+          // 🎆 Trigger crowd reaction for AI response if it's clever/impressive
+          if (result.aiResponse && result.aiResponse.length > 20) {
+            console.log('🤖 Triggering AI crowd reaction for:', result.aiResponse.substring(0, 50) + '...');
+            playIntelligentCrowdReaction(result.aiResponse, {
+              battlePhase: (battleState?.currentRound || 1) === (battleState?.maxRounds || 3) ? 'closing' : 'middle',
+              userPerformanceScore: result.aiScore || 0
+            });
+          }
         } else {
           console.log('⚠️ No AI response in result');
         }
