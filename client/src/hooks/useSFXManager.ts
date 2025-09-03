@@ -58,119 +58,135 @@ export function useSFXManager(): SFXManagerHook {
   const crowdTimerRef = useRef<NodeJS.Timeout | null>(null);
   const speechDetectionRef = useRef<boolean>(false);
 
-  // Preload all SFX audio files
+  // Create Web Audio API context for programmatic sound generation
+  const audioContextRef = useRef<AudioContext | null>(null);
+  
+  // Initialize Web Audio API
   useEffect(() => {
-    const loadAudioFiles = async () => {
-      console.log('🔊 Loading SFX audio files...');
-      
-      // Round Start Bell SFX
-      const roundBellAudio = new Audio();
-      roundBellAudio.preload = 'auto';
-      roundBellAudio.src = '/public-objects/sfx/boxing-bell.mp3'; // Object storage path
-      audioRefs.current['round-bell'] = roundBellAudio;
-
-      // Crowd Reaction SFX
-      config.crowdReactions.reactionTypes.forEach((reactionType, index) => {
-        const crowdAudio = new Audio();
-        crowdAudio.preload = 'auto';
-        crowdAudio.src = `/public-objects/sfx/crowd-${reactionType}-${index + 1}.mp3`;
-        audioRefs.current[`crowd-${reactionType}`] = crowdAudio;
-      });
-
-      // Ending Effects SFX  
-      config.endingEffects.effectTypes.forEach((effectType, index) => {
-        const endingAudio = new Audio();
-        endingAudio.preload = 'auto';
-        endingAudio.src = `/public-objects/sfx/ending-${effectType}.mp3`;
-        audioRefs.current[`ending-${effectType}`] = endingAudio;
-      });
-
-      console.log('✅ All SFX audio files loaded successfully');
+    const initializeWebAudio = async () => {
+      try {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        console.log('🔊 Web Audio API initialized for SFX generation');
+      } catch (error) {
+        console.warn('⚠️ Web Audio API not supported, SFX disabled');
+      }
     };
-
-    loadAudioFiles();
+    
+    initializeWebAudio();
   }, []);
 
-  const playAudio = useCallback(async (audioKey: string, volume: number) => {
-    const audio = audioRefs.current[audioKey];
-    if (!audio) {
-      console.warn(`🔊 Audio file not found: ${audioKey}`);
+  // Generate programmatic sound effects using Web Audio API
+  const generateSFX = useCallback((type: string, volume: number) => {
+    if (!audioContextRef.current) {
+      console.warn('⚠️ Web Audio API not available');
       return;
     }
 
-    try {
-      // Stop current playback
-      audio.currentTime = 0;
-      audio.volume = volume;
+    const ctx = audioContextRef.current;
+    const duration = type.includes('bell') ? 0.8 : type.includes('crowd') ? 1.5 : 2.0;
+    
+    setIsPlaying(true);
+    setCurrentlyPlaying(type);
+    console.log(`🔊 Generating SFX: ${type} at volume ${volume}`);
+
+    if (type === 'round-bell') {
+      // Boxing bell: metallic ring
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
       
-      setIsPlaying(true);
-      setCurrentlyPlaying(audioKey);
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
       
-      console.log(`🔊 Playing SFX: ${audioKey} at volume ${volume}`);
-      await audio.play();
+      oscillator.frequency.setValueAtTime(800, ctx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + duration);
       
-      audio.onended = () => {
-        setIsPlaying(false);
-        setCurrentlyPlaying(null);
-        console.log(`✅ SFX completed: ${audioKey}`);
-      };
+      gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
       
-    } catch (error) {
-      console.error(`❌ Failed to play SFX: ${audioKey}`, error);
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + duration);
+      
+    } else if (type.includes('crowd')) {
+      // Crowd noise: filtered white noise
+      const bufferSize = ctx.sampleRate * duration;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.3;
+      }
+      
+      const source = ctx.createBufferSource();
+      const filter = ctx.createBiquadFilter();
+      const gainNode = ctx.createGain();
+      
+      source.buffer = buffer;
+      source.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      
+      filter.type = 'bandpass';
+      filter.frequency.value = 1000;
+      filter.Q.value = 0.5;
+      
+      gainNode.gain.setValueAtTime(volume * 0.4, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      
+      source.start(ctx.currentTime);
+      
+    } else if (type.includes('ending')) {
+      // Air horn: harsh harmonic tone
+      const oscillator1 = ctx.createOscillator();
+      const oscillator2 = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      
+      oscillator1.connect(gainNode);
+      oscillator2.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      
+      oscillator1.frequency.value = 440;
+      oscillator2.frequency.value = 880;
+      oscillator1.type = 'sawtooth';
+      oscillator2.type = 'square';
+      
+      gainNode.gain.setValueAtTime(volume * 0.6, ctx.currentTime);
+      gainNode.gain.setValueAtTime(volume * 0.3, ctx.currentTime + 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      
+      oscillator1.start(ctx.currentTime);
+      oscillator2.start(ctx.currentTime);
+      oscillator1.stop(ctx.currentTime + duration);
+      oscillator2.stop(ctx.currentTime + duration);
+    }
+
+    // Reset playing state after duration
+    setTimeout(() => {
       setIsPlaying(false);
       setCurrentlyPlaying(null);
-    }
+      console.log(`✅ SFX completed: ${type}`);
+    }, duration * 1000);
+    
   }, []);
 
   const playRoundStartBell = useCallback(() => {
     if (!config.roundBell.enabled) return;
     console.log('🔔 Playing round start bell');
-    playAudio('round-bell', config.roundBell.volume);
-  }, [config.roundBell, playAudio]);
+    generateSFX('round-bell', config.roundBell.volume);
+  }, [config.roundBell, generateSFX]);
 
   const playCrowdReaction = useCallback((intensity: 'mild' | 'medium' | 'wild' = 'medium') => {
     if (!config.crowdReactions.enabled) return;
     
-    // Select appropriate crowd reaction based on intensity
-    const reactionTypes = config.crowdReactions.reactionTypes;
-    let selectedReaction: string;
-    
-    switch (intensity) {
-      case 'mild':
-        selectedReaction = reactionTypes[0] || 'cheer';
-        break;
-      case 'wild':
-        selectedReaction = reactionTypes[reactionTypes.length - 1] || 'wild';
-        break;
-      default:
-        selectedReaction = reactionTypes[Math.floor(reactionTypes.length / 2)] || 'hype';
-    }
-    
-    console.log(`👥 Playing crowd reaction: ${selectedReaction} (${intensity})`);
-    playAudio(`crowd-${selectedReaction}`, config.crowdReactions.volume);
-  }, [config.crowdReactions, playAudio]);
+    console.log(`👥 Playing crowd reaction: ${intensity}`);
+    generateSFX(`crowd-${intensity}`, config.crowdReactions.volume);
+  }, [config.crowdReactions, generateSFX]);
 
   const playEndingEffect = useCallback((type: 'victory' | 'defeat' | 'draw' = 'victory') => {
     if (!config.endingEffects.enabled) return;
     
-    // Select appropriate ending effect
-    const effectTypes = config.endingEffects.effectTypes;
-    let selectedEffect: string;
-    
-    switch (type) {
-      case 'victory':
-        selectedEffect = effectTypes[0] || 'airhorn-long';
-        break;
-      case 'defeat':
-        selectedEffect = effectTypes[1] || 'airhorn-triple';
-        break;
-      default:
-        selectedEffect = effectTypes[2] || 'dj-airhorn';
-    }
-    
-    console.log(`🏁 Playing ending effect: ${selectedEffect} (${type})`);
-    playAudio(`ending-${selectedEffect}`, config.endingEffects.volume);
-  }, [config.endingEffects, playAudio]);
+    console.log(`🏁 Playing ending effect: ${type}`);
+    generateSFX(`ending-${type}`, config.endingEffects.volume);
+  }, [config.endingEffects, generateSFX]);
 
   const stopAllSFX = useCallback(() => {
     console.log('🔇 Stopping all SFX');

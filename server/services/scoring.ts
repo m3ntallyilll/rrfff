@@ -69,17 +69,23 @@ export class ScoringService {
     
     // COMPREHENSIVE ANALYSIS based on actual rap battle criteria
     
-    // 1. BASIC REQUIREMENTS - reasonable penalties for minimal effort
+    // 1. BASIC REQUIREMENTS - more generous for minimal effort
     if (words.length <= 1) {
-      console.log(`❌ Too few words (${words.length}) - penalty applied`);
-      return 10; // Still give some credit for trying
+      console.log(`⚠️ Minimal input (${words.length} word) - base score applied`);
+      return 25; // More generous base score
+    }
+    
+    // Give more credit for very short verses (2-4 words)
+    if (words.length <= 4) {
+      console.log(`🎤 Short verse (${words.length} words) - adjusted scoring`);
+      return Math.min(40, 20 + words.length * 5); // 25-40 range for short inputs
     }
     
     const lines = text.split('\n').filter(line => line.trim());
     
-    // Small bonus for more content, but don't punish short verses too harshly
-    let contentBonus = Math.min(15, words.length * 2);
-    if (words.length >= 8) contentBonus = 15; // Full bonus for 8+ words
+    // More generous content scoring - don't punish short verses heavily
+    let contentBonus = Math.min(15, Math.max(8, words.length * 3)); // Minimum 8 points
+    if (words.length >= 6) contentBonus = 15; // Full bonus for 6+ words (lowered threshold)
     
     // 2. LEXICAL DIVERSITY (vocabulary richness) - More generous scoring
     const uniqueWords = new Set(words);
