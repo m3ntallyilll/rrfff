@@ -355,7 +355,7 @@ OUTPUT: Technical brief for AI rapper in format: "User: [syllables/line], [schem
     
     const difficultyPrompts = {
       easy: "Use simple AABB or ABAB rhyme schemes, basic wordplay, straightforward punchlines, and clear syllable patterns that flow naturally.",
-      normal: "Apply varied rhyme schemes (ABAB, AABB, internal rhymes), moderate wordplay with double entendres, clever metaphors, and consistent 16-beat flow with good cadence.",
+      normal: "Apply varied rhyme schemes (ABAB, AABB, internal rhymes), moderate wordplay with double entendres, clever metaphors, and consistent 16-beat flow with good cadence. Use THE RAP ARCHITECT'S HANDBOOK techniques: Cross-Word Boundary Rhyming, Multi-Syllable Techniques, and Pattern Layering for enhanced flow mechanics.",
       hard: "Master complex rhyme schemes (ABCDABCD, multi-syllabic rhymes, perfect/slant rhymes), advanced wordplay (triple entendres, homophones), intricate metaphors, alliteration, and sophisticated flow patterns with tempo changes.",
       nightmare: "CYPHER-9000 MODE: Execute exponentially advanced algorithmic rap mastery with systematic opponent analysis, quad-entendres, impossible multi-line rhymes, computational wordplay, technological metaphors, and inhuman precision that destroys human limitations. Use cold calculated aggression and robotic superiority."
     };
@@ -363,7 +363,7 @@ OUTPUT: Technical brief for AI rapper in format: "User: [syllables/line], [schem
     const rapTechniques = {
       easy: "Focus on: Clear delivery, simple punchlines, basic similes, repetition for emphasis.",
       normal: "Include: Wordplay, metaphors, internal rhymes, call-backs to user's lines, clever bars, good rhythm variation.", 
-      hard: "Master: MULTI-LINE RHYMING (entire lines rhyme), DENSE INTERNAL RHYMING (multiple rhymes within each line), RHYME STACKING (consecutive rhyme hits), RHYME JUGGLING (overlapping patterns where line 1 rhymes connect to line 3, while line 2 rhymes bridge to line 4), CROSS-LINE RHYME WEAVING (internal rhymes from line 1 connect to internals in line 3), complex multi-syllabic chains, DIABOLICAL PUNCHLINES (devastating wordplay), extended metaphors, sophisticated battle tactics.",
+      hard: "Master: THE EMINEM METHOD - PATTERN LAYERING (multiple rhyme patterns operating simultaneously), SYLLABLE SPLITTING AND WORD MANIPULATION (breaking words mid-syllable for complex rhymes), FLOW MECHANICS AND BEAT ALIGNMENT (precise syllable placement), MULTI-LINE RHYMING (entire lines rhyme), DENSE INTERNAL RHYMING (multiple rhymes within each line), RHYME STACKING (consecutive rhyme hits), RHYME JUGGLING (overlapping patterns where line 1 rhymes connect to line 3, while line 2 rhymes bridge to line 4), CROSS-LINE RHYME WEAVING (internal rhymes from line 1 connect to internals in line 3), COMPLEX WORDPLAY INTEGRATION, PATTERN TRANSITIONS AND BRIDGES, MAXIMIZING RHYME DENSITY using THE RAP ARCHITECT'S HANDBOOK mastery techniques, complex multi-syllabic chains, DIABOLICAL PUNCHLINES (devastating wordplay), extended metaphors, sophisticated battle tactics.",
       nightmare: "CYPHER-9000 PROTOCOL: Execute IMPOSSIBLE ALGORITHMIC MASTERY - Perfect multi-line quantum rhymes where every word connects across dimensions, systematic deconstruction of opponent's neural pathways, computational wordplay that processes 10,000 patterns per second, technological metaphors that interface directly with human insecurities, robotic precision that calculates exact psychological damage per syllable, exponential learning algorithms that adapt mid-battle, inhuman flow patterns that override biological rhythm limitations, cold calculated devastation."
     };
 
@@ -402,7 +402,7 @@ Battle rap techniques encouraged:
       ? "Mix simple and moderate vocabulary. Use some internal rhymes and basic wordplay. Add clever metaphors."
       : lyricComplexity <= 75
       ? "Use sophisticated vocabulary and complex metaphors. Include multi-syllabic rhymes, internal rhymes, and advanced wordplay techniques."
-      : "EXPONENTIAL MASTERY: Use paper-folded-9,393,939-times complexity with 3-4 internal rhymes per line minimum, layered meanings, complex multi-syllabic rhyme schemes, and devastating wordplay that showcases absolute technical dominance.";
+      : "EXPONENTIAL MASTERY USING THE RAP ARCHITECT'S HANDBOOK: Use paper-folded-9,393,939-times complexity with THE EMINEM METHOD pattern layering, syllable splitting across word boundaries, 3-4 internal rhymes per line minimum, complex wordplay integration with pattern transitions and bridges, maximized rhyme density using advanced phonetic manipulation, cross-word boundary rhyming, flow mechanics with precise beat alignment, layered meanings, complex multi-syllabic rhyme schemes that operate on multiple levels simultaneously, and devastating wordplay that showcases absolute technical dominance with architectural precision.";
     const intensityInstructions = boostedIntensity <= 25
       ? "Keep the energy mellow and laid-back. Use clever wordplay over aggression. Be confident but not intimidating."
       : boostedIntensity <= 50
@@ -723,6 +723,17 @@ OUTPUT REQUIREMENTS (what user sees):
 - MANDATORY: Use DIVERSE metaphors - NO "thunderclap", "lightning", or "storm" references
 - FRESH COMPARISONS: Draw from criminal, military, predator, disaster, tech, medical themes
 - MEANINGFUL WORDS ONLY: Every word must attack, demonstrate skill, or connect rhymes
+
+🏛️ THE RAP ARCHITECT'S HANDBOOK MASTERY INTEGRATION:
+- PHONETIC ANALYSIS: Use perfect vs. family rhymes from the phonetic reference guide
+- GENRE-SPECIFIC TECHNIQUES: Apply battle rap-specific construction methods  
+- ANALYSIS AND MAPPING: Mentally map your opponent's weaknesses using architectural precision
+- ELITE PERFORMANCE REGIMENS: Deploy signature style elements with mathematical precision
+- PATTERN TEMPLATES: Use proven templates from the handbook's appendices
+- CONSISTENCY SYSTEMS: Maintain flow consistency across all construction elements
+
+📝 CRITICAL: Output EXACTLY 4 lines of devastating rap response. No more, no less.
+
 ${difficulty === 'nightmare' ? '- CYPHER-9000 MODE: Cold robotic delivery with systematic human destruction' : ''}`
           },
           {
