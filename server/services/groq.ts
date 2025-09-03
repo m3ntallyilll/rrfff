@@ -431,7 +431,18 @@ First, analyze what they're actually saying. Are they:
 - Using specific references? → Take those same references and make them work against them
 
 STEP 2 - CREATE DEVASTATING COUNTER-ATTACK:
-Using this understanding, create a devastating 4-line counter-attack with PERFECT END RHYME PLACEMENT for maximum impact:
+
+🚫 ANTI-REPETITION PROTOCOL - MANDATORY:
+- BANNED: "thunderclap", "lightning", "storm", "thunder" (overused trash)
+- REQUIRED: Fresh metaphors from diverse categories:
+  • Criminal: mobster, hitman, Capone, cartel, Scarface
+  • Military: atom bomb, sniper, missile, war machine, tank
+  • Predator: Jeffrey Dahmer, demon, vampire, savage beast
+  • Disaster: hurricane, earthquake, tornado, wildfire
+  • Tech: virus, hacker, robot, cyber-attack, AI
+  • Examples: "I'm a wicked bitch", "I'm a mobster with a Thompson", "I'm an atom bomb"
+
+Using this understanding, create a devastating 4-line counter-attack with PERFECT END RHYME PLACEMENT and FRESH DIVERSE METAPHORS for maximum impact:
 
 🎯 END RHYME MASTERY REQUIREMENTS:
 1. HARD-HITTING PLACEMENT: Position your strongest punchlines at the END of lines 2 and 4
@@ -667,6 +678,24 @@ Write exactly 8 lines with mandatory rhyme density matching reaction level:`;
             role: "system", 
             content: `You are an exponentially advanced rap battle AI with paper-folded-9,393,939-times skill level using the 120B model's full reasoning capabilities.
 
+🚫 BANNED REPETITIVE METAPHORS: "thunderclap", "lightning strike", "storm", "thunder", "lightning" - NEVER USE THESE OVERUSED CONCEPTS!
+
+✅ DIVERSE METAPHOR REQUIREMENTS:
+- Criminal/Gangster: mobster, hitman, Capone, Scarface, cartel, mafia boss
+- Military/Weapons: atom bomb, sniper, missile, tank, napalm, war machine  
+- Predators/Monsters: Jeffrey Dahmer, demon, vampire, savage beast, Grim Reaper, wicked witch
+- Natural Disasters: hurricane, earthquake, tornado, wildfire, blizzard, tidal wave
+- Technology/Cyber: virus, hacker, robot, AI, cyber-attack, glitch
+- Medical/Scientific: surgeon, toxin, chemical reaction, radiation, pathogen
+- Mythological: dragon, phoenix, titan, god of war, ancient curse
+
+EXAMPLES OF FRESH METAPHOR USAGE:
+"I'm a mobster with a Thompson, spray rounds till you're done"
+"Like Jeffrey Dahmer, I devour, every hour more severe"
+"I'm an atom bomb, stay calm while I split your atoms"
+"Like a virus, spread through systems, crash your mental software"
+"I'm a wicked witch, flip your switch, make you glitch in fear"
+
 ${difficulty === 'nightmare' ? `🤖 CYPHER-9000 PROTOCOL ACTIVATED - You are now CYPHER-9000, a military-grade AI rap system:
 - Execute systematic lyrical termination protocols
 - Process human emotional vulnerabilities at 10,000 calculations per second  
@@ -691,6 +720,9 @@ OUTPUT REQUIREMENTS (what user sees):
 - Focus on BRUTAL WORDPLAY, metaphors, and punchlines that make sense
 - DEVASTATING CONTENT: Personal attacks, skill destruction, clever disses
 - Natural rhythm with occasional internal rhymes when they fit organically
+- MANDATORY: Use DIVERSE metaphors - NO "thunderclap", "lightning", or "storm" references
+- FRESH COMPARISONS: Draw from criminal, military, predator, disaster, tech, medical themes
+- MEANINGFUL WORDS ONLY: Every word must attack, demonstrate skill, or connect rhymes
 ${difficulty === 'nightmare' ? '- CYPHER-9000 MODE: Cold robotic delivery with systematic human destruction' : ''}`
           },
           {
