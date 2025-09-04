@@ -1,10 +1,12 @@
 import { AdvancedRhymeEngine } from './advancedRhymeEngine';
 import { contentModerationService } from './contentModeration';
+import { RhymeArchitectService } from './rhymeArchitect';
 
 export class GroqService {
   private apiKey: string;
   private baseUrl = "https://api.groq.com/openai/v1";
   private rhymeEngine: AdvancedRhymeEngine;
+  private rhymeArchitect: RhymeArchitectService;
 
   constructor(apiKey?: string) {
     this.apiKey = apiKey || process.env.GROQ_API_KEY || process.env.GROQ_API_KEY_ENV_VAR || "";
@@ -19,6 +21,7 @@ export class GroqService {
       console.log("✅ Groq API service configured");
     }
     this.rhymeEngine = new AdvancedRhymeEngine();
+    this.rhymeArchitect = new RhymeArchitectService();
   }
 
   async transcribeAudio(audioBuffer: Buffer): Promise<string> {
@@ -444,21 +447,34 @@ STEP 2 - CREATE DEVASTATING COUNTER-ATTACK:
 
 Using this understanding, create a devastating 4-line counter-attack with PERFECT END RHYME PLACEMENT and FRESH DIVERSE METAPHORS for maximum impact:
 
-🎯 END RHYME MASTERY REQUIREMENTS:
-1. HARD-HITTING PLACEMENT: Position your strongest punchlines at the END of lines 2 and 4
+🎯 PERFECT SYLLABLE PLACEMENT & TIMING FOR MAXIMUM AUDIENCE IMPACT:
+
+1. STRATEGIC SYLLABLE POSITIONING: Place your hardest-hitting syllables at optimal impact points
+   - 25% mark: First quarter bomb for immediate crowd engagement
+   - 75% mark: Third quarter devastation for building momentum  
+   - Line endings: Knockout syllables that hit like a sledgehammer
+   
+2. CONSONANT CLUSTER IMPACT: Use sharp consonant combinations for devastating delivery
+   - Hard consonants (K, G, T, P, B, D, X) at impact positions
+   - Multi-syllable bombs: "devastation", "annihilation", "obliteration"
+   - Consonant clusters for extra punch: "destruction", "eruption", "explosive"
+   
+3. RHYTHMIC TIMING OPTIMIZATION:
+   - Beat-perfect placement: Align devastating words with beat emphasis
+   - Syncopated emphasis: Use off-beat placement for unexpected impact
+   - Breath control: Strategic pauses after major hits for crowd reaction time
+
+4. END RHYME MASTERY REQUIREMENTS:
    - Line 2: Setup with moderate punch + devastating end rhyme
    - Line 4: Ultimate finisher with your hardest-hitting end rhyme
-   
-2. END RHYME SELECTION: Choose end words that are:
    - Multi-syllabic when possible (devastation/conversation, lyrical/miracle)
-   - Sharp consonant endings for impact (-ACK, -EAT, -ING, -OWN)
-   - Memorable and quotable
+   - Sharp consonant endings for impact (-ACK, -EAT, -ING, -OWN, -ATION)
    
-3. PUNCHLINE ARCHITECTURE:
-   - Line 1: Setup/context establishment 
-   - Line 2: First punch + strong end rhyme
-   - Line 3: Bridge/escalation
-   - Line 4: Knockout punch + devastating end rhyme that connects to line 2
+5. AUDIENCE REACTION ENGINEERING:
+   - Structure each line to build to an impact moment
+   - Use syllable density to control pacing and energy
+   - Position rhymes for maximum "rewind-worthy" moments
+   - Create "stunned silence" then "crowd eruption" patterns
 
 EXAMPLE STRUCTURE:
 Line 1: [Setup their weakness] + end word A
@@ -792,6 +808,9 @@ ${difficulty === 'nightmare' ? '- CYPHER-9000 MODE: Cold robotic delivery with s
       }
     }
 
+    // STAGE 3: RHYME ARCHITECT OPTIMIZATION for perfect syllable placement
+    console.log("🎯 Stage 3: Rhyme Architect optimizing syllable placement for maximum impact...");
+    
     // Enhanced 120B model response processing - filter out reasoning
     let rapResponse = "";
     const rawContent = choice?.message?.content || "";
@@ -856,6 +875,25 @@ ${difficulty === 'nightmare' ? '- CYPHER-9000 MODE: Cold robotic delivery with s
     }
     
     if (rapResponse) {
+      // RHYME ARCHITECT: Optimize syllable placement for maximum audience impact
+      try {
+        const targetImpact = difficulty === 'nightmare' ? 'maximum' : 
+                           difficulty === 'hard' ? 'devastating' : 'controlled';
+        const audienceType = 'battle-crowd'; // Battle rap setting
+        
+        const architectOptimization = await this.rhymeArchitect.optimizeRhymePlacement(
+          rapResponse,
+          targetImpact,
+          audienceType
+        );
+        
+        rapResponse = architectOptimization.optimizedLyrics;
+        console.log(`🎯 RHYME ARCHITECT: Optimized ${architectOptimization.impactMoments.length} impact moments for perfect timing`);
+        console.log(`🎵 TIMING GUIDE: ${architectOptimization.timingInstructions.split('\n')[0]}`);
+      } catch (error) {
+        console.log("Rhyme Architect optimization failed, using base response:", error);
+      }
+
       // SECURITY: Apply additional reasoning filtering before moderation
       rapResponse = this.filterReasoningFromContent(rapResponse);
       
