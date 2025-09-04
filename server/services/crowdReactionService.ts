@@ -135,15 +135,35 @@ JSON only: {"reactionType":"wild_cheering","intensity":85,"reasoning":"devastati
   private fallbackPatternAnalysis(lyrics: string, context?: any): CrowdReactionAnalysis {
     const cleanLyrics = lyrics.toLowerCase().trim();
 
-    // PUNCHLINE DETECTION - Triggers wild reactions
+    // ENHANCED PUNCHLINE DETECTION - Triggers wild reactions
     const punchlineIndicators = [
-      /killed|murder|destroy|demolish|wreck|finish/i,
-      /mic drop|game over|checkmate|done deal/i,
-      /savage|brutal|ruthless|vicious/i,
-      /\b(fire|flames|burning|heat)\b/i,
-      /your mama|your girl|your crew/i,
-      /weak|trash|garbage|amateur/i,
-      /king|crown|throne|legend/i
+      // Destruction words
+      /killed|murder|destroy|demolish|wreck|finish|annihilate|obliterate|devastate/i,
+      /slay|slaughter|massacre|eliminate|erase|vanish|delete/i,
+      
+      // Battle victory words  
+      /mic drop|game over|checkmate|done deal|case closed|lights out/i,
+      /victory|winner|champion|conquered|dominated|owned/i,
+      
+      // Intensity words
+      /savage|brutal|ruthless|vicious|deadly|lethal|killer|beast/i,
+      /monster|demon|devil|nightmare|terror|horror/i,
+      
+      // Heat/Fire words
+      /\b(fire|flames|burning|heat|blazing|inferno|torch|roast)\b/i,
+      /hot|heated|steaming|smoking|sizzling|scorching/i,
+      
+      // Personal attacks
+      /your mama|your girl|your crew|your family|your squad/i,
+      /your style|your flow|your bars|your rhymes/i,
+      
+      // Weakness calls
+      /weak|trash|garbage|amateur|pathetic|terrible|awful|wack/i,
+      /basic|lame|boring|tired|played out|expired/i,
+      
+      // Superiority claims
+      /king|crown|throne|legend|god|boss|chief|master/i,
+      /elite|supreme|ultimate|best|greatest|unmatched/i
     ];
     
     const hasPunchline = punchlineIndicators.some(pattern => pattern.test(lyrics));
@@ -162,12 +182,27 @@ JSON only: {"reactionType":"wild_cheering","intensity":85,"reasoning":"devastati
       if (matches) wordplayCount += matches.length;
     });
 
-    // BATTLE TACTICS DETECTION - Triggers hype
+    // ENHANCED BATTLE TACTICS DETECTION - Triggers hype
     const battleTactics = [
-      /step to me|come at me|try me|test me/i,
-      /next level|different league|out your league/i,
-      /schooling|teaching|lesson|homework/i,
-      /amateur|rookie|beginner|newbie/i
+      // Direct challenges
+      /step to me|come at me|try me|test me|bring it|face me/i,
+      /challenge|dare|bet|wanna go|let's go|square up/i,
+      
+      // Skill comparisons
+      /next level|different league|out your league|not your level/i,
+      /can't compete|can't match|can't touch|can't reach/i,
+      
+      // Teaching/dominance
+      /schooling|teaching|lesson|homework|class|school/i,
+      /professor|teacher|master class|education|learn/i,
+      
+      // Experience taunts
+      /amateur|rookie|beginner|newbie|novice|freshman/i,
+      /veteran|experienced|been here|done that|seen it all/i,
+      
+      // Battle positioning
+      /top spot|number one|first place|throne|crown/i,
+      /undefeated|champion|winner|victor|conqueror/i
     ];
     
     const hasBattleTactics = battleTactics.some(pattern => pattern.test(lyrics));
