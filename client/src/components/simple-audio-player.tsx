@@ -30,11 +30,17 @@ export function SimpleAudioPlayer({
         audioRef.current = null;
       }
 
-      // Create new audio element
+      // Create new audio element with debug logging
+      console.log('🔊 Creating new Audio element with volume:', volume);
       const audio = new Audio(audioUrl);
       audio.volume = volume;
       audio.preload = 'auto';
       audioRef.current = audio;
+      
+      // Debug audio properties
+      console.log('🔊 Audio element created:', audio);
+      console.log('🔊 Audio volume set to:', audio.volume);
+      console.log('🔊 Audio src:', audio.src.substring(0, 100) + '...');
 
       // Event listeners
       audio.addEventListener('play', () => {
