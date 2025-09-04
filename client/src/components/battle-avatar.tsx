@@ -175,11 +175,11 @@ export function BattleAvatar({
             volume={1.0}
             onPlay={() => {
               console.log('🔥 FORCED TTS Audio started - AI is now speaking!');
-              setIsAISpeaking(true);
+              // setIsAISpeaking(true); // State managed by parent component
             }}
             onEnded={() => {
               console.log('🔇 TTS Audio ended - AI finished speaking');
-              setIsAISpeaking(false);
+              // setIsAISpeaking(false); // State managed by parent component
             }}
           />
           
