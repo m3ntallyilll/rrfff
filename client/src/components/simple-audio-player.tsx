@@ -61,48 +61,69 @@ export function SimpleAudioPlayer({
 
       // FORCE AUTO-PLAY - All AI responses must play automatically
       if (autoPlay) {
-        console.log('🔥 FORCING AUTO-PLAY - AI response must play');
+        console.log('🔥 ULTRA-AGGRESSIVE AUTO-PLAY - AI MUST SPEAK NOW!');
         
         const forcePlayback = () => {
-          console.log('🎯 Attempting forced playback...');
+          console.log('🎯 MAXIMUM FORCE PLAYBACK ATTEMPT...');
           return audio.play().then(() => {
-            console.log('✅ AUTOPLAY SUCCESS - AI speaking now!');
+            console.log('✅ AUTOPLAY SUCCESS - AI VOICE ACTIVATED!');
           }).catch(error => {
-            console.error('🔊 Initial autoplay failed, trying aggressive retry:', error);
+            console.error('🔊 Initial autoplay failed, deploying MEGA AGGRESSIVE retries:', error);
             
-            // AGGRESSIVE RETRY - Multiple strategies
-            // Strategy 1: Wait for audio to be ready
+            // ULTRA AGGRESSIVE RETRY - All strategies at once
+            // Strategy 1: Immediate audio loading events
             audio.addEventListener('loadeddata', () => {
-              console.log('🔄 Audio loaded, retrying...');
+              console.log('🔄 Audio loaded, FORCING IMMEDIATE PLAY...');
               audio.play().catch(e => console.log('🔄 Loadeddata retry failed'));
             }, { once: true });
             
-            // Strategy 2: Try after canplay event
+            // Strategy 2: Can play events
             audio.addEventListener('canplay', () => {
-              console.log('🔄 Audio can play, retrying...');
+              console.log('🔄 Audio can play, FORCING IMMEDIATE PLAY...');
               audio.play().catch(e => console.log('🔄 Canplay retry failed'));
             }, { once: true });
             
-            // Strategy 3: Delayed retry
+            // Strategy 3: Can play through events
+            audio.addEventListener('canplaythrough', () => {
+              console.log('🔄 Audio can play through, FORCING IMMEDIATE PLAY...');
+              audio.play().catch(e => console.log('🔄 Canplaythrough retry failed'));
+            }, { once: true });
+            
+            // Strategy 4: Multiple delayed retries with increasing persistence
             setTimeout(() => {
-              console.log('🔄 Delayed retry attempt...');
-              audio.play().catch(e => console.log('🔄 Delayed retry failed'));
+              console.log('🔄 Delayed retry 1 - FORCING PLAY...');
+              audio.play().catch(e => console.log('🔄 Delayed retry 1 failed'));
+            }, 100);
+            
+            setTimeout(() => {
+              console.log('🔄 Delayed retry 2 - FORCING PLAY...');
+              audio.play().catch(e => console.log('🔄 Delayed retry 2 failed'));
             }, 300);
             
-            // Strategy 4: Final aggressive retry
             setTimeout(() => {
-              console.log('🔥 FINAL ATTEMPT - Must play now!');
+              console.log('🔄 Delayed retry 3 - FORCING PLAY...');
+              audio.play().catch(e => console.log('🔄 Delayed retry 3 failed'));
+            }, 600);
+            
+            // Strategy 5: Final nuclear option
+            setTimeout(() => {
+              console.log('🔥 NUCLEAR OPTION - AI MUST SPEAK NOW!');
               audio.play().catch(e => {
-                console.error('💥 ALL AUTOPLAY ATTEMPTS FAILED - Manual interaction required');
+                console.error('💥 ALL MEGA AGGRESSIVE ATTEMPTS FAILED - Manual interaction required');
+                // Last resort: try to trigger user interaction
+                console.log('🚨 LAST RESORT: Attempting user interaction trigger...');
               });
             }, 1000);
           });
         };
         
-        // Multiple immediate attempts
+        // MAXIMUM IMMEDIATE ATTEMPTS - Carpet bombing approach
         forcePlayback();
+        setTimeout(forcePlayback, 25);
         setTimeout(forcePlayback, 50);
+        setTimeout(forcePlayback, 100);
         setTimeout(forcePlayback, 200);
+        setTimeout(forcePlayback, 400);
       }
 
       return () => {

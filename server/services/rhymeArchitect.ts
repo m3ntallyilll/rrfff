@@ -58,8 +58,62 @@ export class RhymeArchitectService {
     }
   };
 
+  // FORMULA VARIATIONS: Different impact formulas for diverse battle scenarios
+  private impactFormulas = {
+    // Formula 1: Classic Battle Formula - devastating end rhymes
+    classicBattle: {
+      name: 'Classic Devastation',
+      quarterMarks: [0.25, 0.75], // Primary impact points
+      endWeight: 0.8, // 80% weight on line endings
+      internalWeight: 0.2,
+      breathPattern: [0.3, 0.7], // Pause points for crowd reaction
+      description: 'Traditional battle rap formula with devastating punchlines'
+    },
+
+    // Formula 2: Speed Demon Formula - rapid-fire internal rhymes
+    speedDemon: {
+      name: 'Rapid Fire Arsenal',
+      quarterMarks: [0.15, 0.35, 0.55, 0.75, 0.95], // Multiple strike points
+      endWeight: 0.4,
+      internalWeight: 0.6, // Heavy internal rhyme focus
+      breathPattern: [0.5], // Minimal breathing for speed
+      description: 'Machine-gun delivery with relentless internal rhymes'
+    },
+
+    // Formula 3: Emotional Storytelling Formula - strategic buildups
+    emotionalStory: {
+      name: 'Emotional Crescendo',
+      quarterMarks: [0.33, 0.66, 1.0], // Building crescendo
+      endWeight: 0.9, // Maximum end impact
+      internalWeight: 0.1,
+      breathPattern: [0.25, 0.5, 0.75], // Dramatic pauses
+      description: 'Storytelling with emotional peaks and devastating finishes'
+    },
+
+    // Formula 4: Technical Genius Formula - complex multi-syllable patterns
+    technicalGenius: {
+      name: 'Multi-Syllable Mastery',
+      quarterMarks: [0.2, 0.4, 0.6, 0.8], // Evenly distributed complexity
+      endWeight: 0.6,
+      internalWeight: 0.4,
+      breathPattern: [0.4, 0.8], // Technical breathing control
+      description: 'Complex multi-syllable rhymes showcasing technical skill'
+    },
+
+    // Formula 5: Freestyle Cipher Formula - conversational flow with surprises
+    freestyleCipher: {
+      name: 'Cipher Flow Surprise',
+      quarterMarks: [0.3, 0.7], // Unpredictable timing
+      endWeight: 0.5,
+      internalWeight: 0.5, // Balanced approach
+      breathPattern: [0.35, 0.65], // Natural conversation flow
+      description: 'Casual flow with unexpected rhyme bombs'
+    }
+  };
+
   /**
    * MASTER FUNCTION: Optimize rhyme placement for maximum audience impact
+   * Uses dynamic formula selection for varied devastation styles
    */
   async optimizeRhymePlacement(
     lyrics: string,
@@ -73,6 +127,10 @@ export class RhymeArchitectService {
   }> {
     console.log(`🎯 RHYME ARCHITECT: Optimizing for ${targetImpact} impact...`);
     
+    // DYNAMIC FORMULA SELECTION: Choose the perfect formula for the situation
+    const selectedFormula = this.selectOptimalFormula(lyrics, targetImpact, audienceType);
+    console.log(`🔥 SELECTED FORMULA: ${selectedFormula.name} - ${selectedFormula.description}`);
+    
     const lines = lyrics.split('\n').filter(line => line.trim());
     const optimizedLines: string[] = [];
     const placementMap: RhymePlacement[] = [];
@@ -84,7 +142,8 @@ export class RhymeArchitectService {
         i, 
         targetImpact,
         audienceType,
-        lines // Context for cross-line patterns
+        lines, // Context for cross-line patterns
+        selectedFormula
       );
       
       optimizedLines.push(lineOptimization.optimizedLine);
@@ -106,6 +165,80 @@ export class RhymeArchitectService {
   }
 
   /**
+   * INTELLIGENT FORMULA SELECTION: Analyze content and choose optimal formula
+   */
+  private selectOptimalFormula(lyrics: string, targetImpact: string, audienceType: string): any {
+    const analysis = this.analyzeLyricalContent(lyrics);
+    
+    // Formula selection logic based on content analysis
+    if (analysis.hasComplexMultisyllables && targetImpact === 'maximum') {
+      return this.impactFormulas.technicalGenius;
+    }
+    
+    if (analysis.isEmotionalContent && audienceType === 'battle-crowd') {
+      return this.impactFormulas.emotionalStory;
+    }
+    
+    if (analysis.hasRapidRhymes || targetImpact === 'devastating') {
+      return this.impactFormulas.speedDemon;
+    }
+    
+    if (audienceType === 'freestyle-cipher') {
+      return this.impactFormulas.freestyleCipher;
+    }
+    
+    // Default to classic battle formula for maximum devastation
+    return this.impactFormulas.classicBattle;
+  }
+
+  /**
+   * CONTENT ANALYSIS: Analyze lyrics to determine optimal approach
+   */
+  private analyzeLyricalContent(lyrics: string): {
+    hasComplexMultisyllables: boolean;
+    isEmotionalContent: boolean;
+    hasRapidRhymes: boolean;
+    averageWordsPerLine: number;
+  } {
+    const lines = lyrics.split('\n').filter(line => line.trim());
+    let totalWords = 0;
+    let multisyllableCount = 0;
+    let emotionalWords = 0;
+    let internalRhymes = 0;
+    
+    const emotionalKeywords = ['pain', 'struggle', 'fight', 'victory', 'defeat', 'heart', 'soul', 'dream', 'hope', 'fear'];
+    
+    for (const line of lines) {
+      const words = line.split(' ');
+      totalWords += words.length;
+      
+      for (const word of words) {
+        // Check for multisyllables
+        if (this.getSyllables(word).length > 2) {
+          multisyllableCount++;
+        }
+        
+        // Check for emotional content
+        if (emotionalKeywords.some(keyword => word.toLowerCase().includes(keyword))) {
+          emotionalWords++;
+        }
+        
+        // Check for internal rhymes (simple heuristic)
+        if (words.filter(w => w.slice(-2) === word.slice(-2)).length > 1) {
+          internalRhymes++;
+        }
+      }
+    }
+    
+    return {
+      hasComplexMultisyllables: multisyllableCount > totalWords * 0.3,
+      isEmotionalContent: emotionalWords > totalWords * 0.1,
+      hasRapidRhymes: internalRhymes > lines.length * 2,
+      averageWordsPerLine: totalWords / lines.length
+    };
+  }
+
+  /**
    * Optimize individual line for perfect syllable placement
    */
   private async optimizeLineForImpact(
@@ -113,7 +246,8 @@ export class RhymeArchitectService {
     lineNumber: number,
     targetImpact: string,
     audienceType: string,
-    allLines: string[]
+    allLines: string[],
+    formula?: any
   ): Promise<{
     optimizedLine: string;
     placements: RhymePlacement[];
@@ -122,8 +256,8 @@ export class RhymeArchitectService {
     const words = line.trim().split(' ');
     const syllableAnalysis = this.analyzeSyllableStructure(words);
     
-    // Find optimal placement positions for maximum impact
-    const impactPositions = this.calculateImpactPositions(syllableAnalysis, targetImpact);
+    // Find optimal placement positions for maximum impact using selected formula
+    const impactPositions = this.calculateImpactPositions(syllableAnalysis, targetImpact, formula);
     
     // Enhance end rhymes for devastating delivery
     const endOptimization = this.optimizeEndRhyme(words, targetImpact, audienceType);
@@ -178,27 +312,29 @@ export class RhymeArchitectService {
   /**
    * Calculate perfect impact positions for syllable placement
    */
-  private calculateImpactPositions(syllableAnalysis: any, targetImpact: string): number[] {
+  private calculateImpactPositions(syllableAnalysis: any, targetImpact: string, formula?: any): number[] {
     const positions: number[] = [];
     
-    // Strategic positioning for maximum crowd reaction
-    if (targetImpact === 'maximum') {
-      // Place devastating hits at quarter beats for perfect timing
-      positions.push(
-        Math.floor(syllableAnalysis.totalSyllables * 0.25), // First quarter bomb
-        Math.floor(syllableAnalysis.totalSyllables * 0.75), // Third quarter devastation
-        syllableAnalysis.totalSyllables - 1 // End line knockout
-      );
-    } else if (targetImpact === 'devastating') {
-      // Mid-line explosion and end devastation
-      positions.push(
-        Math.floor(syllableAnalysis.totalSyllables * 0.5),
-        syllableAnalysis.totalSyllables - 1
-      );
-    } else {
-      // Controlled impact at end
-      positions.push(syllableAnalysis.totalSyllables - 1);
+    // Use selected formula for strategic positioning or fallback to default
+    const selectedFormula = formula || this.impactFormulas.classicBattle;
+    
+    console.log(`🎯 Using formula: ${selectedFormula.name} for impact positioning`);
+    
+    // Apply formula-specific quarter marks for maximum crowd reaction
+    for (const quarterMark of selectedFormula.quarterMarks) {
+      const position = Math.floor(syllableAnalysis.totalSyllables * quarterMark);
+      if (position >= 0 && position < syllableAnalysis.totalSyllables) {
+        positions.push(position);
+      }
     }
+    
+    // Ensure we always have an end position for devastating finish
+    const endPosition = syllableAnalysis.totalSyllables - 1;
+    if (!positions.includes(endPosition) && endPosition >= 0) {
+      positions.push(endPosition);
+    }
+    
+    console.log(`🔥 Impact positions calculated: [${positions.join(', ')}] using ${selectedFormula.name}`);
     
     return positions.filter(pos => pos >= 0 && pos < syllableAnalysis.totalSyllables);
   }
