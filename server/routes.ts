@@ -31,6 +31,18 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Sitemap.xml endpoint for SEO
+  app.get('/sitemap.xml', (req, res) => {
+    const sitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');
+    
+    if (fs.existsSync(sitemapPath)) {
+      res.set('Content-Type', 'application/xml');
+      res.sendFile(sitemapPath);
+    } else {
+      res.status(404).send('Sitemap not found');
+    }
+  });
+
   // Health check endpoint for deployment monitoring
   app.get('/api/health', (req, res) => {
     const health = {

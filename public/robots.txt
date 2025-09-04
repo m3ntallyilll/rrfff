@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://your-domain.com/sitemap.xml
+
+# Disallow admin and private routes
+Disallow: /admin
+Disallow: /api/
+Disallow: /_*
+
+# Allow important public routes
+Allow: /
+Allow: /battle
+Allow: /tournaments
+Allow: /subscribe
+Allow: /settings
