@@ -179,7 +179,6 @@ export function BattleAvatar({
             }}
             onEnded={() => {
               console.log('🔇 TTS Audio ended - AI finished speaking');
-              // setIsAISpeaking(false); // State managed by parent component
             }}
           />
           
