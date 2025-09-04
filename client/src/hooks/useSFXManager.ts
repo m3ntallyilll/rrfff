@@ -41,7 +41,7 @@ export function useSFXManager(): SFXManagerHook {
   const [config, setConfig] = useState<SFXConfig>({
     crowdReactions: {
       enabled: true,
-      volume: 0.2,  // Reduced volume for more subtle crowd reactions
+      volume: 0.08,  // 60% quieter - very subtle crowd reactions
       reactionTypes: ['cheer', 'wild', 'hype', 'reaction', 'crowd-going-wild']
     },
     roundBell: {
