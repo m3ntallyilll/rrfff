@@ -51,40 +51,50 @@ export function SimpleAudioPlayer({
         console.error('🔊 Audio error:', error);
       });
 
-      // Auto-play if enabled - Enhanced for reliability
+      // FORCE AUTO-PLAY - All AI responses must play automatically
       if (autoPlay) {
-        console.log('🔥 Auto-playing audio immediately');
+        console.log('🔥 FORCING AUTO-PLAY - AI response must play');
         
-        // Try immediate playback first
-        const tryPlayback = () => {
+        const forcePlayback = () => {
+          console.log('🎯 Attempting forced playback...');
           return audio.play().then(() => {
-            console.log('✅ Autoplay successful');
+            console.log('✅ AUTOPLAY SUCCESS - AI speaking now!');
           }).catch(error => {
-            console.error('🔊 Auto-play failed:', error);
+            console.error('🔊 Initial autoplay failed, trying aggressive retry:', error);
             
-            // Enhanced retry mechanism with multiple attempts
-            console.log('🔄 Attempting enhanced playback retry...');
-            
-            // Try again after ensuring audio is loaded
-            audio.addEventListener('canplaythrough', () => {
-              audio.play().catch(e => console.error('🔊 Canplaythrough retry failed:', e));
+            // AGGRESSIVE RETRY - Multiple strategies
+            // Strategy 1: Wait for audio to be ready
+            audio.addEventListener('loadeddata', () => {
+              console.log('🔄 Audio loaded, retrying...');
+              audio.play().catch(e => console.log('🔄 Loadeddata retry failed'));
             }, { once: true });
             
-            // Also try after a delay
+            // Strategy 2: Try after canplay event
+            audio.addEventListener('canplay', () => {
+              console.log('🔄 Audio can play, retrying...');
+              audio.play().catch(e => console.log('🔄 Canplay retry failed'));
+            }, { once: true });
+            
+            // Strategy 3: Delayed retry
             setTimeout(() => {
+              console.log('🔄 Delayed retry attempt...');
+              audio.play().catch(e => console.log('🔄 Delayed retry failed'));
+            }, 300);
+            
+            // Strategy 4: Final aggressive retry
+            setTimeout(() => {
+              console.log('🔥 FINAL ATTEMPT - Must play now!');
               audio.play().catch(e => {
-                console.error('🔊 Delayed retry failed:', e);
-                console.log('💡 Audio may require user interaction to play');
+                console.error('💥 ALL AUTOPLAY ATTEMPTS FAILED - Manual interaction required');
               });
-            }, 500);
+            }, 1000);
           });
         };
         
-        // Immediate attempt
-        tryPlayback();
-        
-        // Also try after a short delay to ensure DOM is ready
-        setTimeout(tryPlayback, 100);
+        // Multiple immediate attempts
+        forcePlayback();
+        setTimeout(forcePlayback, 50);
+        setTimeout(forcePlayback, 200);
       }
 
       return () => {

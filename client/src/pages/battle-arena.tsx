@@ -206,12 +206,12 @@ export default function BattleArena() {
         console.log('🎵 Audio available:', !!result.audioUrl);
         setCurrentAiAudio(result.audioUrl);
         
-        // Auto-play TTS immediately when available with enhanced trigger
+        // FORCE AUTO-PLAY TTS - All AI responses must play automatically
         if (result.audioUrl && result.audioUrl.length > 100) {
-          console.log('🔥 Battle round complete - triggering enhanced auto-play');
-          console.log('🔥 Audio URL ready for playback:', result.audioUrl.substring(0, 100) + '...');
+          console.log('🔥 FORCING AUTOPLAY - AI must speak now!');
+          console.log('🔥 Audio URL ready for FORCED playback:', result.audioUrl.substring(0, 100) + '...');
           
-          // Immediately trigger audio playback state
+          // Immediately trigger FORCED audio playback state
           updateBattleState({ isPlayingAudio: true });
           
           // Enhanced audio playback trigger with multiple attempts

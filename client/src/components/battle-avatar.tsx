@@ -168,16 +168,18 @@ export function BattleAvatar({
             />
           )}
           
-          {/* Dedicated Audio Player for TTS */}
+          {/* Dedicated Audio Player for TTS - FORCED AUTOPLAY */}
           <SimpleAudioPlayer 
             audioUrl={audioUrl}
-            autoPlay={true}  // Always auto-play AI responses
+            autoPlay={true}  // FORCE auto-play ALL AI responses
             volume={1.0}
             onPlay={() => {
-              console.log('🔊 TTS Audio started - AI is now speaking');
+              console.log('🔥 FORCED TTS Audio started - AI is now speaking!');
+              setIsAISpeaking(true);
             }}
             onEnded={() => {
               console.log('🔇 TTS Audio ended - AI finished speaking');
+              setIsAISpeaking(false);
             }}
           />
           
