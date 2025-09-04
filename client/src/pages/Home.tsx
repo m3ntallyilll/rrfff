@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Mic, Trophy, Zap, Crown, TrendingUp, Settings } from "lucide-react";
+import { Mic, Trophy, Zap, Crown, TrendingUp, Settings, Volume2, VolumeX } from "lucide-react";
 import { Link } from "wouter";
+import { useState, useEffect, useRef } from "react";
+import themeSong from "@assets/Lyrical sauce, you can't handle the boss_1756951536849.mp3";
 
 interface SubscriptionStatus {
   tier: 'free' | 'premium' | 'pro';
@@ -31,6 +33,9 @@ interface Battle {
 
 export default function Home() {
   const { user } = useAuth();
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(0.3);
   
   const { data: subscriptionStatus } = useQuery<SubscriptionStatus>({
     queryKey: ["/api/subscription/status"],
@@ -46,6 +51,52 @@ export default function Home() {
     queryKey: ["/api/battles/history"],
     enabled: !!user,
   });
+
+  // Theme song autoplay effect
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.volume = volume;
+      audio.loop = true;
+      
+      // Try to autoplay after user interaction
+      const playTheme = async () => {
+        try {
+          await audio.play();
+          setIsPlaying(true);
+        } catch (error) {
+          console.log('Autoplay blocked, waiting for user interaction');
+        }
+      };
+
+      // Attempt autoplay with a small delay
+      setTimeout(playTheme, 1000);
+    }
+  }, [volume]);
+
+  const togglePlayPause = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    try {
+      if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+      } else {
+        await audio.play();
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      console.error('Error playing audio:', error);
+    }
+  };
+
+  const handleVolumeChange = (newVolume: number) => {
+    setVolume(newVolume);
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume;
+    }
+  };
 
   const getTierColor = (tier: string) => {
     switch (tier) {
@@ -65,6 +116,16 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+      {/* Hidden audio element */}
+      <audio
+        ref={audioRef}
+        src={themeSong}
+        preload="auto"
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onError={(e) => console.error('Theme song error:', e)}
+      />
+
       <div className="container mx-auto max-w-6xl">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -87,13 +148,39 @@ export default function Home() {
             </div>
           </div>
           
-          <Button 
-            onClick={() => window.location.href = '/api/logout'}
-            variant="outline"
-            className="border-slate-600 text-slate-300 hover:bg-slate-700"
-          >
-            Logout
-          </Button>
+          <div className="flex items-center gap-4">
+            {/* Theme Song Controls */}
+            <div className="flex items-center gap-2 bg-slate-800 rounded-lg px-4 py-2 border border-slate-600">
+              <Button
+                onClick={togglePlayPause}
+                size="sm"
+                variant="ghost"
+                className="text-purple-400 hover:text-purple-300 hover:bg-purple-900/20 p-1"
+                data-testid="button-theme-toggle"
+              >
+                {isPlaying ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              </Button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={volume}
+                onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                className="theme-volume-slider w-16 h-1 rounded-lg appearance-none"
+                data-testid="slider-volume"
+              />
+              <span className="text-xs text-slate-400 min-w-0 whitespace-nowrap">Theme</span>
+            </div>
+
+            <Button 
+              onClick={() => window.location.href = '/api/logout'}
+              variant="outline"
+              className="border-slate-600 text-slate-300 hover:bg-slate-700"
+            >
+              Logout
+            </Button>
+          </div>
         </div>
 
         {/* Battle Status */}
