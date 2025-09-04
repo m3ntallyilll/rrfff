@@ -8,6 +8,7 @@ import { Mic, Trophy, Zap, Crown, TrendingUp, Settings, Volume2, VolumeX } from 
 import { Link } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import themeSong from "@assets/Lyrical sauce, you can't handle the boss_1756951536849.mp3";
+import { SocialShare } from "@/components/SocialShare";
 
 interface SubscriptionStatus {
   tier: 'free' | 'premium' | 'pro';
@@ -354,6 +355,27 @@ export default function Home() {
             )}
           </CardContent>
         </Card>
+
+        {/* Social Sharing Section */}
+        {userStats && userStats.totalBattles > 0 && (
+          <div className="mt-8">
+            <SocialShare
+              title="Rap Battle AI - Voice-Powered Battle Rap Game"
+              text={`🎤 Join me on Rap Battle AI! I've fought ${userStats.totalBattles} battles with a ${userStats.winRate?.toFixed(1)}% win rate. Think you can beat the AI? Let's battle!`}
+              hashtags={['RapBattleAI', 'FreestyleBattle', 'AIChallenge']}
+              variant="default"
+              className="mb-6"
+            />
+          </div>
+        )}
+
+        {/* Floating Social Share Button */}
+        <SocialShare
+          title="Rap Battle AI - Ultimate Voice-Powered Battle Rap Game"
+          text="🔥 The future of freestyle battling is here! Challenge AI opponents with real voice synthesis and authentic rap scoring. Who's ready to test their flow?"
+          hashtags={['RapBattleAI', 'VoiceAI', 'BattleRap', 'FreestyleBattle']}
+          variant="floating"
+        />
       </div>
     </div>
   );
