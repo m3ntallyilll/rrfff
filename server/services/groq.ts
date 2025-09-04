@@ -440,7 +440,7 @@ STEP 2 - CREATE DEVASTATING COUNTER-ATTACK:
 - REQUIRED: Fresh metaphors from diverse categories:
   • Criminal: mobster, hitman, Capone, cartel, Scarface
   • Military: atom bomb, sniper, missile, war machine, tank
-  • Predator: Jeffrey Dahmer, demon, vampire, savage beast
+  • Predators: Hannibal Lecter, Freddy Krueger, demon, vampire, savage beast, Jason Voorhees
   • Disaster: hurricane, earthquake, tornado, wildfire
   • Tech: virus, hacker, robot, cyber-attack, AI
   • Examples: "I'm a wicked bitch", "I'm a mobster with a Thompson", "I'm an atom bomb"
@@ -711,7 +711,7 @@ Write exactly 8 lines with mandatory rhyme density matching reaction level:`;
 ✅ DIVERSE METAPHOR REQUIREMENTS:
 - Criminal/Gangster: mobster, hitman, Capone, Scarface, cartel, mafia boss
 - Military/Weapons: atom bomb, sniper, missile, tank, napalm, war machine  
-- Predators/Monsters: Jeffrey Dahmer, demon, vampire, savage beast, Grim Reaper, wicked witch
+- Predators/Monsters: Jason Voorhees, Freddy Krueger, Michael Myers, Hannibal Lecter, Chucky, Pennywise, demon, vampire, savage beast, Grim Reaper, Pinhead, Leatherface
 - Natural Disasters: hurricane, earthquake, tornado, wildfire, blizzard, tidal wave
 - Technology/Cyber: virus, hacker, robot, AI, cyber-attack, glitch
 - Medical/Scientific: surgeon, toxin, chemical reaction, radiation, pathogen
@@ -719,7 +719,7 @@ Write exactly 8 lines with mandatory rhyme density matching reaction level:`;
 
 EXAMPLES OF FRESH METAPHOR USAGE:
 "I'm a mobster with a Thompson, spray rounds till you're done"
-"Like Jeffrey Dahmer, I devour, every hour more severe"
+"Like Jason Voorhees, I slice through dreams and make you scream"
 "I'm an atom bomb, stay calm while I split your atoms"
 "Like a virus, spread through systems, crash your mental software"
 "I'm a wicked witch, flip your switch, make you glitch in fear"
