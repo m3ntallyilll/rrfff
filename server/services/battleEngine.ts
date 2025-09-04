@@ -1,8 +1,9 @@
-import { groqService } from './groq';
+import { groqService, GroqService } from './groq';
 import { typecastService } from './typecast';
-import { scoringService } from './scoring';
+import { scoringService, ScoringService } from './scoring';
 import { LyricAnalysisService } from './lyricAnalysis';
 import { PerformanceOptimizer } from './performanceOptimizer';
+import { userTTSManager } from './user-tts-manager';
 
 export interface BattleContext {
   difficulty: 'easy' | 'normal' | 'hard';
@@ -30,7 +31,7 @@ export interface BattleResponse {
 
 export class BattleEngine {
   private groqService: GroqService;
-  private typecastService: TypecastService;
+  private typecastService: any; // Keep for compatibility but won't use
   private scoringService: ScoringService;
   private lyricAnalysisService: LyricAnalysisService;
   private performanceOptimizer: PerformanceOptimizer;
