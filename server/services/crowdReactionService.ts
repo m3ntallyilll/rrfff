@@ -37,32 +37,41 @@ export class CrowdReactionService {
 
     // Use Groq AI for intelligent crowd reaction analysis
     try {
-      const prompt = `You are an expert battle rap crowd analyzer with knowledge of legendary battle rap characters. Analyze these lyrics and determine the appropriate crowd reaction.
+      const prompt = `You are an expert battle rap crowd analyzer. Analyze these lyrics ONLY for SPECIFIC TRIGGER WORDS and phrases that would make a crowd react. DO NOT react to timing, length, or general performance - ONLY specific trigger words.
 
 LYRICS: "${lyrics}"
-${context?.userPerformanceScore ? `PERFORMANCE SCORE: ${context.userPerformanceScore}/100` : ''}
-${context?.battlePhase ? `BATTLE PHASE: ${context.battlePhase}` : ''}
 
-Consider legendary battle rap personas like: Ghost H.H. Holmes, The Destroyer Thor, Thunderstrike Frank Lucas, The Silent Jack the Ripper, The Impaler Richard Ramirez, Bloodletter Saddam Hussein, The Reaper Bugsy Siegel, Shadow Pablo Escobar, Iron Al Capone, Dark Whitey Bulger, and hundreds of other deadly personas.
+TRIGGER WORD CATEGORIES (crowd reacts ONLY to these):
 
-Analyze for:
-- Punchlines and devastating bars (check for clever disses, metaphors, similes worthy of legends)
-- Complex wordplay and rhyme schemes (internal rhymes, multi-syllabic rhymes, homophones)
-- Flow and delivery impact (rhythm, cadence, syllable density matching legendary personas)
-- Battle tactics and aggression (direct attacks, superiority claims, dominance like The Destroyer or The Reaper)
-- Crowd energy triggers (hype words, audience engagement, quotable lines)
-- Technical skill display (alliteration, assonance, double entendres)
-- Surprise/shock value (unexpected twists, controversial content)
-- Cultural references and callbacks to legendary figures
-- Lyrical complexity and intelligence that would impress battle rap legends
+🔥 DESTRUCTION WORDS (wild_cheering 80-95%):
+- kill, murder, destroy, demolish, wreck, finish, slay, slaughter, massacre, eliminate, annihilate, obliterate, devastate, erase, delete
 
-Respond with JSON:
-{
-  "reactionType": "silence|mild_approval|hype|wild_cheering|booing|shocked_gasps",
-  "intensity": 0-100,
-  "reasoning": "brief explanation",
-  "timing": "immediate|delayed|buildup"
-}`;
+🏆 VICTORY WORDS (wild_cheering 75-90%):
+- mic drop, game over, checkmate, done deal, case closed, lights out, victory, winner, champion, conquered, dominated, owned
+
+⚡ INTENSITY WORDS (hype 65-80%):
+- savage, brutal, ruthless, vicious, deadly, lethal, killer, beast, monster, demon, devil, nightmare, terror, horror
+
+🔥 HEAT WORDS (hype 60-75%):
+- fire, flames, burning, heat, blazing, inferno, torch, roast, hot, heated, steaming, smoking, sizzling, scorching
+
+👑 SUPERIORITY WORDS (hype 55-70%):
+- king, crown, throne, legend, god, boss, chief, master, elite, supreme, ultimate, best, greatest, unmatched
+
+⚔️ BATTLE WORDS (mild_approval 45-60%):
+- step to me, come at me, try me, test me, bring it, face me, challenge, next level, different league, schooling, amateur
+
+💀 PERSONAL ATTACK WORDS (shocked_gasps 50-75%):
+- your mama, your girl, your crew, your family, weak, trash, garbage, pathetic, terrible, awful, wack, basic, lame
+
+RULES:
+- NO reaction unless specific trigger words are present
+- Multiple trigger words = higher intensity
+- Single weak word = lower intensity
+- NO reactions for general rap content without triggers
+- Match exact words/phrases from categories above
+
+JSON ONLY: {"reactionType":"wild_cheering","intensity":85,"reasoning":"Found trigger words: fire, destroy","timing":"immediate"}`;
 
       const response = await this.groqService.generateRapResponse(prompt);
 
@@ -185,24 +194,24 @@ JSON only: {"reactionType":"wild_cheering","intensity":85,"reasoning":"devastati
     // ENHANCED BATTLE TACTICS DETECTION - Triggers hype
     const battleTactics = [
       // Direct challenges
-      /step to me|come at me|try me|test me|bring it|face me/i,
-      /challenge|dare|bet|wanna go|let's go|square up/i,
+      /\b(step to me|come at me|try me|test me|bring it|face me)\b/i,
+      /\b(challenge|dare|bet|wanna go|let's go|square up)\b/i,
       
       // Skill comparisons
-      /next level|different league|out your league|not your level/i,
-      /can't compete|can't match|can't touch|can't reach/i,
+      /\b(next level|different league|out your league|not your level)\b/i,
+      /\b(can't compete|can't match|can't touch|can't reach)\b/i,
       
       // Teaching/dominance
-      /schooling|teaching|lesson|homework|class|school/i,
-      /professor|teacher|master class|education|learn/i,
+      /\b(schooling|teaching|lesson|homework|class|school)\b/i,
+      /\b(professor|teacher|master class|education|learn)\b/i,
       
       // Experience taunts
-      /amateur|rookie|beginner|newbie|novice|freshman/i,
-      /veteran|experienced|been here|done that|seen it all/i,
+      /\b(amateur|rookie|beginner|newbie|novice|freshman)\b/i,
+      /\b(veteran|experienced|been here|done that|seen it all)\b/i,
       
       // Battle positioning
-      /top spot|number one|first place|throne|crown/i,
-      /undefeated|champion|winner|victor|conqueror/i
+      /\b(top spot|number one|first place|throne|crown)\b/i,
+      /\b(undefeated|champion|winner|victor|conqueror)\b/i
     ];
     
     const hasBattleTactics = battleTactics.some(pattern => pattern.test(lyrics));
@@ -281,9 +290,9 @@ JSON only: {"reactionType":"wild_cheering","intensity":85,"reasoning":"devastati
       timing = 'immediate';
     }
     
-    // Controversial content gets mixed reactions
+    // Controversial content gets shocked gasps (no randomness)
     else if (isControversial) {
-      reactionType = Math.random() > 0.6 ? 'shocked_gasps' : 'booing';
+      reactionType = 'shocked_gasps';
       intensity = 65;
       reasoning = 'Controversial content detected';
       timing = 'immediate';
@@ -305,12 +314,12 @@ JSON only: {"reactionType":"wild_cheering","intensity":85,"reasoning":"devastati
       timing = 'immediate';
     }
     
-    // Poor performance gets silence or boos
+    // Poor performance gets silence (no randomness)
     if (wordCount < 3 || flowQuality < 20) {
-      reactionType = Math.random() > 0.7 ? 'booing' : 'silence';
+      reactionType = 'silence';
       intensity = Math.max(10, 30 - wordCount * 5);
-      reasoning = 'Weak performance detected';
-      timing = 'delayed';
+      reasoning = 'Weak performance detected - no trigger words found';
+      timing = 'immediate';
     }
 
     // Apply context adjustments

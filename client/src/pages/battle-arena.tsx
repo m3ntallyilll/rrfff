@@ -68,6 +68,7 @@ export default function BattleArena() {
     stopAllSFX,
     enableRealtimeCrowdReactions,
     triggerCrowdOnSpeech,
+    analyzeWordsForTriggers,
     isPlaying: isSFXPlaying,
     currentlyPlaying: currentSFX
   } = useSFXManager();
@@ -133,6 +134,12 @@ export default function BattleArena() {
             
             // Show transcription immediately
             setLiveTranscription(transcriptionData.userText || "Voice input processed");
+            
+            // 🎯 REAL-TIME WORD-TRIGGERED CROWD REACTIONS - Instant response to trigger words
+            if (transcriptionData.userText && transcriptionData.userText.length > 2) {
+              console.log('🎯 Analyzing words for instant crowd triggers:', transcriptionData.userText);
+              analyzeWordsForTriggers(transcriptionData.userText);
+            }
             
             // 🧠 INTELLIGENT CROWD REACTION - Only for substantial user performances
             if (transcriptionData.userText && transcriptionData.userText.length > 50 && transcriptionData.userText.split(' ').length > 8) {

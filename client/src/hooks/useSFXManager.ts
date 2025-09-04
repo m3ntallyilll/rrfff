@@ -34,6 +34,7 @@ interface SFXManagerHook {
   currentlyPlaying: string | null;
   enableRealtimeCrowdReactions: (enabled: boolean) => void;
   triggerCrowdOnSpeech: () => void;
+  analyzeWordsForTriggers: (words: string) => void;
 }
 
 export function useSFXManager(): SFXManagerHook {
@@ -282,30 +283,17 @@ export function useSFXManager(): SFXManagerHook {
   const triggerCrowdOnSpeech = useCallback(() => {
     speechDetectionRef.current = true;
     
-    // 🎯 ENHANCED: Enable mild real-time crowd reactions during speech
-    console.log('🎤 User started recording - enabling real-time crowd reactions');
+    // 🎯 WORD-TRIGGERED ONLY: No timed reactions - only triggered by specific words/phrases
+    console.log('🎤 User started recording - crowd reactions are WORD-TRIGGERED ONLY');
     
-    // Trigger subtle crowd reaction when user gets into flow
-    if (config.crowdReactions.enabled && realtimeCrowdEnabled) {
-      setTimeout(() => {
-        console.log('🎆 Triggering mild crowd reaction for active speech');
-        playCrowdReaction('mild');
-      }, 2000); // Wait 2 seconds for user to get into flow
-      
-      // Optional: Add another subtle reaction after 5 seconds
-      setTimeout(() => {
-        if (speechDetectionRef.current) {
-          console.log('🎆 Triggering sustained crowd energy');
-          playCrowdReaction('mild');
-        }
-      }, 5000);
-    }
+    // REMOVED: All timing-based crowd reactions
+    // Crowd will ONLY react to specific trigger words detected in real-time transcription
     
-    // Reset speech detection after 8 seconds
+    // Reset speech detection after recording ends
     setTimeout(() => {
       speechDetectionRef.current = false;
     }, 8000);
-  }, [config.crowdReactions.enabled, realtimeCrowdEnabled, playCrowdReaction]);
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -313,6 +301,64 @@ export function useSFXManager(): SFXManagerHook {
       stopAllSFX();
     };
   }, [stopAllSFX]);
+
+  // REAL-TIME word-triggered crowd reactions
+  const analyzeWordsForTriggers = useCallback((words: string) => {
+    if (!config.crowdReactions.enabled) return;
+    
+    const lowerWords = words.toLowerCase();
+    console.log(`🎯 REAL-TIME word analysis: "${words}"`);
+    
+    // DESTRUCTION WORDS - Instant wild reaction
+    const destructionWords = /\b(kill|murder|destroy|demolish|wreck|finish|slay|slaughter|massacre|eliminate|annihilate|obliterate|devastate|erase|delete)\b/i;
+    if (destructionWords.test(lowerWords)) {
+      console.log('🔥 DESTRUCTION WORD DETECTED - Wild crowd reaction!');
+      playCrowdReaction('wild');
+      return;
+    }
+    
+    // VICTORY WORDS - Instant wild reaction
+    const victoryWords = /\b(mic drop|game over|checkmate|done deal|case closed|lights out|victory|winner|champion|conquered|dominated|owned)\b/i;
+    if (victoryWords.test(lowerWords)) {
+      console.log('🏆 VICTORY WORD DETECTED - Wild crowd reaction!');
+      playCrowdReaction('wild');
+      return;
+    }
+    
+    // HEAT WORDS - Medium reaction
+    const heatWords = /\b(fire|flames|burning|heat|blazing|inferno|torch|roast|hot|heated|steaming|smoking|sizzling|scorching)\b/i;
+    if (heatWords.test(lowerWords)) {
+      console.log('🔥 HEAT WORD DETECTED - Medium crowd reaction!');
+      playCrowdReaction('medium');
+      return;
+    }
+    
+    // INTENSITY WORDS - Medium reaction
+    const intensityWords = /\b(savage|brutal|ruthless|vicious|deadly|lethal|killer|beast|monster|demon|devil|nightmare|terror|horror)\b/i;
+    if (intensityWords.test(lowerWords)) {
+      console.log('⚡ INTENSITY WORD DETECTED - Medium crowd reaction!');
+      playCrowdReaction('medium');
+      return;
+    }
+    
+    // BATTLE WORDS - Mild reaction
+    const battleWords = /\b(step to me|come at me|try me|test me|bring it|face me|challenge|next level|different league|schooling|amateur)\b/i;
+    if (battleWords.test(lowerWords)) {
+      console.log('⚔️ BATTLE WORD DETECTED - Mild crowd reaction!');
+      playCrowdReaction('mild');
+      return;
+    }
+    
+    // PERSONAL ATTACK WORDS - Shocked gasps
+    const attackWords = /\b(your mama|your girl|your crew|your family|weak|trash|garbage|pathetic|terrible|awful|wack|basic|lame)\b/i;
+    if (attackWords.test(lowerWords)) {
+      console.log('💀 ATTACK WORD DETECTED - Shocked reaction!');
+      playCrowdReaction('medium'); // Use medium for shocked gasps
+      return;
+    }
+    
+    console.log('🤫 No trigger words found - crowd stays silent');
+  }, [config.crowdReactions.enabled, playCrowdReaction]);
 
   // Intelligent crowd reaction based on lyrical content
   const playIntelligentCrowdReaction = useCallback(async (lyrics: string, context?: {
@@ -332,8 +378,7 @@ export function useSFXManager(): SFXManagerHook {
       });
       
       if (!response.ok) {
-        console.warn('Failed to get intelligent crowd reaction, using default');
-        playCrowdReaction('medium');
+        console.warn('Failed to get intelligent crowd reaction - NO fallback reaction triggered');
         return;
       }
       
@@ -367,8 +412,8 @@ export function useSFXManager(): SFXManagerHook {
       
     } catch (error) {
       console.error('Error with intelligent crowd reaction:', error);
-      // Fallback to basic reaction
-      playCrowdReaction('medium');
+      // NO FALLBACK - Only word-triggered reactions allowed
+      console.log('🤫 No fallback reaction - crowd stays silent unless triggered by words');
     }
   }, [config.crowdReactions, playCrowdReaction]);
 
@@ -383,6 +428,7 @@ export function useSFXManager(): SFXManagerHook {
     isPlaying,
     currentlyPlaying,
     enableRealtimeCrowdReactions,
-    triggerCrowdOnSpeech
+    triggerCrowdOnSpeech,
+    analyzeWordsForTriggers
   };
 }
