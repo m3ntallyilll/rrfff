@@ -6,7 +6,7 @@
 
   <!-- Homepage / Landing Page -->
   <url>
-    <loc>https://your-domain.com/</loc>
+    <loc>https://rapbots.online/</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -14,7 +14,7 @@
 
   <!-- Main Battle Arena -->
   <url>
-    <loc>https://your-domain.com/battle</loc>
+    <loc>https://rapbots.online/battle</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -22,7 +22,7 @@
 
   <!-- Subscription Page -->
   <url>
-    <loc>https://your-domain.com/subscribe</loc>
+    <loc>https://rapbots.online/subscribe</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -30,28 +30,28 @@
 
   <!-- Tournament Section -->
   <url>
-    <loc>https://your-domain.com/tournaments</loc>
+    <loc>https://rapbots.online/tournaments</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://your-domain.com/tournaments/leaderboard</loc>
+    <loc>https://rapbots.online/tournaments/leaderboard</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://your-domain.com/tournaments/history</loc>
+    <loc>https://rapbots.online/tournaments/history</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://your-domain.com/tournaments/brackets</loc>
+    <loc>https://rapbots.online/tournaments/brackets</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -59,14 +59,14 @@
 
   <!-- Settings & Configuration -->
   <url>
-    <loc>https://your-domain.com/settings</loc>
+    <loc>https://rapbots.online/settings</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://your-domain.com/fine-tuning</loc>
+    <loc>https://rapbots.online/fine-tuning</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -74,7 +74,7 @@
 
   <!-- Admin Section (lower priority) -->
   <url>
-    <loc>https://your-domain.com/admin</loc>
+    <loc>https://rapbots.online/admin</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
