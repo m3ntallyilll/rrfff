@@ -206,6 +206,20 @@ export default function BattleArena() {
         console.log('🎵 Audio available:', !!result.audioUrl);
         setCurrentAiAudio(result.audioUrl);
         
+        // 🔊 IMMEDIATE AUDIO TEST - Manual direct playback
+        if (result.audioUrl && result.audioUrl.startsWith('data:audio/')) {
+          console.log('🔥 DIRECT AUDIO TEST - bypassing component system');
+          const testAudio = new Audio(result.audioUrl);
+          testAudio.volume = 1.0;
+          console.log('🔊 Direct test audio created, attempting immediate play...');
+          testAudio.play().then(() => {
+            console.log('✅ DIRECT AUDIO PLAYBACK SUCCESS!');
+          }).catch(err => {
+            console.error('❌ DIRECT AUDIO PLAYBACK FAILED:', err);
+            console.log('🔧 Browser audio may be blocked - user interaction needed');
+          });
+        }
+        
         // FORCE AUTO-PLAY TTS - All AI responses must play automatically
         if (result.audioUrl && result.audioUrl.length > 100) {
           console.log('🔥 FORCING AUTOPLAY - AI must speak now!');

@@ -41,6 +41,8 @@ export function SimpleAudioPlayer({
       console.log('🔊 Audio element created:', audio);
       console.log('🔊 Audio volume set to:', audio.volume);
       console.log('🔊 Audio src:', audio.src.substring(0, 100) + '...');
+      console.log('🔊 Audio readyState:', audio.readyState);
+      console.log('🔊 Audio networkState:', audio.networkState);
 
       // Event listeners
       audio.addEventListener('play', () => {
