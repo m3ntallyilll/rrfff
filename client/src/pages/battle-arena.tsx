@@ -134,14 +134,16 @@ export default function BattleArena() {
             // Show transcription immediately
             setLiveTranscription(transcriptionData.userText || "Voice input processed");
             
-            // 🧠 INTELLIGENT CROWD REACTION - Analyze transcribed lyrics for appropriate reaction
-            if (transcriptionData.userText) {
-              console.log('🧠 Triggering intelligent crowd reaction for:', transcriptionData.userText.substring(0, 50) + '...');
+            // 🧠 INTELLIGENT CROWD REACTION - Only for substantial user performances
+            if (transcriptionData.userText && transcriptionData.userText.length > 50 && transcriptionData.userText.split(' ').length > 8) {
+              console.log('🧠 Triggering intelligent crowd reaction for substantial performance:', transcriptionData.userText.substring(0, 50) + '...');
               playIntelligentCrowdReaction(transcriptionData.userText, {
                 battlePhase: battleState?.currentRound === 1 ? 'opening' : 
                            battleState?.currentRound === battleState?.maxRounds ? 'closing' : 'middle',
                 userPerformanceScore: battleState?.userScore
               });
+            } else {
+              console.log('🧠 Skipping user crowd reaction - performance too brief:', transcriptionData.userText?.length || 0, 'chars');
             }
             
             toast({
@@ -188,13 +190,15 @@ export default function BattleArena() {
           
           console.log('🤖 AI response state should be updated now');
           
-          // 🎆 Trigger crowd reaction for AI response if it's clever/impressive
-          if (result.aiResponse && result.aiResponse.length > 20) {
-            console.log('🤖 Triggering AI crowd reaction for:', result.aiResponse.substring(0, 50) + '...');
+          // 🎆 Only trigger crowd reactions for truly impressive AI responses (score > 70)
+          if (result.aiResponse && result.aiResponse.length > 20 && (result.aiScore || 0) > 70) {
+            console.log('🤖 Triggering AI crowd reaction for high-scoring response:', result.aiResponse.substring(0, 50) + '...');
             playIntelligentCrowdReaction(result.aiResponse, {
               battlePhase: (battleState?.currentRound || 1) === (battleState?.maxRounds || 3) ? 'closing' : 'middle',
               userPerformanceScore: result.aiScore || 0
             });
+          } else {
+            console.log('🤖 Skipping crowd reaction - AI score too low:', result.aiScore || 0);
           }
         } else {
           console.log('⚠️ No AI response in result');
@@ -206,19 +210,7 @@ export default function BattleArena() {
         console.log('🎵 Audio available:', !!result.audioUrl);
         setCurrentAiAudio(result.audioUrl);
         
-        // 🔊 IMMEDIATE AUDIO TEST - Manual direct playback
-        if (result.audioUrl && result.audioUrl.startsWith('data:audio/')) {
-          console.log('🔥 DIRECT AUDIO TEST - bypassing component system');
-          const testAudio = new Audio(result.audioUrl);
-          testAudio.volume = 1.0;
-          console.log('🔊 Direct test audio created, attempting immediate play...');
-          testAudio.play().then(() => {
-            console.log('✅ DIRECT AUDIO PLAYBACK SUCCESS!');
-          }).catch(err => {
-            console.error('❌ DIRECT AUDIO PLAYBACK FAILED:', err);
-            console.log('🔧 Browser audio may be blocked - user interaction needed');
-          });
-        }
+        // 🔊 Audio is working via component system now
         
         // FORCE AUTO-PLAY TTS - All AI responses must play automatically
         if (result.audioUrl && result.audioUrl.length > 100) {
