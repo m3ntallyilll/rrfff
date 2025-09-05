@@ -1,12 +1,14 @@
 import { AdvancedRhymeEngine } from './advancedRhymeEngine';
 import { contentModerationService } from './contentModeration';
 import { RhymeArchitectService } from './rhymeArchitect';
+import { InternalRhymeAgent } from './internalRhymeAgent';
 
 export class GroqService {
   private apiKey: string;
   private baseUrl = "https://api.groq.com/openai/v1";
   private rhymeEngine: AdvancedRhymeEngine;
   private rhymeArchitect: RhymeArchitectService;
+  private internalRhymeAgent: InternalRhymeAgent;
 
   constructor(apiKey?: string) {
     this.apiKey = apiKey || process.env.GROQ_API_KEY || process.env.GROQ_API_KEY_ENV_VAR || "";
@@ -22,6 +24,7 @@ export class GroqService {
     }
     this.rhymeEngine = new AdvancedRhymeEngine();
     this.rhymeArchitect = new RhymeArchitectService();
+    this.internalRhymeAgent = new InternalRhymeAgent();
   }
 
   async transcribeAudio(audioBuffer: Buffer): Promise<string> {
@@ -319,7 +322,8 @@ OUTPUT: Technical brief for AI rapper in format: "User: [syllables/line], [schem
     profanityFilter: boolean = true,
     lyricComplexity: number = 50,
     styleIntensity: number = 50,
-    userScore: number = 50
+    userScore: number = 50,
+    enableInternalRhymes: boolean = true
   ): Promise<string> {
     if (!this.apiKey) {
       throw new Error("Groq API key not available for rap generation");
@@ -875,14 +879,52 @@ ${difficulty === 'nightmare' ? '- CYPHER-9000 MODE: Cold robotic delivery with s
     }
     
     if (rapResponse) {
-      // RHYME ARCHITECT: Optimize syllable placement for maximum audience impact
+      // STAGE 3: INTERNAL RHYME ENHANCEMENT - Advanced internal rhyme patterns
+      let internallyEnhancedResponse = rapResponse;
+      
+      if (enableInternalRhymes) {
+        console.log("🎯 Stage 3: Internal Rhyme Agent enhancing midline complexity...");
+        
+        try {
+          // Configure internal rhyme options based on difficulty and user performance
+          const internalRhymeOptions = {
+            targetDensity: difficulty === 'nightmare' ? 0.55 : 
+                          difficulty === 'hard' ? 0.45 : 
+                          userScore >= 70 ? 0.50 : 0.35,
+            preserveEndWords: true, // Don't mess with end rhymes that RhymeArchitect needs
+            maxSyllableDeltaPerLine: 1, // Keep flow intact
+            mode: (difficulty === 'nightmare' ? 'aggressive' : 
+                  userScore >= 70 ? 'aggressive' : 
+                  userScore >= 50 ? 'balanced' : 'subtle') as 'aggressive' | 'balanced' | 'subtle'
+          };
+
+          const internalRhymePlan = await this.internalRhymeAgent.enhanceInternalRhymes(
+            rapResponse,
+            internalRhymeOptions
+          );
+
+          if (internalRhymePlan.density > 0.2) {
+            internallyEnhancedResponse = internalRhymePlan.enhancedLyrics;
+            console.log(`🎯 Internal rhymes enhanced: ${internalRhymePlan.spans.length} spans, density: ${internalRhymePlan.density.toFixed(2)}`);
+          } else {
+            console.log("🎯 Internal rhyme enhancement minimal, keeping original");
+          }
+        } catch (error) {
+          console.warn("🎯 Internal rhyme enhancement failed, continuing with original:", error);
+        }
+      } else {
+        console.log("🎯 Internal rhyme enhancement disabled via feature flag");
+      }
+
+      // STAGE 4: RHYME ARCHITECT - Optimize syllable placement for maximum audience impact
+      console.log("🎯 Stage 4: Rhyme Architect optimizing syllable placement for maximum impact...");
       try {
         const targetImpact = difficulty === 'nightmare' ? 'maximum' : 
                            difficulty === 'hard' ? 'devastating' : 'controlled';
         const audienceType = 'battle-crowd'; // Battle rap setting
         
         const architectOptimization = await this.rhymeArchitect.optimizeRhymePlacement(
-          rapResponse,
+          internallyEnhancedResponse, // Use internally enhanced version
           targetImpact,
           audienceType
         );
