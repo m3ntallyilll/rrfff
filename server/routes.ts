@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { ObjectStorageService } from "./objectStorage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { SUBSCRIPTION_TIERS, insertTournamentSchema } from "@shared/schema";
+import { SUBSCRIPTION_TIERS, insertTournamentSchema, processedWebhookEvents, insertWebhookEventSchema } from "@shared/schema";
 import { groqService } from "./services/groq";
 import { typecastService } from "./services/typecast";
 import { barkTTS } from "./services/bark";
@@ -26,9 +26,7 @@ const upload = multer({
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-08-27.basil",
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Sitemap.xml endpoint for SEO
@@ -499,6 +497,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Database-backed idempotency for webhook events
+
   // Stripe webhook for payment updates (subscriptions + one-time purchases)
   app.post('/api/stripe-webhook', express.raw({type: 'application/json'}), async (req, res) => {
     let event;
@@ -510,75 +510,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
         process.env.STRIPE_WEBHOOK_SECRET || ''
       );
     } catch (err: any) {
-      console.log(`Webhook signature verification failed.`, err.message);
+      console.error(`🚨 Webhook signature verification failed:`, err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Handle the event
-    switch (event.type) {
-      case 'payment_intent.succeeded':
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        
-        try {
-          // Check if this is a battle pack purchase
-          if (paymentIntent.metadata?.battleCount) {
-            const userId = paymentIntent.metadata.userId;
-            const battleCount = parseInt(paymentIntent.metadata.battleCount);
-            
-            if (userId && battleCount) {
-              // Add battles to user account
-              await storage.addUserBattles(userId, battleCount);
-              console.log(`✅ Added ${battleCount} battles to user ${userId} (Payment: ${paymentIntent.id})`);
-            }
-          }
-        } catch (error) {
-          console.error('Error processing battle pack purchase:', error);
-        }
-        break;
-      case 'customer.subscription.updated':
-      case 'customer.subscription.deleted':
-        const subscription = event.data.object as Stripe.Subscription;
-        
-        try {
-          // Get all users to find the one with matching stripe customer ID
-          // Note: In production, you'd want a more efficient lookup method
-          const allUsers = await storage.getAllUsers();
-          const user = allUsers.find(u => u.stripeCustomerId === subscription.customer);
-          
-          if (user) {
-            const subscriptionStatus = subscription.status === 'active' ? 'active' : 'inactive';
-            
-            // Get tier from subscription metadata if available, otherwise infer from price
-            let subscriptionTier = 'free';
-            if (subscription.status === 'active') {
-              if (subscription.metadata?.tier) {
-                subscriptionTier = subscription.metadata.tier;
-              } else {
-                // Fallback: infer from price amount (999 = $9.99 Premium, 1999 = $19.99 Pro)
-                const unitAmount = subscription.items.data[0]?.price?.unit_amount;
-                subscriptionTier = unitAmount === 999 ? 'premium' : unitAmount === 1999 ? 'pro' : 'free';
-              }
-            }
-            
-            await storage.updateUserSubscription(user.id, {
-              subscriptionStatus,
-              subscriptionTier,
-              stripeSubscriptionId: subscription.id
-            });
-            
-            console.log(`Updated user ${user.id} subscription: ${subscriptionTier} (${subscriptionStatus})`);
-          } else {
-            console.log(`No user found for Stripe customer ${subscription.customer}`);
-          }
-        } catch (error) {
-          console.error('Error processing subscription webhook:', error);
-        }
-        break;
-      default:
-        console.log(`Unhandled event type ${event.type}`);
+    const eventId = event.id;
+    
+    // Database-backed idempotency check - prevent duplicate processing
+    try {
+      const existingEvent = await storage.getProcessedWebhookEvent(eventId);
+      if (existingEvent) {
+        console.log(`⚠️ Event ${eventId} already processed at ${existingEvent.processedAt}, skipping`);
+        return res.json({received: true});
+      }
+    } catch (error: any) {
+      console.error(`❌ Error checking webhook idempotency for event ${eventId}:`, error.message);
+      return res.status(500).json({
+        error: 'Database error during idempotency check',
+        eventId: eventId,
+        message: error.message
+      });
     }
 
-    res.json({received: true});
+    console.log(`📥 Processing webhook event: ${event.type} (${eventId})`);
+
+    try {
+      // Handle the event
+      switch (event.type) {
+        case 'payment_intent.succeeded':
+          const paymentIntent = event.data.object as Stripe.PaymentIntent;
+          
+          try {
+            // Check if this is a battle pack purchase
+            if (paymentIntent.metadata?.battleCount) {
+              const userId = paymentIntent.metadata.userId;
+              const battleCount = parseInt(paymentIntent.metadata.battleCount);
+              
+              if (userId && battleCount) {
+                // Add battles to user account
+                const result = await storage.addUserBattles(userId, battleCount);
+                if (result) {
+                  console.log(`✅ Added ${battleCount} battles to user ${userId} (Payment: ${paymentIntent.id})`);
+                } else {
+                  console.warn(`⚠️ Failed to add battles to user ${userId} - user not found`);
+                }
+              } else {
+                console.warn(`⚠️ Invalid battle pack data: userId=${userId}, battleCount=${battleCount}`);
+              }
+            }
+          } catch (error: any) {
+            console.error(`❌ Error processing battle pack purchase ${paymentIntent.id}:`, error.message);
+            throw error; // Re-throw to trigger retry
+          }
+          break;
+
+        case 'customer.subscription.updated':
+        case 'customer.subscription.deleted':
+          const subscription = event.data.object as Stripe.Subscription;
+          
+          try {
+            // Defensive customer ID extraction - handle both string and expanded objects
+            let customerId: string;
+            if (typeof subscription.customer === 'string') {
+              customerId = subscription.customer;
+            } else if (subscription.customer && typeof subscription.customer === 'object' && 'id' in subscription.customer) {
+              customerId = subscription.customer.id;
+            } else {
+              throw new Error(`Invalid customer ID format: ${typeof subscription.customer}`);
+            }
+            
+            console.log(`🔍 Looking up user for Stripe customer: ${customerId}`);
+            
+            // Efficiently find user by Stripe customer ID
+            const user = await storage.getUserByStripeCustomerId(customerId);
+            
+            if (user) {
+              const subscriptionStatus = subscription.status === 'active' ? 'active' : 'inactive';
+              
+              // Get tier from subscription metadata if available, otherwise infer from price
+              let subscriptionTier = 'free';
+              if (subscription.status === 'active') {
+                if (subscription.metadata?.tier) {
+                  subscriptionTier = subscription.metadata.tier;
+                } else {
+                  // Fallback: infer from price amount (999 = $9.99 Premium, 1999 = $19.99 Pro)
+                  const unitAmount = subscription.items.data[0]?.price?.unit_amount;
+                  subscriptionTier = unitAmount === 999 ? 'premium' : unitAmount === 1999 ? 'pro' : 'free';
+                }
+              }
+              
+              await storage.updateUserSubscription(user.id, {
+                subscriptionStatus,
+                subscriptionTier,
+                stripeSubscriptionId: subscription.id
+              });
+              
+              console.log(`✅ Updated user ${user.id} subscription: ${subscriptionTier} (${subscriptionStatus})`);
+            } else {
+              console.warn(`⚠️ No user found for Stripe customer ${customerId}`);
+            }
+          } catch (error: any) {
+            console.error(`❌ Error processing subscription webhook ${subscription.id}:`, error.message);
+            throw error; // Re-throw to trigger retry
+          }
+          break;
+
+        default:
+          console.log(`ℹ️ Unhandled event type: ${event.type}`);
+      }
+
+      // Mark event as processed in database
+      try {
+        await storage.recordProcessedWebhookEvent({
+          eventId: eventId,
+          eventType: event.type
+        });
+      } catch (error: any) {
+        console.error(`⚠️ Failed to record processed webhook event ${eventId}:`, error.message);
+        // Continue anyway - the event was processed successfully
+      }
+
+      console.log(`✅ Successfully processed webhook event: ${event.type} (${eventId})`);
+      res.json({received: true});
+
+    } catch (error: any) {
+      console.error(`❌ Critical webhook processing error for event ${eventId}:`, error.message);
+      
+      // Return 500 to trigger Stripe retry
+      res.status(500).json({
+        error: 'Webhook processing failed',
+        eventId: eventId,
+        message: error.message
+      });
+    }
   });
 
   // User stats and analytics

@@ -4,6 +4,7 @@ import {
   tournaments,
   tournamentBattles,
   referrals,
+  processedWebhookEvents,
   type User,
   type UpsertUser,
   type Battle,
@@ -18,6 +19,8 @@ import {
   type TournamentBracket,
   type TournamentMatch,
   type TournamentPlayer,
+  type ProcessedWebhookEvent,
+  type InsertWebhookEvent,
   SUBSCRIPTION_TIERS,
 } from "@shared/schema";
 import { db } from "./db";
@@ -87,6 +90,10 @@ export interface IStorage {
     hasValidGroq: boolean;
     preferredTtsService: string;
   }>;
+
+  // Webhook idempotency operations
+  getProcessedWebhookEvent(eventId: string): Promise<ProcessedWebhookEvent | undefined>;
+  recordProcessedWebhookEvent(event: InsertWebhookEvent): Promise<ProcessedWebhookEvent>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -624,6 +631,36 @@ export class DatabaseStorage implements IStorage {
       .from(referrals)
       .where(eq(referrals.referrerId, userId))
       .orderBy(desc(referrals.createdAt));
+  }
+
+  // Webhook idempotency methods
+  async getProcessedWebhookEvent(eventId: string): Promise<ProcessedWebhookEvent | undefined> {
+    try {
+      const [event] = await db
+        .select()
+        .from(processedWebhookEvents)
+        .where(eq(processedWebhookEvents.eventId, eventId))
+        .limit(1);
+      
+      return event;
+    } catch (error) {
+      console.error('Error finding processed webhook event:', error);
+      throw error;
+    }
+  }
+
+  async recordProcessedWebhookEvent(event: InsertWebhookEvent): Promise<ProcessedWebhookEvent> {
+    try {
+      const [newEvent] = await db
+        .insert(processedWebhookEvents)
+        .values(event)
+        .returning();
+      
+      return newEvent;
+    } catch (error) {
+      console.error('Error recording processed webhook event:', error);
+      throw error;
+    }
   }
 }
 

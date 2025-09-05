@@ -133,7 +133,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  stripeCustomerId: varchar("stripe_customer_id"),
+  stripeCustomerId: varchar("stripe_customer_id").unique(),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
   subscriptionStatus: varchar("subscription_status").default("free"), // free, active, cancelled, past_due
   subscriptionTier: varchar("subscription_tier").default("free"), // free, premium, pro
@@ -150,7 +150,10 @@ export const users = pgTable("users", {
   preferredTtsService: varchar("preferred_tts_service").default("system"), // "openai", "groq", "system"
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  // Index for Stripe webhook performance
+  index("idx_users_stripe_customer_id").on(table.stripeCustomerId),
+]);
 
 
 
@@ -309,3 +312,22 @@ export const SUBSCRIPTION_TIERS = {
     features: ["Unlimited battles", "All AI opponents", "Custom voices", "Advanced analytics", "Priority support", "Tournament mode"]
   }
 } as const;
+
+// Webhook idempotency tracking
+export const processedWebhookEvents = pgTable("processed_webhook_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventId: varchar("event_id").unique().notNull(), // Stripe event ID
+  eventType: varchar("event_type").notNull(), // e.g., payment_intent.succeeded
+  processedAt: timestamp("processed_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_webhook_events_event_id").on(table.eventId),
+  index("idx_webhook_events_processed_at").on(table.processedAt),
+]);
+
+export const insertWebhookEventSchema = createInsertSchema(processedWebhookEvents).omit({
+  id: true,
+  processedAt: true,
+});
+
+export type InsertWebhookEvent = z.infer<typeof insertWebhookEventSchema>;
+export type ProcessedWebhookEvent = typeof processedWebhookEvents.$inferSelect;
