@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { SponsoredBanner } from "@/components/sponsored-banner";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { InstallPrompt } from "@/components/install-prompt";
 import Landing from "@/pages/Landing";
 import Home from "@/pages/Home";
 import Subscribe from "@/pages/Subscribe";
@@ -71,6 +72,7 @@ function App() {
           <div className="min-h-screen bg-gradient-to-br from-primary-dark via-secondary-dark to-primary-dark">
             <Toaster />
             <SponsoredBanner interval={25000} enabled={true} />
+            <InstallPrompt />
             <ErrorBoundary>
               <Router />
             </ErrorBoundary>
