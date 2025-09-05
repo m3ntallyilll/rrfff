@@ -139,8 +139,8 @@ export function SimpleAudioPlayer({
               }
             }
             
-            // Set mobile-specific properties
-            audio.muted = false;
+            // Set mobile-specific properties - START MUTED for mobile autoplay compliance
+            audio.muted = true; // Mobile browsers require starting muted for autoplay
             audio.autoplay = true;
             audio.load(); // Force reload on mobile
             
@@ -154,6 +154,14 @@ export function SimpleAudioPlayer({
           
           return audio.play().then(() => {
             console.log('✅ AUTOPLAY SUCCESS - AI VOICE ACTIVATED!');
+            
+            // Unmute audio after successful autoplay on mobile
+            if (isMobile && audio.muted) {
+              console.log('📱 UNMUTING MOBILE AUDIO after successful autoplay...');
+              audio.muted = false;
+              audio.volume = volume; // Restore original volume
+              console.log('📱 Mobile audio unmuted, volume restored to:', volume);
+            }
           }).catch(error => {
             console.error('🔊 Initial autoplay failed, deploying MEGA AGGRESSIVE retries:', error);
             
@@ -161,41 +169,83 @@ export function SimpleAudioPlayer({
             // Strategy 1: Immediate audio loading events
             audio.addEventListener('loadeddata', () => {
               console.log('🔄 Audio loaded, FORCING IMMEDIATE PLAY...');
-              audio.play().catch(e => console.log('🔄 Loadeddata retry failed'));
+              audio.play().then(() => {
+                if (isMobile && audio.muted) {
+                  console.log('📱 UNMUTING after loadeddata retry success...');
+                  audio.muted = false;
+                  audio.volume = volume;
+                }
+              }).catch(e => console.log('🔄 Loadeddata retry failed'));
             }, { once: true });
             
             // Strategy 2: Can play events
             audio.addEventListener('canplay', () => {
               console.log('🔄 Audio can play, FORCING IMMEDIATE PLAY...');
-              audio.play().catch(e => console.log('🔄 Canplay retry failed'));
+              audio.play().then(() => {
+                if (isMobile && audio.muted) {
+                  console.log('📱 UNMUTING after canplay retry success...');
+                  audio.muted = false;
+                  audio.volume = volume;
+                }
+              }).catch(e => console.log('🔄 Canplay retry failed'));
             }, { once: true });
             
             // Strategy 3: Can play through events
             audio.addEventListener('canplaythrough', () => {
               console.log('🔄 Audio can play through, FORCING IMMEDIATE PLAY...');
-              audio.play().catch(e => console.log('🔄 Canplaythrough retry failed'));
+              audio.play().then(() => {
+                if (isMobile && audio.muted) {
+                  console.log('📱 UNMUTING after canplaythrough retry success...');
+                  audio.muted = false;
+                  audio.volume = volume;
+                }
+              }).catch(e => console.log('🔄 Canplaythrough retry failed'));
             }, { once: true });
             
             // Strategy 4: Multiple delayed retries with increasing persistence
             setTimeout(() => {
               console.log('🔄 Delayed retry 1 - FORCING PLAY...');
-              audio.play().catch(e => console.log('🔄 Delayed retry 1 failed'));
+              audio.play().then(() => {
+                if (isMobile && audio.muted) {
+                  console.log('📱 UNMUTING after delayed retry 1 success...');
+                  audio.muted = false;
+                  audio.volume = volume;
+                }
+              }).catch(e => console.log('🔄 Delayed retry 1 failed'));
             }, 100);
             
             setTimeout(() => {
               console.log('🔄 Delayed retry 2 - FORCING PLAY...');
-              audio.play().catch(e => console.log('🔄 Delayed retry 2 failed'));
+              audio.play().then(() => {
+                if (isMobile && audio.muted) {
+                  console.log('📱 UNMUTING after delayed retry 2 success...');
+                  audio.muted = false;
+                  audio.volume = volume;
+                }
+              }).catch(e => console.log('🔄 Delayed retry 2 failed'));
             }, 300);
             
             setTimeout(() => {
               console.log('🔄 Delayed retry 3 - FORCING PLAY...');
-              audio.play().catch(e => console.log('🔄 Delayed retry 3 failed'));
+              audio.play().then(() => {
+                if (isMobile && audio.muted) {
+                  console.log('📱 UNMUTING after delayed retry 3 success...');
+                  audio.muted = false;
+                  audio.volume = volume;
+                }
+              }).catch(e => console.log('🔄 Delayed retry 3 failed'));
             }, 600);
             
             // Strategy 5: Final nuclear option
             setTimeout(() => {
               console.log('🔥 NUCLEAR OPTION - AI MUST SPEAK NOW!');
-              audio.play().catch(e => {
+              audio.play().then(() => {
+                if (isMobile && audio.muted) {
+                  console.log('📱 UNMUTING after nuclear option success...');
+                  audio.muted = false;
+                  audio.volume = volume;
+                }
+              }).catch(e => {
                 console.error('💥 ALL MEGA AGGRESSIVE ATTEMPTS FAILED - Manual interaction required');
                 // Last resort: try to trigger user interaction
                 console.log('🚨 LAST RESORT: Attempting user interaction trigger...');
