@@ -249,6 +249,7 @@ export class InternalRhymeAgent {
 
   /**
    * Add multisyllabic internal rhymes - most sophisticated technique
+   * Now uses context-aware rhyming that preserves meaning and flow
    */
   private addMultisyllabicRhymes(
     words: string[], 
@@ -258,55 +259,214 @@ export class InternalRhymeAgent {
     
     if (workingRange < 6) return { success: false, words, spans: [], technique: '' };
 
-    // Look for opportunities to place 2-3 syllable rhyming phrases
-    const midPoint = Math.floor(workingRange / 2);
-    const position1 = midPoint - 2;
-    const position2 = midPoint + 1;
-
-    if (position1 < 1 || position2 >= workingRange - 1) {
-      return { success: false, words, spans: [], technique: '' };
-    }
-
-    // Select rhyming pair from word bank
-    const techniques = Object.keys(this.rhymeWordBanks.multi);
-    const selectedTechnique = techniques[Math.floor(Math.random() * techniques.length)];
-    const candidates = this.rhymeWordBanks.multi[selectedTechnique as keyof typeof this.rhymeWordBanks.multi];
+    // Find existing words that can be enhanced with internal rhymes
+    // Instead of replacing words, look for opportunities to create rhymes with existing content
+    const existingWords = words.slice(0, workingRange);
     
-    if (candidates.length < 2) {
-      return { success: false, words, spans: [], technique: '' };
-    }
-
-    const [word1, word2] = candidates.slice(0, 2);
-    const newWords = [...words];
-    
-    // Insert multisyllabic rhymes at calculated positions
-    newWords[position1] = word1;
-    newWords[position2] = word2;
-
-    const spans: InternalRhymeSpan[] = [
-      {
-        lineIndex,
-        start: position1,
-        end: position1 + 1,
-        rhymeKey: selectedTechnique,
-        strength: 3,
-        technique: 'multi'
-      },
-      {
-        lineIndex,
-        start: position2,
-        end: position2 + 1,
-        rhymeKey: selectedTechnique,
-        strength: 3,
-        technique: 'multi'
+    // Look for words that already have strong phonetic endings we can build on
+    for (let i = 1; i < existingWords.length - 2; i++) {
+      const word = existingWords[i];
+      if (word.length < 4) continue; // Skip short words
+      
+      const phoneticEnding = this.extractPhoneticEnding(word);
+      if (phoneticEnding.length < 2) continue;
+      
+      // Find a suitable position later in the line for a rhyme
+      for (let j = i + 2; j < Math.min(workingRange - 1, i + 5); j++) {
+        const targetWord = existingWords[j];
+        
+        // Try to create a meaningful rhyme that fits the context
+        const contextualRhyme = this.findContextualRhyme(word, targetWord, phoneticEnding);
+        if (contextualRhyme && contextualRhyme !== targetWord) {
+          const newWords = [...words];
+          newWords[j] = contextualRhyme;
+          
+          const spans: InternalRhymeSpan[] = [
+            {
+              lineIndex,
+              start: i,
+              end: i + 1,
+              rhymeKey: phoneticEnding,
+              strength: 2,
+              technique: 'multi'
+            },
+            {
+              lineIndex,
+              start: j,
+              end: j + 1,
+              rhymeKey: phoneticEnding,
+              strength: 2,
+              technique: 'multi'
+            }
+          ];
+          
+          return { success: true, words: newWords, spans, technique: phoneticEnding };
+        }
       }
-    ];
+    }
 
-    return { success: true, words: newWords, spans, technique: selectedTechnique };
+    return { success: false, words, spans: [], technique: '' };
+  }
+
+  /**
+   * Find a contextually appropriate rhyme that maintains meaning
+   */
+  private findContextualRhyme(originalWord: string, targetWord: string, phoneticEnding: string): string | null {
+    // Rap-focused contextual word mappings
+    const rapContextRhymes: Record<string, string[]> = {
+      'ack': ['attack', 'track', 'back', 'stack', 'crack', 'pack'],
+      'ow': ['flow', 'show', 'know', 'grow', 'throw', 'blow'],
+      'ight': ['fight', 'right', 'might', 'sight', 'tight', 'light'],
+      'ound': ['sound', 'ground', 'round', 'found', 'bound', 'pound'],
+      'ire': ['fire', 'wire', 'desire', 'inspire', 'require', 'acquire'],
+      'eat': ['beat', 'heat', 'feat', 'defeat', 'complete', 'elite'],
+      'ame': ['game', 'fame', 'name', 'shame', 'claim', 'flame'],
+      'eal': ['real', 'deal', 'steal', 'feel', 'reveal', 'appeal']
+    };
+    
+    // Try to find a rap-appropriate rhyme for the phonetic ending
+    const candidates = rapContextRhymes[phoneticEnding] || [];
+    
+    // Prefer words that maintain the aggressive/confident tone of rap
+    const contextPriority = ['attack', 'fire', 'fight', 'flow', 'beat', 'real', 'game'];
+    
+    for (const priority of contextPriority) {
+      if (candidates.includes(priority) && priority !== originalWord) {
+        return priority;
+      }
+    }
+    
+    // If no priority match, use any available candidate
+    const available = candidates.filter(word => word !== originalWord && word !== targetWord);
+    return available.length > 0 ? available[0] : null;
+  }
+
+  /**
+   * Extract phonetic ending for rhyme matching
+   * Enhanced with better phonetic analysis beyond substring matching
+   */
+  private extractPhoneticEnding(word: string): string {
+    const cleanWord = word.toLowerCase();
+    
+    // Enhanced phonetic patterns with IPA-inspired mappings
+    const phoneticPatterns = [
+      // Perfect rhyme endings (nucleus + coda)
+      { pattern: /tion$/, phonetic: 'ʃən' },
+      { pattern: /sion$/, phonetic: 'ʒən' },
+      { pattern: /ight$/, phonetic: 'aɪt' },
+      { pattern: /ought$/, phonetic: 'ɔːt' },
+      { pattern: /ound$/, phonetic: 'aʊnd' },
+      { pattern: /ack$/, phonetic: 'æk' },
+      { pattern: /eat$/, phonetic: 'iːt' },
+      { pattern: /ire$/, phonetic: 'aɪər' },
+      { pattern: /ow$/, phonetic: 'oʊ' },
+      { pattern: /ame$/, phonetic: 'eɪm' },
+      { pattern: /eal$/, phonetic: 'iːl' },
+      { pattern: /ing$/, phonetic: 'ɪŋ' },
+      
+      // Consonant cluster endings
+      { pattern: /st$/, phonetic: 'st' },
+      { pattern: /nd$/, phonetic: 'nd' },
+      { pattern: /ck$/, phonetic: 'k' },
+      { pattern: /ng$/, phonetic: 'ŋ' },
+      { pattern: /mp$/, phonetic: 'mp' },
+      { pattern: /nt$/, phonetic: 'nt' },
+      
+      // Vowel-heavy endings (for assonance)
+      { pattern: /ay$/, phonetic: 'eɪ' },
+      { pattern: /ey$/, phonetic: 'eɪ' },
+      { pattern: /ie$/, phonetic: 'iː' },
+      { pattern: /ee$/, phonetic: 'iː' },
+      { pattern: /oo$/, phonetic: 'uː' },
+    ];
+    
+    // Try enhanced phonetic patterns first
+    for (const { pattern, phonetic } of phoneticPatterns) {
+      if (pattern.test(cleanWord)) {
+        return phonetic;
+      }
+    }
+    
+    // Advanced phonetic analysis for complex words
+    const advancedAnalysis = this.getAdvancedPhoneticEnding(cleanWord);
+    if (advancedAnalysis) {
+      return advancedAnalysis;
+    }
+    
+    // Fallback to basic character-based analysis with vowel prioritization
+    return this.getBasicPhoneticEnding(cleanWord);
+  }
+
+  /**
+   * Get advanced phonetic ending using syllable structure analysis
+   */
+  private getAdvancedPhoneticEnding(word: string): string | null {
+    // Split into phonetic components
+    const vowelClusters = word.match(/[aeiouy]+/g) || [];
+    const consonantClusters = word.split(/[aeiouy]+/).filter(c => c.length > 0);
+    
+    if (vowelClusters.length === 0) return null;
+    
+    const lastVowelCluster = vowelClusters[vowelClusters.length - 1];
+    const lastConsonantCluster = consonantClusters[consonantClusters.length - 1] || '';
+    
+    // Create phonetic key from last syllable components
+    const phoneticKey = this.mapToPhonetic(lastVowelCluster) + this.mapToPhonetic(lastConsonantCluster);
+    
+    return phoneticKey.length > 1 ? phoneticKey : null;
+  }
+
+  /**
+   * Map character sequences to phonetic representations
+   */
+  private mapToPhonetic(sequence: string): string {
+    const phoneticMap: Record<string, string> = {
+      // Vowel mappings
+      'a': 'æ', 'e': 'ɛ', 'i': 'ɪ', 'o': 'ɔ', 'u': 'ʌ', 'y': 'ɪ',
+      'ai': 'eɪ', 'ay': 'eɪ', 'ea': 'iː', 'ee': 'iː', 'ei': 'eɪ',
+      'ie': 'iː', 'oa': 'oʊ', 'oo': 'uː', 'ou': 'aʊ', 'ow': 'aʊ',
+      'ey': 'eɪ', 'ue': 'uː', 'ew': 'uː',
+      
+      // Consonant mappings
+      'ch': 'tʃ', 'sh': 'ʃ', 'th': 'θ', 'ng': 'ŋ', 'ph': 'f',
+      'ck': 'k', 'gh': 'f', 'kn': 'n', 'wr': 'r',
+      
+      // Single consonants
+      'b': 'b', 'c': 'k', 'd': 'd', 'f': 'f', 'g': 'g',
+      'h': 'h', 'j': 'dʒ', 'k': 'k', 'l': 'l', 'm': 'm',
+      'n': 'n', 'p': 'p', 'q': 'k', 'r': 'r', 's': 's',
+      't': 't', 'v': 'v', 'w': 'w', 'x': 'ks', 'z': 'z'
+    };
+    
+    // Try longer sequences first
+    for (let len = Math.min(sequence.length, 3); len >= 1; len--) {
+      const subseq = sequence.slice(-len);
+      if (phoneticMap[subseq]) {
+        return phoneticMap[subseq];
+      }
+    }
+    
+    return sequence; // Fallback to original
+  }
+
+  /**
+   * Get basic phonetic ending for simple words
+   */
+  private getBasicPhoneticEnding(word: string): string {
+    // Extract last vowel + consonants for better rhyme matching
+    const match = word.match(/([aeiouy]+[^aeiouy]*)$/);
+    if (match) {
+      return this.mapToPhonetic(match[1]);
+    }
+    
+    // Fallback to last few characters with phonetic preference
+    const ending = word.length >= 3 ? word.slice(-3) : word.slice(-2);
+    return this.mapToPhonetic(ending);
   }
 
   /**
    * Add assonance chain - repeated vowel sounds
+   * Enhanced with semantic similarity checks to maintain meaning
    */
   private addAssonanceChain(
     words: string[], 
@@ -329,15 +489,21 @@ export class InternalRhymeAgent {
     for (let i = 0; i < Math.min(positions.length, candidates.length); i++) {
       const pos = positions[i];
       if (pos < workingRange) {
-        newWords[pos] = candidates[i];
-        spans.push({
-          lineIndex,
-          start: pos,
-          end: pos + 1,
-          rhymeKey: selectedVowel,
-          strength: 2,
-          technique: 'assonance'
-        });
+        const originalWord = words[pos];
+        const candidateWord = candidates[i];
+        
+        // Semantic similarity check before replacement
+        if (this.isSemanticallySimilar(originalWord, candidateWord, 'assonance')) {
+          newWords[pos] = candidateWord;
+          spans.push({
+            lineIndex,
+            start: pos,
+            end: pos + 1,
+            rhymeKey: selectedVowel,
+            strength: 2,
+            technique: 'assonance'
+          });
+        }
       }
     }
 
@@ -351,6 +517,7 @@ export class InternalRhymeAgent {
 
   /**
    * Add consonance clusters - repeated consonant endings
+   * Enhanced with semantic similarity checks to maintain meaning
    */
   private addConsonanceClusters(
     words: string[], 
@@ -373,15 +540,21 @@ export class InternalRhymeAgent {
     for (let i = 0; i < Math.min(positions.length, candidates.length); i++) {
       const pos = positions[i];
       if (pos < workingRange) {
-        newWords[pos] = candidates[i];
-        spans.push({
-          lineIndex,
-          start: pos,
-          end: pos + 1,
-          rhymeKey: selectedPattern,
-          strength: 2,
-          technique: 'consonance'
-        });
+        const originalWord = words[pos];
+        const candidateWord = candidates[i];
+        
+        // Semantic similarity check before replacement
+        if (this.isSemanticallySimilar(originalWord, candidateWord, 'consonance')) {
+          newWords[pos] = candidateWord;
+          spans.push({
+            lineIndex,
+            start: pos,
+            end: pos + 1,
+            rhymeKey: selectedPattern,
+            strength: 2,
+            technique: 'consonance'
+          });
+        }
       }
     }
 
@@ -629,5 +802,66 @@ export class InternalRhymeAgent {
     }
     
     return 'overlap';
+  }
+
+  /**
+   * Check semantic similarity between original and candidate words
+   * Returns true if replacement maintains contextual relevance
+   */
+  private isSemanticallySimilar(originalWord: string, candidateWord: string, technique: string): boolean {
+    const original = originalWord.toLowerCase();
+    const candidate = candidateWord.toLowerCase();
+    
+    // Never replace with the same word
+    if (original === candidate) return false;
+    
+    // Rap context semantic groups - words that maintain similar energy/meaning
+    const semanticGroups = {
+      // Action/Movement verbs
+      action: ['attack', 'fight', 'strike', 'blast', 'crush', 'destroy', 'break', 'force', 'push', 'move', 'flow', 'go'],
+      
+      // Power/Strength words
+      power: ['strong', 'mighty', 'fierce', 'tough', 'hard', 'solid', 'steel', 'rock', 'fire', 'thunder', 'lightning'],
+      
+      // Success/Achievement
+      success: ['win', 'beat', 'defeat', 'conquer', 'triumph', 'achieve', 'complete', 'master', 'elite', 'champion'],
+      
+      // Sound/Music
+      sound: ['beat', 'track', 'sound', 'music', 'rhythm', 'flow', 'voice', 'song', 'noise', 'blast'],
+      
+      // Emotion/Attitude
+      emotion: ['mad', 'wild', 'fierce', 'calm', 'cool', 'hot', 'cold', 'smooth', 'rough', 'sharp'],
+      
+      // Time/Speed
+      time: ['fast', 'quick', 'slow', 'late', 'soon', 'now', 'then', 'when', 'time', 'moment'],
+      
+      // Location/Direction
+      location: ['here', 'there', 'up', 'down', 'back', 'front', 'side', 'around', 'through', 'ground']
+    };
+    
+    // Check if both words belong to the same semantic group
+    for (const [groupName, words] of Object.entries(semanticGroups)) {
+      const originalInGroup = words.includes(original);
+      const candidateInGroup = words.includes(candidate);
+      
+      if (originalInGroup && candidateInGroup) {
+        return true; // Both in same semantic group
+      }
+    }
+    
+    // Fallback: Allow replacement if words share similar phonetic structure
+    // This maintains rhythm while being more conservative with meaning
+    if (technique === 'assonance' || technique === 'consonance') {
+      const originalAnalysis = this.getPhoneticAnalysis(original);
+      const candidateAnalysis = this.getPhoneticAnalysis(candidate);
+      
+      // Allow if syllable count is similar (within 1) and both are rap-appropriate
+      const syllableDiff = Math.abs(originalAnalysis.syllableCount - candidateAnalysis.syllableCount);
+      const rapWords = ['attack', 'track', 'back', 'stack', 'crack', 'pack', 'flow', 'show', 'know', 'grow', 'beat', 'heat', 'feat', 'real', 'deal', 'steel', 'feel'];
+      
+      return syllableDiff <= 1 && rapWords.includes(candidate);
+    }
+    
+    return false; // Conservative default - don't replace if unsure
   }
 }

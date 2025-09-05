@@ -1,4 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Play } from 'lucide-react';
 
 // Global mobile audio unlock state
 let audioUnlocked = false;
@@ -46,6 +48,7 @@ interface SimpleAudioPlayerProps {
   volume?: number;
   onPlay?: () => void;
   onEnded?: () => void;
+  showFallbackButton?: boolean;
 }
 
 export function SimpleAudioPlayer({ 
@@ -53,9 +56,12 @@ export function SimpleAudioPlayer({
   autoPlay = false, 
   volume = 1.0,
   onPlay,
-  onEnded 
+  onEnded,
+  showFallbackButton = true 
 }: SimpleAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [showPlayButton, setShowPlayButton] = useState(false);
+  const [autoplayAttempted, setAutoplayAttempted] = useState(false);
 
   useEffect(() => {
     if (audioUrl) {
@@ -113,154 +119,106 @@ export function SimpleAudioPlayer({
         console.error('🔊 Audio error:', error);
       });
 
-      // FORCE AUTO-PLAY - All AI responses must play automatically
+      // SMART AUTO-PLAY - Reliable AI voice playback across all platforms
       if (autoPlay) {
-        console.log('🔥 ULTRA-AGGRESSIVE AUTO-PLAY - AI MUST SPEAK NOW!');
+        console.log('🔥 SMART AUTO-PLAY - AI Voice Activation');
         
-        const forcePlayback = () => {
-          console.log('🎯 MAXIMUM FORCE PLAYBACK ATTEMPT...');
+        const attemptPlayback = async () => {
+          console.log('🎯 Attempting smart playback...');
           
-          // Mobile-specific autoplay preparation
-          if (isMobile) {
-            console.log('📱 MOBILE AUTOPLAY: Priming audio context...');
-            console.log('📱 Audio unlocked status:', audioUnlocked);
+          try {
+            // Strategy 1: Direct play attempt first (works for desktop)
+            await audio.play();
+            console.log('✅ Direct autoplay successful!');
+            onPlay?.();
+            return true;
+          } catch (directError) {
+            console.log('🔄 Direct autoplay failed, trying mobile-optimized approach...');
             
-            // If audio isn't unlocked yet, try to prime it
-            if (!audioUnlocked) {
-              unlockMobileAudio();
-            }
-            
-            // Try to unlock audio context on mobile
-            if (window.AudioContext || (window as any).webkitAudioContext) {
-              const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-              if (audioContext.state === 'suspended') {
-                console.log('📱 Resuming suspended audio context for mobile...');
-                audioContext.resume().catch(e => console.log('📱 Audio context resume failed'));
+            // Strategy 2: Mobile-optimized approach
+            if (isMobile) {
+              try {
+                // Mobile requires muted start for autoplay
+                audio.muted = true;
+                audio.autoplay = true;
+                
+                // Resume audio context if suspended
+                if (window.AudioContext || (window as any).webkitAudioContext) {
+                  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+                  if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                  }
+                }
+                
+                // Force load and play
+                audio.load();
+                await audio.play();
+                
+                // Unmute after successful start (smooth transition)
+                setTimeout(() => {
+                  audio.muted = false;
+                  audio.volume = volume;
+                  console.log('📱 Mobile audio unmuted successfully');
+                }, 100);
+                
+                console.log('✅ Mobile autoplay successful!');
+                onPlay?.();
+                return true;
+              } catch (mobileError) {
+                console.log('📱 Mobile autoplay failed, falling back to user interaction');
               }
             }
             
-            // Set mobile-specific properties - START MUTED for mobile autoplay compliance
-            audio.muted = true; // Mobile browsers require starting muted for autoplay
-            audio.autoplay = true;
-            audio.load(); // Force reload on mobile
-            
-            if (isIOS) {
-              console.log('🍎 iOS SPECIFIC: Setting webkitPreservesPitch to false');
-              (audio as any).webkitPreservesPitch = false;
-              (audio as any).mozPreservesPitch = false;
-              (audio as any).preservesPitch = false;
+            // Strategy 3: Show fallback button for user interaction
+            console.log('🔄 Autoplay blocked, showing fallback play button...');
+            if (showFallbackButton) {
+              setShowPlayButton(true);
+              setAutoplayAttempted(true);
             }
-          }
-          
-          return audio.play().then(() => {
-            console.log('✅ AUTOPLAY SUCCESS - AI VOICE ACTIVATED!');
             
-            // Unmute audio after successful autoplay on mobile
-            if (isMobile && audio.muted) {
-              console.log('📱 UNMUTING MOBILE AUDIO after successful autoplay...');
-              audio.muted = false;
-              audio.volume = volume; // Restore original volume
-              console.log('📱 Mobile audio unmuted, volume restored to:', volume);
-            }
-          }).catch(error => {
-            console.error('🔊 Initial autoplay failed, deploying MEGA AGGRESSIVE retries:', error);
-            
-            // ULTRA AGGRESSIVE RETRY - All strategies at once
-            // Strategy 1: Immediate audio loading events
-            audio.addEventListener('loadeddata', () => {
-              console.log('🔄 Audio loaded, FORCING IMMEDIATE PLAY...');
+            // Wait for audio to be ready, then try again
+            const tryAfterReady = () => {
+              console.log('🔄 Audio ready, attempting playback...');
               audio.play().then(() => {
-                if (isMobile && audio.muted) {
-                  console.log('📱 UNMUTING after loadeddata retry success...');
-                  audio.muted = false;
-                  audio.volume = volume;
-                }
-              }).catch(e => console.log('🔄 Loadeddata retry failed'));
-            }, { once: true });
-            
-            // Strategy 2: Can play events
-            audio.addEventListener('canplay', () => {
-              console.log('🔄 Audio can play, FORCING IMMEDIATE PLAY...');
-              audio.play().then(() => {
-                if (isMobile && audio.muted) {
-                  console.log('📱 UNMUTING after canplay retry success...');
-                  audio.muted = false;
-                  audio.volume = volume;
-                }
-              }).catch(e => console.log('🔄 Canplay retry failed'));
-            }, { once: true });
-            
-            // Strategy 3: Can play through events
-            audio.addEventListener('canplaythrough', () => {
-              console.log('🔄 Audio can play through, FORCING IMMEDIATE PLAY...');
-              audio.play().then(() => {
-                if (isMobile && audio.muted) {
-                  console.log('📱 UNMUTING after canplaythrough retry success...');
-                  audio.muted = false;
-                  audio.volume = volume;
-                }
-              }).catch(e => console.log('🔄 Canplaythrough retry failed'));
-            }, { once: true });
-            
-            // Strategy 4: Multiple delayed retries with increasing persistence
-            setTimeout(() => {
-              console.log('🔄 Delayed retry 1 - FORCING PLAY...');
-              audio.play().then(() => {
-                if (isMobile && audio.muted) {
-                  console.log('📱 UNMUTING after delayed retry 1 success...');
-                  audio.muted = false;
-                  audio.volume = volume;
-                }
-              }).catch(e => console.log('🔄 Delayed retry 1 failed'));
-            }, 100);
-            
-            setTimeout(() => {
-              console.log('🔄 Delayed retry 2 - FORCING PLAY...');
-              audio.play().then(() => {
-                if (isMobile && audio.muted) {
-                  console.log('📱 UNMUTING after delayed retry 2 success...');
-                  audio.muted = false;
-                  audio.volume = volume;
-                }
-              }).catch(e => console.log('🔄 Delayed retry 2 failed'));
-            }, 300);
-            
-            setTimeout(() => {
-              console.log('🔄 Delayed retry 3 - FORCING PLAY...');
-              audio.play().then(() => {
-                if (isMobile && audio.muted) {
-                  console.log('📱 UNMUTING after delayed retry 3 success...');
-                  audio.muted = false;
-                  audio.volume = volume;
-                }
-              }).catch(e => console.log('🔄 Delayed retry 3 failed'));
-            }, 600);
-            
-            // Strategy 5: Final nuclear option
-            setTimeout(() => {
-              console.log('🔥 NUCLEAR OPTION - AI MUST SPEAK NOW!');
-              audio.play().then(() => {
-                if (isMobile && audio.muted) {
-                  console.log('📱 UNMUTING after nuclear option success...');
-                  audio.muted = false;
-                  audio.volume = volume;
-                }
+                console.log('✅ Event-triggered playback successful!');
+                setShowPlayButton(false);
+                onPlay?.();
               }).catch(e => {
-                console.error('💥 ALL MEGA AGGRESSIVE ATTEMPTS FAILED - Manual interaction required');
-                // Last resort: try to trigger user interaction
-                console.log('🚨 LAST RESORT: Attempting user interaction trigger...');
+                console.log('🔄 Event-triggered playback failed');
+                if (showFallbackButton) {
+                  setShowPlayButton(true);
+                }
               });
-            }, 1000);
-          });
+            };
+            
+            // Try when audio data loads
+            audio.addEventListener('loadeddata', tryAfterReady, { once: true });
+            audio.addEventListener('canplay', tryAfterReady, { once: true });
+            
+            return false;
+          }
         };
         
-        // MAXIMUM IMMEDIATE ATTEMPTS - Carpet bombing approach
-        forcePlayback();
-        setTimeout(forcePlayback, 25);
-        setTimeout(forcePlayback, 50);
-        setTimeout(forcePlayback, 100);
-        setTimeout(forcePlayback, 200);
-        setTimeout(forcePlayback, 400);
+        // Immediate attempt
+        attemptPlayback();
+        
+        // Backup attempts with delays
+        setTimeout(() => attemptPlayback(), 100);
+        setTimeout(() => attemptPlayback(), 300);
+        
+        // Final fallback for stubborn browsers
+        setTimeout(() => {
+          if (audio.paused) {
+            console.log('🔄 Final fallback attempt...');
+            audio.play().catch(error => {
+              console.log('🚨 All autoplay attempts failed - user interaction required');
+              if (showFallbackButton) {
+                setShowPlayButton(true);
+                setAutoplayAttempted(true);
+              }
+            });
+          }
+        }, 600);
       }
 
       return () => {
@@ -272,6 +230,41 @@ export function SimpleAudioPlayer({
     }
   }, [audioUrl, autoPlay, volume]);
 
-  // This component is invisible - it only handles audio playback
+  // Handle manual play button click
+  const handleManualPlay = async () => {
+    if (audioRef.current) {
+      try {
+        console.log('🎯 Manual play button clicked');
+        await audioRef.current.play();
+        setShowPlayButton(false);
+        onPlay?.();
+      } catch (error) {
+        console.error('🔊 Manual play failed:', error);
+      }
+    }
+  };
+
+  // Show play button fallback when autoplay fails
+  if (showPlayButton && autoplayAttempted) {
+    return (
+      <div className="flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm rounded-lg border border-border/50 shadow-lg">
+        <div className="text-center space-y-3">
+          <p className="text-sm text-muted-foreground">Audio playback blocked by browser</p>
+          <Button 
+            onClick={handleManualPlay}
+            variant="default"
+            size="sm"
+            className="flex items-center gap-2"
+            data-testid="button-manual-play"
+          >
+            <Play className="w-4 h-4" />
+            Play Audio
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Hidden by default - only handles audio playback
   return null;
 }

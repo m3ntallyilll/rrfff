@@ -17,7 +17,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     id: 'razor',
     name: 'MC Razor',
     displayName: 'Razor',
-    voiceId: 'tc_a4b8f31d52e8763a1234567f', // Working voice ID from API
+    voiceId: 'Aria-PlayAI', // Updated to Groq PlayAI format - fierce female voice
     gender: 'female',
     personality: 'Fierce, aggressive, no-nonsense attitude with razor-sharp wit',
     style: 'hardcore',
@@ -30,7 +30,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     id: 'venom',
     name: 'MC Venom',
     displayName: 'Venom',
-    voiceId: 'Sergio-PlayAI', // Working Groq voice ID - aggressive male
+    voiceId: 'Thunder-PlayAI', // Updated to verified working Groq voice ID - intense male
     gender: 'male',
     personality: 'Intense, intimidating, uses psychological warfare and dark imagery',
     style: 'aggressive',
@@ -43,7 +43,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     id: 'silk',
     name: 'MC Silk',
     displayName: 'Silk',
-    voiceId: 'Jordan-PlayAI', // Working Groq voice ID - smooth male
+    voiceId: 'Basil-PlayAI', // Updated to verified working Groq voice ID - smooth male
     gender: 'male',
     personality: 'Smooth, charismatic black male MC who uses clever wordplay and sophisticated flow',
     style: 'smooth',
