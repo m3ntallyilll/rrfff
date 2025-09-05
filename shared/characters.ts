@@ -30,7 +30,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     id: 'venom',
     name: 'MC Venom',
     displayName: 'Venom',
-    voiceId: 'tc_b5c9e42e63f9874b2345678f', // Different working voice ID
+    voiceId: 'Sergio-PlayAI', // Working Groq voice ID - aggressive male
     gender: 'male',
     personality: 'Intense, intimidating, uses psychological warfare and dark imagery',
     style: 'aggressive',
@@ -43,7 +43,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     id: 'silk',
     name: 'MC Silk',
     displayName: 'Silk',
-    voiceId: 'tc_c6d0f53f74ga985c3456789f', // Third working voice ID
+    voiceId: 'Jordan-PlayAI', // Working Groq voice ID - smooth male
     gender: 'male',
     personality: 'Smooth, charismatic black male MC who uses clever wordplay and sophisticated flow',
     style: 'smooth',
@@ -56,7 +56,7 @@ export const BATTLE_CHARACTERS: BattleCharacter[] = [
     id: 'cypher',
     name: 'MC CYPHER-9000',
     displayName: 'CYPHER-9000',
-    voiceId: 'Fritz-PlayAI', // Fixed: Use clean voice ID that matches TTS mapping
+    voiceId: 'Fritz-PlayAI', // Working Groq voice ID - robotic/AI
     gender: 'male',
     personality: 'Advanced AI consciousness with calculated precision, uses technological metaphors and systematic destruction tactics. Speaks in robotic patterns with clinical efficiency.',
     style: 'robotic_devastation',
