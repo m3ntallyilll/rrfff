@@ -51,7 +51,7 @@ export function BattleTextDisplay({
 
   const formatRapText = (text: string) => {
     return text.split('\n').map((line, index) => (
-      <div key={index} className="mb-2">
+      <div key={index} className="mb-0.5">
         {line.trim() && (
           <>
             {line.includes('🎤') && <span className="mr-2">🎤</span>}
