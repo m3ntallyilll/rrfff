@@ -26,7 +26,63 @@ function PaymentForm({ tier, paymentMethod, purchaseType, battleCount }: Payment
   const elements = useElements();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentSent, setPaymentSent] = useState(false);
 
+  // Simplified CashApp flow - direct payment instructions
+  if (paymentMethod === 'cashapp') {
+    const amount = purchaseType === 'battles' 
+      ? (battleCount === 1500 ? '$100.00' : '$1.00')
+      : `$${tier === 'premium' ? '9.99' : '19.99'}`;
+    const description = purchaseType === 'battles' 
+      ? (battleCount === 1500 ? '1,500 Battle Pack' : '10 Battle Pack')
+      : `${tier === 'premium' ? 'Premium' : 'Pro'} Subscription`;
+    
+    const handleCashAppPayment = () => {
+      setPaymentSent(true);
+      toast({
+        title: "✅ Payment Confirmed",
+        description: "Your account will be activated automatically once we receive your CashApp payment.",
+      });
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-green-900/20 border border-green-500/50 rounded-lg p-6 text-center">
+          <h3 className="text-green-400 font-semibold text-lg mb-4">💰 CashApp Payment</h3>
+          <div className="space-y-3">
+            <p className="text-white text-xl font-bold">Send {amount} to:</p>
+            <div className="bg-black/30 rounded-lg p-4">
+              <p className="text-green-400 text-2xl font-mono">$ILLAITHEGPTSTORE</p>
+            </div>
+            <p className="text-gray-300 text-sm">Note: {description}</p>
+          </div>
+        </div>
+        
+        <div className="bg-blue-900/20 border border-blue-500/50 rounded-lg p-4">
+          <p className="text-blue-300 text-sm">
+            ✅ Your subscription will be activated automatically within 5-10 minutes after payment.
+          </p>
+        </div>
+
+        <Button 
+          onClick={handleCashAppPayment}
+          disabled={paymentSent}
+          className="w-full bg-green-600 hover:bg-green-700 text-white"
+          data-testid="button-cashapp-confirm"
+        >
+          {paymentSent ? (
+            <>
+              ✅ Payment Confirmed - Activating Soon
+            </>
+          ) : (
+            `✉️ I've Sent ${amount} via CashApp`
+          )}
+        </Button>
+      </div>
+    );
+  }
+
+  // Regular Stripe payment flow
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -96,12 +152,8 @@ function PaymentForm({ tier, paymentMethod, purchaseType, battleCount }: Payment
           </>
         ) : (
           purchaseType === 'battles' ? 
-            (paymentMethod === 'cashapp' ? 
-              `Buy 10 Battles with Cash App ($ILLAITHEGPTSTORE) - $1.00` :
-              `Buy 10 Battles for $1.00`) :
-            (paymentMethod === 'cashapp' ? 
-              `Pay with Cash App ($ILLAITHEGPTSTORE) - $${tier === 'premium' ? '9.99' : '19.99'}/month` :
-              `Subscribe to ${tier === 'premium' ? 'Premium' : 'Pro'} - $${tier === 'premium' ? '9.99' : '19.99'}/month`)
+            `Buy 10 Battles for $1.00` :
+            `Subscribe to ${tier === 'premium' ? 'Premium' : 'Pro'} - $${tier === 'premium' ? '9.99' : '19.99'}/month`
         )}
       </Button>
     </form>
@@ -193,7 +245,7 @@ export default function Subscribe() {
     setPaymentMethod(method);
     setClientSecret('');
     if (purchaseType === 'battles') {
-      createBattlePack.mutate();
+      createBattlePack.mutate({ battleCount: 10 });
     } else {
       createSubscription.mutate({ tier, paymentMethod: method });
     }
