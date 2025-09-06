@@ -75,8 +75,24 @@ JSON ONLY: {"reactionType":"wild_cheering","intensity":85,"reasoning":"Found tri
 
       const response = await this.groqService.generateRapResponse(prompt);
 
+      // Enhanced JSON extraction - handle cases where AI returns extra text
+      let cleanResponse = response.trim();
+      
+      // Look for JSON pattern in the response
+      const jsonMatch = cleanResponse.match(/\{[^{}]*"reactionType"[^{}]*\}/g);
+      if (jsonMatch) {
+        cleanResponse = jsonMatch[jsonMatch.length - 1]; // Get the last/best match
+      } else {
+        // If no JSON found, try to extract content between first { and last }
+        const start = cleanResponse.indexOf('{');
+        const end = cleanResponse.lastIndexOf('}');
+        if (start !== -1 && end !== -1 && end > start) {
+          cleanResponse = cleanResponse.substring(start, end + 1);
+        }
+      }
+      
       // Parse JSON response
-      const analysis = JSON.parse(response.trim());
+      const analysis = JSON.parse(cleanResponse);
       
       // Validate response structure
       if (analysis.reactionType && typeof analysis.intensity === 'number' && analysis.reasoning) {
@@ -113,7 +129,24 @@ Consider battle rap crowd psychology: they want skill, cleverness, aggression, a
 JSON only: {"reactionType":"wild_cheering","intensity":85,"reasoning":"devastating punchline","timing":"immediate"}`;
 
         const retryResponse = await this.groqService.generateRapResponse(retryPrompt);
-        const retryAnalysis = JSON.parse(retryResponse.trim());
+        
+        // Enhanced JSON extraction for retry response
+        let cleanRetryResponse = retryResponse.trim();
+        
+        // Extract JSON from the response if it contains extra text
+        const retryJsonMatch = cleanRetryResponse.match(/\{[^{}]*"reactionType"[^{}]*\}/g);
+        if (retryJsonMatch) {
+          cleanRetryResponse = retryJsonMatch[retryJsonMatch.length - 1]; // Get the last match
+        } else {
+          // If no JSON found, try to extract content between first { and last }
+          const start = cleanRetryResponse.indexOf('{');
+          const end = cleanRetryResponse.lastIndexOf('}');
+          if (start !== -1 && end !== -1 && end > start) {
+            cleanRetryResponse = cleanRetryResponse.substring(start, end + 1);
+          }
+        }
+        
+        const retryAnalysis = JSON.parse(cleanRetryResponse);
         
         if (retryAnalysis.reactionType && typeof retryAnalysis.intensity === 'number') {
           return {

@@ -78,30 +78,48 @@ export class ARTalkService {
         throw new Error(`ARTalk error: ${stderr}`);
       }
       
-      // Extract JSON from stdout by finding the last complete JSON object
-      const lines = stdout.trim().split('\n');
-      let jsonStr = '';
+      // Enhanced JSON extraction from stdout
+      let jsonResult = null;
       
-      // Look for JSON starting from the end
-      for (let i = lines.length - 1; i >= 0; i--) {
-        const line = lines[i].trim();
-        if (line.startsWith('{') || jsonStr.length > 0) {
-          jsonStr = line + '\n' + jsonStr;
-          if (line.startsWith('{')) {
+      try {
+        // Method 1: Try to parse the entire output as JSON
+        jsonResult = JSON.parse(stdout.trim());
+      } catch (e) {
+        // Method 2: Look for JSON patterns in the output
+        const jsonMatches = stdout.match(/\{[^{}]*"success"[^{}]*\}/g);
+        if (jsonMatches) {
+          for (const match of jsonMatches.reverse()) {
             try {
-              const result = JSON.parse(jsonStr.trim());
-              return {
-                videoPath: result.video_path,
-                success: result.success,
-                message: result.message,
-                mode: result.mode || (this.simulationMode ? 'simulation' : 'full')
-              };
-            } catch (e) {
-              // Continue searching if JSON is incomplete
+              jsonResult = JSON.parse(match);
+              break;
+            } catch (parseError) {
               continue;
             }
           }
         }
+      }
+      
+      if (!jsonResult) {
+        // Method 3: Extract between first { and last }
+        const start = stdout.indexOf('{');
+        const end = stdout.lastIndexOf('}');
+        if (start !== -1 && end !== -1 && end > start) {
+          try {
+            jsonResult = JSON.parse(stdout.substring(start, end + 1));
+          } catch (e) {
+            // Final fallback
+            console.warn('ARTalk JSON parsing failed, using simulation mode');
+          }
+        }
+      }
+      
+      if (jsonResult && jsonResult.success !== undefined) {
+        return {
+          videoPath: jsonResult.video_path,
+          success: jsonResult.success,
+          message: jsonResult.message,
+          mode: jsonResult.mode || (this.simulationMode ? 'simulation' : 'full')
+        };
       }
       
       throw new Error(`No valid JSON found in ARTalk output: ${stdout.substring(0, 200)}...`);
@@ -124,7 +142,25 @@ export class ARTalkService {
         'python3 server/services/artalk_integration.py --check-status',
         { cwd: process.cwd() }
       );
-      return JSON.parse(stdout);
+      
+      // Enhanced JSON parsing for status
+      let statusResult = null;
+      try {
+        statusResult = JSON.parse(stdout.trim());
+      } catch (e) {
+        // Try to extract JSON from output
+        const jsonMatch = stdout.match(/\{[^{}]*"artalk_available"[^{}]*\}/g);
+        if (jsonMatch) {
+          statusResult = JSON.parse(jsonMatch[jsonMatch.length - 1]);
+        }
+      }
+      
+      return statusResult || {
+        artalk_available: false,
+        simulation_mode: true,
+        initialized: this.initialized,
+        error: 'Failed to parse status response'
+      };
     } catch (error) {
       return {
         artalk_available: false,
