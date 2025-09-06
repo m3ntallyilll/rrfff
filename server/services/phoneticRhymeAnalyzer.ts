@@ -161,12 +161,21 @@ export class PhoneticRhymeAnalyzer {
       const analysis = this.analyzeLine(line, lineIndex);
       lineAnalyses.push(analysis);
       
-      // Count rhyme types
+      // Count rhyme types by analyzing family patterns
       analysis.familyCounts.forEach((count, familyLetter) => {
         const family = this.families.get(familyLetter);
-        if (family) {
-          // Determine if this is perfect or slant based on phonetic similarity
-          totalPerfectRhymes += Math.floor(count / 2); // Pairs of perfect rhymes
+        if (family && count > 1) {
+          // Determine perfect vs slant based on pattern exactness
+          const rhymePairs = Math.floor(count / 2);
+          
+          // Analyze pattern precision for classification
+          const isExactPattern = this.isExactRhymePattern(family.pattern);
+          
+          if (isExactPattern) {
+            totalPerfectRhymes += rhymePairs;
+          } else {
+            totalSlantRhymes += rhymePairs;
+          }
         }
       });
     }
@@ -290,6 +299,15 @@ export class PhoneticRhymeAnalyzer {
     }
 
     return syllables.length > 0 ? syllables : this.heuristicSyllabify(word);
+  }
+
+  /**
+   * Determines if a rhyme pattern represents a perfect rhyme
+   */
+  private isExactRhymePattern(pattern: string[]): boolean {
+    // Perfect rhymes have exact phoneme matches
+    // This is a simplified check - can be expanded
+    return pattern.length >= 2 && pattern.some(p => p.match(/[12]$/));
   }
 
   private extractRhymePattern(phonemes: string[]): string[] {
