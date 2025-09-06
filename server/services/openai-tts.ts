@@ -72,7 +72,9 @@ export class OpenAITTSService {
       // Clean text for better TTS
       const cleanText = text
         .replace(/\[.*?\]/g, '') // Remove style tags
+        .replace(/\(.*?\)/g, '') // Remove parentheses and content
         .replace(/\*.*?\*/g, '') // Remove emphasis markers
+        .replace(/\s+/g, ' ')    // Normalize whitespace
         .trim();
 
       /*

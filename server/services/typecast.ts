@@ -31,7 +31,12 @@ export class TypecastService {
         },
         body: JSON.stringify({
           voice_id: voiceId,
-          text: text.trim(), // Clean input text
+          text: text
+            .replace(/\[.*?\]/g, '') // Remove style tags
+            .replace(/\(.*?\)/g, '') // Remove parentheses and content
+            .replace(/\*.*?\*/g, '') // Remove emphasis markers
+            .replace(/\s+/g, ' ')    // Normalize whitespace
+            .trim(), // Clean input text
           model: "ssfm-v21", // Advanced model for best quality
           language: "eng",
           prompt: {

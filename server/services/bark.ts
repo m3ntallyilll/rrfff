@@ -74,7 +74,7 @@ export class BarkTTS {
         this.isBarkAvailable = true;
         console.log('🐶 Bark TTS system available and ready!');
       }
-    } catch (error) {
+    } catch (error: any) {
       // Assume Bark is working if we timeout (downloading models)
       if (error.message?.includes('timeout') || error.code === 124) {
         this.isBarkAvailable = true;
@@ -170,7 +170,7 @@ export class BarkTTS {
         fileSize
       };
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(`❌ Bark generation failed for ${characterId}:`, error);
       throw new Error(`Failed to generate audio with Bark: ${error.message}`);
     }
@@ -197,6 +197,9 @@ export class BarkTTS {
     let cleanText = text
       .replace(/["""]/g, '"')
       .replace(/[''']/g, "'")
+      .replace(/\(.*?\)/g, '') // Remove parentheses and content
+      .replace(/\[.*?\]/g, '') // Remove style tags
+      .replace(/\*.*?\*/g, '') // Remove emphasis markers
       .replace(/\n+/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();

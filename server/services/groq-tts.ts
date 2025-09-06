@@ -108,11 +108,13 @@ export class GroqTTSService {
       // Clean text for better TTS - keep robot FX markers for CYPHER-9000
       const cleanText = characterId === 'cypher' 
         ? processedText // Keep robot effects for CYPHER-9000
+            .replace(/\(.*?\)/g, '') // Remove parentheses and content
             .replace(/\*.*?\*/g, '') // Remove emphasis markers only
             .replace(/\s+/g, ' ')    // Normalize whitespace
             .trim()
         : processedText
             .replace(/\[.*?\]/g, '') // Remove all style tags for other characters
+            .replace(/\(.*?\)/g, '') // Remove parentheses and content
             .replace(/\*.*?\*/g, '') // Remove emphasis markers
             .replace(/\s+/g, ' ')    // Normalize whitespace
             .trim();
