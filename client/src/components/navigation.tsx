@@ -28,7 +28,7 @@ export function Navigation() {
         <Link href="/subscribe">
           <Button variant="outline" size="sm" className="bg-gradient-to-r from-purple-600 to-amber-600 border-purple-500 hover:from-purple-700 hover:to-amber-700 text-white" data-testid="nav-subscribe">
             <Crown className="w-4 h-4" />
-            <span className="ml-1 hidden sm:inline">Subscribe</span>
+            <span className="ml-1">Subscribe</span>
           </Button>
         </Link>
         
