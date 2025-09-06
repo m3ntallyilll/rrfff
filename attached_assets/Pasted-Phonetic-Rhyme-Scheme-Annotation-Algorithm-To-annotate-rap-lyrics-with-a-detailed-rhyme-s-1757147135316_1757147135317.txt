@@ -1,0 +1,370 @@
+Phonetic Rhyme Scheme Annotation Algorithm
+
+
+
+
+
+To annotate rap lyrics with a detailed rhyme scheme (e.g. X–AᵃBᵇ…), we process each line in several stages: count syllables, transcribe to phonemes, identify end-of-line rhymes and rhyme families, detect slant vs. perfect rhymes, mark internal rhymes, and finally annotate each syllable. Below is a step-by-step outline of the algorithm, with pseudocode and references to established methods:
+
+
+
+Preprocessing: Normalize text (lowercasing, removing punctuation) and split into lines and words. Load a phonetic dictionary or API (e.g. NLTK’s CMU Pronouncing Dictionary or a tool like eSpeak  ) to convert words to phonemes.
+
+
+
+
+
+
+1. Count Syllables in Each Line
+
+
+
+
+
+Use phonetic dictionary for accuracy: For each word, retrieve its phoneme transcription from CMU (e.g. nltk.corpus.cmudict). Count the number of phoneme units ending in a digit (stress marker) – these digits (0,1,2) mark vowels/syllable boundaries . Sum the counts across all words to get the total syllable count X for the line.
+
+
+# Pseudocode for syllable counting
+
+function count_syllables(line):
+
+    syllable_total = 0
+
+    for word in tokenize(line):
+
+        if word in cmu_dict:
+
+            phoneme_list = cmu_dict[word][0]
+
+            # Count phonemes ending with a digit (a vowel sound)
+
+            word_syllables = count([ph for ph in phoneme_list if ph[-1].isdigit()])
+
+        else:
+
+            # Fallback heuristic: count vowel-letter groups in the spelling
+
+            word_syllables = heuristic_syllable_count(word)
+
+        syllable_total += word_syllables
+
+    return syllable_total
+
+
+
+This approach mirrors standard techniques: NLTK/CMU usage for syllable counting . If a word is missing from the dictionary, a simple heuristic (e.g. counting vowel groups) can approximate the count.
+
+
+
+
+
+
+2. Phonetic Transcription and Syllabification
+
+
+
+
+
+Transcribe to phonemes: Convert each word in the line to its phonetic transcription (e.g. ARPABET via CMU or eSpeak) .
+Split into syllables: Iterate through the phoneme sequence of each word, breaking syllables at stress markers. In CMU notation, any phoneme whose last character is a digit signals the end of a syllable. For example, in ARPABET transcription, AE1 or AH0 are vowels with stress. The algorithm appends syllables when it encounters such phonemes .
+
+
+function syllabify_word(word):
+
+    phonemes = cmu_dict[word][0]  # e.g. ['M', 'AE1', 'N']
+
+    syllables = []
+
+    current = []
+
+    for ph in phonemes:
+
+        current.append(ph)
+
+        if ph[-1].isdigit():        # stress digit indicates syllable boundary [oai_citation:6‡baeldung.com](https://www.baeldung.com/cs/syllabification-nltk-pyphen#:~:text=built,and%20returns%20the%20syllabified%20word)
+
+            syllables.append(current)
+
+            current = []
+
+    if current:  # any leftover phonemes (unlikely)
+
+        syllables.append(current)
+
+    return syllables
+
+
+
+function syllabify_line(line):
+
+    syllables = []
+
+    for word in tokenize(line):
+
+        if word in cmu_dict:
+
+            syllables.extend(syllabify_word(word))
+
+        else:
+
+            syllables.extend(heuristic_syllabify(word))
+
+    return syllables
+
+
+
+This segmentation produces a list of syllable-phoneme lists for each line. (Each syllable can also track its text span if needed.) Splitting on digits is a common method .
+
+
+
+
+
+
+3. Identify Line-End Rhyme (Rhyme Family)
+
+
+
+
+
+Final stressed syllable: For each line, examine the phoneme sequence of its last word and find the final stressed vowel (digit “1” for primary stress, or “2” for secondary if no primary). Extract that syllable’s phonemes from the vowel to the end of the word. This sequence (vowel + any following sounds) constitutes the rhyme ending for the line.
+Assign rhyme families: Maintain a global mapping of discovered rhyme patterns to capital letters (A, B, C, …). For the current line’s rhyme ending, compare its phoneme sequence to existing families:
+Perfect rhyme: If the ending phonemes exactly match a family’s pattern, assign that family letter.
+New family: If no existing family matches (even approximately), create a new family label (next unused letter) and store its pattern.
+
+
+
+families = {}  # map from family letter to representative rhyme pattern
+
+next_letter = 'A'
+
+
+
+function assign_family(rhyme_pattern):
+
+    for letter, pattern in families.items():
+
+        if phoneme_match(rhyme_pattern, pattern):
+
+            return letter
+
+    # no match found, create new family
+
+    families[next_letter] = rhyme_pattern
+
+    letter_assigned = next_letter
+
+    next_letter = chr(ord(next_letter) + 1)
+
+    return letter_assigned
+
+
+
+for line in lyrics:
+
+    phonemes = phoneme_sequence(line)
+
+    final_word_phonemes = phonemes_of_last_word(phonemes)
+
+    stressed_index = last_index_of(primary_stress_in(final_word_phonemes))
+
+    rhyme_pattern = final_word_phonemes[stressed_index:]  # tail from stressed vowel
+
+    family = assign_family(rhyme_pattern)
+
+    line.family_end = family
+
+    line.family_pattern = rhyme_pattern
+
+    line.family_count[family] += 1
+
+
+
+Here phoneme_match checks for rhyme similarity (see next section). Every line’s final syllable yields one family (A, B, C, …). This matches poetic convention: identical end sounds share a letter in the scheme.
+
+
+
+
+
+
+4. Perfect vs. Slant Rhymes (Phonetic Matching)
+
+
+
+
+
+Perfect rhymes: By definition, perfect rhymes share the last stressed vowel and all subsequent sounds . So phoneme_match can test if two patterns are identical from the vowel onward. For example, “conviction” and “prediction” match perfectly .
+Slant (imperfect) rhymes: Allow a looser match. Require the main vowel to be the same (or very similar) but permit differences in final consonant(s) . For example, ending pairs like “-act” and “-acked” (pact/slacked) or shared vowel sounds (unpack/detach) illustrate slant rhymes . In practice, one can implement phoneme_match to:
+Check that the vowel phoneme(s) in the stressed syllable are identical (or within an allowable phonetic set ).
+Compute a simple distance or rule on the trailing consonants (e.g. allow voicing changes or drop one consonant).
+Alternatively, use phonetic edit distance or feature-based similarity on the suffix.
+
+Raplyzer’s insight is instructive: focus on matching vowel sequences for rhymes . For slant matches, one might require the vowel identity and allow a small edit (insert/delete/substitute) in the consonant parts. This captures typical rap slant rhymes (assonance and consonance)  .
+
+
+function phoneme_match(pattern1, pattern2):
+
+    # Require same stressed vowel
+
+    if extract_vowel(pattern1) != extract_vowel(pattern2):
+
+        return False
+
+    # If identical from vowel to end, perfect match
+
+    if pattern1 == pattern2:
+
+        return True
+
+    # Slant rule: allow minor consonant differences
+
+    return consonant_similarity(pattern1, pattern2) >= THRESHOLD
+
+
+
+Here, extract_vowel gets the stressed vowel phoneme, and consonant_similarity is a heuristic (or simple equality check for voiced/unvoiced pairs) allowing e.g. k vs g, or t vs d, etc. Prior work emphasizes vowel identity and approximate matching on consonants  .
+
+
+
+
+
+
+5. Detect Internal Rhymes and Multiple Families in a Line
+
+
+
+
+
+Internal rhyme detection: Beyond the line-end rhyme, rap often uses internal rhymes (multisyllabic and assonant rhymes)  . To capture these, scan every syllable in each line and check if it rhymes with any family’s pattern. Concretely:
+After assigning the end-of-line syllable to its family, take all other syllables in the line (from syllabification).
+For each syllable, extract its “rhyme pattern” (stressed vowel to end of syllable).
+Check phoneme_match against all existing families (A, B, …). If a syllable matches family X’s pattern (perfect/slant), mark it as an occurrence of family X.
+If a syllable does not match any existing family but strongly repeats later in lyrics, optionally create a new family (especially if the pattern reoccurs in other lines). This handles cases where a mid-line rhyme introduces a new scheme letter.
+Keep counts of how many times each family appears within the line.
+
+
+
+function assign_internal_rhymes(line):
+
+    syllables = syllabify_line(line)
+
+    for syl in syllables:
+
+        syl_pattern = extract_pattern(syl)  # e.g. vowel+consonant tail
+
+        for letter, pattern in families.items():
+
+            if phoneme_match(syl_pattern, pattern):
+
+                syl.families.add(letter)
+
+                line.family_count[letter] += 1
+
+                break
+
+        else:
+
+            # no match: optional: define new family for repeated internal pattern
+
+            continue
+
+
+
+This ensures that a line can carry multiple letters. For example, if mid-line a new rhyme scheme starts, it will get a new letter. We annotate all matching syllables with their family letter(s). We only consider as rhymes those with at least two matching vowel sounds (to avoid one-letter false positives) .
+
+
+
+
+
+
+6. Annotate Syllables and Build the Scheme Output
+
+
+
+
+
+Mark syllables: Now that each syllable knows its family label(s), annotate the line by appending superscripts. For each syllable in sequence, append the family letter as a superscript. (If a syllable participates in two families, it could get multiple superscripts; typically each syllable maps to one family, but rap multi-rhymes could overlap.) For example, if syllable “ra” is part of family A (second occurrence), mark it raᵃ; if “trap” is family B’s first occurrence, trapᵇ.
+Format line output: Combine the total syllable count and family counts. The format (X–AᵃBᵇ…) is constructed by:
+X = total syllable count for the line.
+For each family letter in order of first appearance, write Letter with superscript count (e.g. A² if A appears twice in the line). Omit families with zero count. For example, a 10-syllable line with two A-rhymes and one B-rhyme becomes 10–A²B¹.
+Optionally, provide the full syllable breakdown on a second line, like: “saᵃ d(…) a(…) bowᵇ… (syllables with superscripts)”.
+
+
+
+for line in lyrics:
+
+    X = line.syllable_count
+
+    scheme_parts = []
+
+    for letter in order_of_families_appearance:
+
+        count = line.family_count.get(letter, 0)
+
+        if count > 0:
+
+            scheme_parts.append(f"{letter}{to_superscript(count)}")
+
+    line.scheme = f"{X}–" + "".join(scheme_parts)
+
+
+
+    # Annotated breakdown (for analysis)
+
+    annotated_sylls = []
+
+    for syl in syllabify_line(line):
+
+        labels = "".join(letter for letter in syl.families)
+
+        annotated_sylls.append(f"{syl.text}{superscript_letters(labels)}")
+
+    line.breakdown = " ".join(annotated_sylls)
+
+
+
+
+Final map: The algorithm outputs each line with its syllable count and scheme. For instance:
+
+
+Line: "I slam, you cram"
+
+Syllables: 4, Families: A=2, B=1  →  "4–A²B¹"
+
+Breakdown: "slamᵃ youᵃ cramᵇ"
+
+
+
+This satisfies the format requirements and shows exactly which syllables carry which rhyme families. All internal and end rhymes are annotated.
+
+
+
+
+
+
+Summary
+
+
+
+
+
+Putting it all together, the algorithm proceeds as follows:
+
+
+
+Preprocess lyrics text and load a phonetic dictionary (e.g. CMU) or transcription tool .
+Count syllables in each line by summing vowel-phoneme occurrences (fallback to heuristic if necessary).
+Transcribe and split syllables: Convert words to phonemes and break at stress markers , yielding a list of syllable units for each line.
+Identify final rhyme family: For each line’s last word, extract the phonemes from the final stressed vowel onward. Compare with known families: if it matches (perfectly or as a slant), assign that family letter; otherwise start a new family letter .
+Detect slant vs. perfect rhymes: Implement a match function that requires identical main vowel and allows approximate consonant matching . This supports rap-style assonance rhymes (matching vowel sounds) .
+Scan internal syllables: For each syllable in the line, check if its ending matches any family. Mark and count any that do (capturing internal rhymes) . If an entirely new repeated pattern appears mid-line, assign it a new family letter.
+Annotate: Attach superscript family labels to each syllable that participates in a rhyme. Build the final scheme string with total syllable count and each family’s superscript count. For example, 12–A²B¹ indicates 12 syllables with 2 A-rhymes and 1 B-rhyme in that line.
+
+
+
+
+This algorithm is general-purpose and efficient enough for real-time use (e.g. assisting lyric generation) and for post-hoc analysis (measuring rhyme density or complexity). It leverages phonetic analysis (via CMU or eSpeak) and flexible matching rules for perfect and slant rhymes , producing a transparent annotated rhyme scheme for any rap lyric.
+
+
+
+Sources: We adopt phonetic syllable counting from CMU/ NLTK , syllable segmentation by stress markers , and rhyme definitions from poetry research (perfect vs. slant rhymes) . Rap-specific rhyme techniques (vowel-focus and assonance detection) are inspired by Raplyzer , which emphasizes matching vowel sequences to catch end and internal rhymes. All steps are designed to be implementable in code following the pseudocode structure above.
+

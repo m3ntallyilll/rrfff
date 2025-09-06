@@ -1,49 +1,23 @@
 import { type RoundScores } from "@shared/schema";
+import { PhoneticRhymeAnalyzer } from './phoneticRhymeAnalyzer';
 
 export class ScoringService {
+  private phoneticAnalyzer: PhoneticRhymeAnalyzer;
+
+  constructor() {
+    this.phoneticAnalyzer = new PhoneticRhymeAnalyzer();
+    console.log('🎯 ScoringService initialized with PhoneticRhymeAnalyzer');
+  }
+
   calculateRhymeDensity(text: string): number {
-    const lines = text.split('\n').filter(line => line.trim());
-    if (lines.length < 2) return 0;
-
-    // Calculate end rhymes (line endings)
-    let endRhymes = 0;
-    for (let i = 0; i < lines.length - 1; i++) {
-      const word1 = this.getLastWord(lines[i]);
-      const word2 = this.getLastWord(lines[i + 1]);
-      if (this.wordsRhyme(word1, word2)) {
-        endRhymes++;
-      }
-    }
-
-    // Calculate internal rhymes (within lines)
-    let internalRhymes = 0;
-    for (const line of lines) {
-      const words = line.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/);
-      for (let i = 0; i < words.length - 1; i++) {
-        for (let j = i + 1; j < words.length; j++) {
-          if (this.wordsRhyme(words[i], words[j])) {
-            internalRhymes++;
-          }
-        }
-      }
-    }
-
-    // Calculate multi-syllabic rhymes
-    let multiSyllableRhymes = 0;
-    for (let i = 0; i < lines.length - 1; i++) {
-      const word1 = this.getLastWord(lines[i]);
-      const word2 = this.getLastWord(lines[i + 1]);
-      if (this.isMultiSyllableRhyme(word1, word2)) {
-        multiSyllableRhymes++;
-      }
-    }
-
-    // Weighted scoring: end rhymes (50%), internal rhymes (30%), multi-syllabic (20%)
-    const endScore = Math.min(50, (endRhymes / Math.max(1, lines.length - 1)) * 50);
-    const internalScore = Math.min(30, internalRhymes * 5);
-    const multiScore = Math.min(20, multiSyllableRhymes * 10);
+    // Use the advanced phonetic analyzer for accurate rhyme detection
+    const rhymeAnalysis = this.phoneticAnalyzer.getEnhancedRhymeAnalysis(text);
     
-    return Math.round(endScore + internalScore + multiScore);
+    // The analyzer provides comprehensive metrics
+    const rhymeDensityScore = Math.min(60, rhymeAnalysis.rhymeDensity * 100); // Max 60 points
+    const complexityScore = Math.min(40, rhymeAnalysis.complexityScore); // Max 40 points
+    
+    return Math.round(rhymeDensityScore + complexityScore);
   }
 
   calculateFlowQuality(text: string): number {
@@ -870,18 +844,31 @@ export class ScoringService {
   }
   
   calculateUserScore(userText: string): number {
+    // Enhanced scoring with phonetic analysis
+    const phoneticAnalysis = this.phoneticAnalyzer.getEnhancedRhymeAnalysis(userText);
+    
     const components = this.getDetailedComponents(userText);
     const weights = this.calculateDynamicWeights(components);
     const score = this.calculateBalancedScore(components, weights);
     
+    // Enhance rhyme scoring with phonetic analysis
+    const baseRhyme = this.calculateRhymeDensity(userText);
+    const phoneticBonus = Math.min(15, phoneticAnalysis.complexityScore * 0.15);
+    const enhancedRhyme = Math.min(100, baseRhyme + phoneticBonus);
+    
     // Legacy compatibility - still show main components
-    const rhymeDensity = this.calculateRhymeDensity(userText);
     const flowQuality = this.calculateFlowQuality(userText);
     const creativity = this.calculateCreativity(userText);
     
-    console.log(`🎯 User components: Rhyme ${rhymeDensity}, Flow ${flowQuality}, Creativity ${creativity} → Score ${Math.round(score)}`);
+    // Enhanced score combination with phonetic insights
+    const enhancedScore = (enhancedRhyme * 0.35) + (flowQuality * 0.35) + (creativity * 0.30);
     
-    return Math.max(0, Math.min(100, score));
+    console.log(`🎯 Enhanced User Analysis:`);
+    console.log(`   📊 Phonetic: ${phoneticAnalysis.totalRhymes} total, ${phoneticAnalysis.internalRhymes} internal, density ${phoneticAnalysis.rhymeDensity.toFixed(2)}`);
+    console.log(`   🎵 Rhyme: ${baseRhyme} + ${phoneticBonus.toFixed(1)} phonetic = ${enhancedRhyme.toFixed(1)}`);
+    console.log(`   🎯 Final: Rhyme ${enhancedRhyme.toFixed(1)}, Flow ${flowQuality}, Creativity ${creativity} → Score ${Math.round(enhancedScore)}`);
+    
+    return Math.max(0, Math.min(100, enhancedScore));
   }
 }
 

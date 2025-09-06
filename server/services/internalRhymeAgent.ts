@@ -4,6 +4,8 @@
  * Enhances midline rhyming complexity without disrupting end-rhyme schemes
  */
 
+import { PhoneticRhymeAnalyzer } from './phoneticRhymeAnalyzer';
+
 export interface InternalRhymeSpan {
   lineIndex: number;
   start: number;
@@ -39,6 +41,7 @@ export class InternalRhymeAgent {
   private phoneticCache = new Map<string, PhoneticAnalysis>();
   private readonly MAX_CACHE_SIZE = 1000; // LRU cache limit
   private cacheAccessOrder = new Set<string>(); // Track access order for LRU
+  private phoneticAnalyzer: PhoneticRhymeAnalyzer;
   
   // Internal rhyme word banks for different techniques
   private rhymeWordBanks = {
@@ -71,7 +74,15 @@ export class InternalRhymeAgent {
   ];
 
   constructor() {
-    console.log('🎯 InternalRhymeAgent initialized - Advanced internal rhyme processing enabled');
+    this.phoneticAnalyzer = new PhoneticRhymeAnalyzer();
+    console.log('🎯 InternalRhymeAgent initialized - Advanced internal rhyme processing enabled with PhoneticRhymeAnalyzer');
+  }
+
+  /**
+   * Get comprehensive phonetic rhyme analysis using the advanced algorithm
+   */
+  getPhoneticRhymeSchemeAnalysis(lyrics: string) {
+    return this.phoneticAnalyzer.analyzeRhymeScheme(lyrics);
   }
 
   /**
@@ -693,7 +704,8 @@ export class InternalRhymeAgent {
     }).join(' ');
   }
 
-  private getPhoneticAnalysis(word: string): PhoneticAnalysis {
+  // DEPRECATED: Use phoneticAnalyzer.analyzeRhymeScheme() instead
+  private getPhoneticAnalysisDeprecated(word: string): PhoneticAnalysis {
     const key = word.toLowerCase();
     
     // LRU cache implementation
@@ -740,64 +752,50 @@ export class InternalRhymeAgent {
   }
 
   private wordsRhyme(word1: string, word2: string): boolean {
-    const analysis1 = this.getPhoneticAnalysis(word1);
-    const analysis2 = this.getPhoneticAnalysis(word2);
-    
-    // Perfect rhyme: nucleus + coda match
-    if (analysis1.nucleus === analysis2.nucleus && analysis1.coda === analysis2.coda) {
-      return true;
-    }
-    
-    // Near rhyme: nucleus matches
-    return analysis1.nucleus === analysis2.nucleus;
+    // Delegate to phonetic analyzer's enhanced rhyme detection
+    const analysis = this.phoneticAnalyzer.analyzeRhymeScheme(`${word1}\n${word2}`);
+    return analysis.families.size < 2; // Same family means they rhyme
   }
 
   private extractRhymeKey(word: string): string {
-    const analysis = this.getPhoneticAnalysis(word);
-    return analysis.nucleus + analysis.coda;
+    const analysis = this.phoneticAnalyzer.analyzeRhymeScheme(word);
+    const firstLine = analysis.lines[0];
+    return firstLine ? firstLine.endRhymeFamily : word.slice(-2);
   }
 
   private calculateRhymeStrength(word1: string, word2: string): 1 | 2 | 3 {
-    const analysis1 = this.getPhoneticAnalysis(word1);
-    const analysis2 = this.getPhoneticAnalysis(word2);
+    const analysis = this.phoneticAnalyzer.analyzeRhymeScheme(`${word1}\n${word2}`);
+    const isSameFamily = analysis.families.size < 2;
     
-    // Perfect multisyllabic rhyme
-    if (analysis1.nucleus === analysis2.nucleus && 
-        analysis1.coda === analysis2.coda && 
-        Math.min(analysis1.syllableCount, analysis2.syllableCount) > 1) {
-      return 3;
+    if (!isSameFamily) {
+      return 1; // Subtle/slant
     }
     
-    // Perfect single syllable rhyme
-    if (analysis1.nucleus === analysis2.nucleus && analysis1.coda === analysis2.coda) {
-      return 2;
+    // Check syllable count for strength
+    const word1Syllables = this.countSyllables(word1);
+    const word2Syllables = this.countSyllables(word2);
+    
+    if (word1Syllables > 1 && word2Syllables > 1) {
+      return 3; // Multi-syllable rhyme = devastating
     }
     
-    // Near rhyme or assonance
-    return 1;
+    return 2; // Single syllable perfect rhyme = strong
   }
 
   private identifyRhymeTechnique(word1: string, word2: string): InternalRhymeSpan['technique'] {
-    const analysis1 = this.getPhoneticAnalysis(word1);
-    const analysis2 = this.getPhoneticAnalysis(word2);
+    const word1Syllables = this.countSyllables(word1);
+    const word2Syllables = this.countSyllables(word2);
     
     // Multisyllabic
-    if (Math.min(analysis1.syllableCount, analysis2.syllableCount) > 1) {
+    if (Math.min(word1Syllables, word2Syllables) > 1) {
       return 'multi';
     }
     
-    // Alliteration
-    if (analysis1.onset === analysis2.onset && analysis1.onset.length > 0) {
-      return 'alliteration';
-    }
+    // Simple technique classification based on phonetic similarity
+    const analysis = this.phoneticAnalyzer.analyzeRhymeScheme(`${word1}\n${word2}`);
+    const isSameFamily = analysis.families.size < 2;
     
-    // Consonance
-    if (analysis1.coda === analysis2.coda && analysis1.coda.length > 0) {
-      return 'consonance';
-    }
-    
-    // Assonance
-    if (analysis1.nucleus === analysis2.nucleus) {
+    if (isSameFamily) {
       return 'assonance';
     }
     
@@ -852,11 +850,11 @@ export class InternalRhymeAgent {
     // Fallback: Allow replacement if words share similar phonetic structure
     // This maintains rhythm while being more conservative with meaning
     if (technique === 'assonance' || technique === 'consonance') {
-      const originalAnalysis = this.getPhoneticAnalysis(original);
-      const candidateAnalysis = this.getPhoneticAnalysis(candidate);
+      const originalSyllables = this.countSyllables(original);
+      const candidateSyllables = this.countSyllables(candidate);
       
       // Allow if syllable count is similar (within 1) and both are rap-appropriate
-      const syllableDiff = Math.abs(originalAnalysis.syllableCount - candidateAnalysis.syllableCount);
+      const syllableDiff = Math.abs(originalSyllables - candidateSyllables);
       const rapWords = ['attack', 'track', 'back', 'stack', 'crack', 'pack', 'flow', 'show', 'know', 'grow', 'beat', 'heat', 'feat', 'real', 'deal', 'steel', 'feel'];
       
       return syllableDiff <= 1 && rapWords.includes(candidate);
