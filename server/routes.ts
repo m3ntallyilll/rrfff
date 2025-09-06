@@ -455,6 +455,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         metadata: {
           paymentMethod: paymentMethod,
           tier: tier,
+          userId: userId,
           ...(paymentMethod === 'cashapp' && { cashapp_account: '$ILLAITHEGPTSTORE' })
         },
         description: paymentMethod === 'cashapp' 
@@ -558,8 +559,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 console.warn(`⚠️ Invalid battle pack data: userId=${userId}, battleCount=${battleCount}`);
               }
             }
+            
+            // Check if this is a CashApp subscription payment (first payment)
+            else if (paymentIntent.metadata?.tier && paymentIntent.metadata?.paymentMethod === 'cashapp') {
+              console.log(`💰 Processing CashApp subscription payment: ${paymentIntent.id}`);
+              
+              const userId = paymentIntent.metadata.userId;
+              const tier = paymentIntent.metadata.tier;
+              
+              if (userId && tier && ['premium', 'pro'].includes(tier)) {
+                // Activate the subscription for CashApp payments
+                await storage.updateUserSubscription(userId, {
+                  subscriptionStatus: 'active',
+                  subscriptionTier: tier,
+                  // Note: Stripe subscription ID should already be set from subscription creation
+                });
+                
+                console.log(`✅ Activated CashApp subscription for user ${userId}: ${tier} tier (Payment: ${paymentIntent.id})`);
+              } else {
+                console.warn(`⚠️ Invalid CashApp subscription data: userId=${userId}, tier=${tier}`);
+              }
+            }
           } catch (error: any) {
-            console.error(`❌ Error processing battle pack purchase ${paymentIntent.id}:`, error.message);
+            console.error(`❌ Error processing payment intent ${paymentIntent.id}:`, error.message);
             throw error; // Re-throw to trigger retry
           }
           break;
