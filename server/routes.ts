@@ -1037,68 +1037,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bufferLength: req.file.buffer?.length
       } : 'No file');
 
-      if (!req.file?.buffer) {
-        console.log(`❌ No audio file buffer provided`);
-        return res.status(400).json({ message: "No audio file provided" });
+      // Handle both audio and text input - at least one must be provided
+      const userVerse = req.body.userVerse;
+      const hasAudio = !!(req.file?.buffer);
+      const hasText = !!(userVerse?.trim());
+      
+      if (!hasAudio && !hasText) {
+        console.log(`❌ No audio file or text verse provided`);
+        return res.status(400).json({ message: "Either audio file or text verse must be provided" });
       }
 
-      const audioBuffer = req.file.buffer;
+      const audioBuffer = req.file?.buffer;
       
-      console.log(`📊 File stats: ${audioBuffer.length} bytes, mimetype: ${req.file.mimetype}`);
-      
-      // TEMPORARILY REMOVE SIZE RESTRICTIONS for debugging
-      if (audioBuffer.length === 0) {
-        console.log(`❌ Empty audio file`);
-        return res.status(400).json({ message: "Audio file is empty" });
-      }
-      
-      // SECURITY: Proper audio format validation based on our findings
-      const audioHeader = audioBuffer.slice(0, 16).toString('hex');
-      
-      console.log(`🔍 Audio validation: ${audioBuffer.length} bytes, header: ${audioHeader.substring(0, 16)}`);
-      
-      // WebM format validation (what browsers actually send)
-      const isWebM = audioBuffer[0] === 0x1a && audioBuffer[1] === 0x45 && 
-                     audioBuffer[2] === 0xDF && audioBuffer[3] === 0xA3;
-      
-      // Other common formats
-      const isWAV = audioHeader.startsWith('52494646'); // RIFF
-      const isOgg = audioHeader.startsWith('4f676753'); // OggS
-      const isMP3 = audioHeader.startsWith('fffb') || audioHeader.startsWith('fff3');
-      const isMP4 = audioHeader.startsWith('0000001c') || audioHeader.startsWith('00000020') || 
-                    audioHeader.includes('66747970'); // MP4/M4A - more flexible detection
-      
-      if (!isWebM && !isWAV && !isOgg && !isMP3 && !isMP4) {
-        console.log(`❌ Unrecognized audio format, header: ${audioHeader.substring(0, 16)}`);
-        return res.status(400).json({ message: "Unsupported audio format" });
-      }
-      
-      console.log(`✅ Audio validation passed: ${isWebM ? 'WebM' : isWAV ? 'WAV' : isOgg ? 'Ogg' : isMP3 ? 'MP3' : 'MP4'} format`);
+      // Audio validation only if audio is provided
+      if (hasAudio) {
+        console.log(`📊 File stats: ${audioBuffer.length} bytes, mimetype: ${req.file.mimetype}`);
+        
+        // TEMPORARILY REMOVE SIZE RESTRICTIONS for debugging
+        if (audioBuffer.length === 0) {
+          console.log(`❌ Empty audio file`);
+          return res.status(400).json({ message: "Audio file is empty" });
+        }
+        
+        // SECURITY: Proper audio format validation based on our findings
+        const audioHeader = audioBuffer.slice(0, 16).toString('hex');
+        
+        console.log(`🔍 Audio validation: ${audioBuffer.length} bytes, header: ${audioHeader.substring(0, 16)}`);
+        
+        // WebM format validation (what browsers actually send)
+        const isWebM = audioBuffer[0] === 0x1a && audioBuffer[1] === 0x45 && 
+                       audioBuffer[2] === 0xDF && audioBuffer[3] === 0xA3;
+        
+        // Other common formats
+        const isWAV = audioHeader.startsWith('52494646'); // RIFF
+        const isOgg = audioHeader.startsWith('4f676753'); // OggS
+        const isMP3 = audioHeader.startsWith('fffb') || audioHeader.startsWith('fff3');
+        const isMP4 = audioHeader.startsWith('0000001c') || audioHeader.startsWith('00000020') || 
+                      audioHeader.includes('66747970'); // MP4/M4A - more flexible detection
+        
+        if (!isWebM && !isWAV && !isOgg && !isMP3 && !isMP4) {
+          console.log(`❌ Unrecognized audio format, header: ${audioHeader.substring(0, 16)}`);
+          return res.status(400).json({ message: "Unsupported audio format" });
+        }
+        
+        console.log(`✅ Audio validation passed: ${isWebM ? 'WebM' : isWAV ? 'WAV' : isOgg ? 'Ogg' : isMP3 ? 'MP3' : 'MP4'} format`);
 
-      console.log(`🎵 Audio received: ${audioBuffer.length} bytes`);
+        console.log(`🎵 Audio received: ${audioBuffer.length} bytes`);
+      } else {
+        console.log(`📝 Text input received: "${userVerse}"`);
+      }
 
-      // IMMEDIATE TRANSCRIPTION - Process user's audio first for instant feedback
-      console.log(`⚡ Starting immediate transcription...`);
-      let userText = "Voice input received";
+      // TRANSCRIPTION OR TEXT INPUT
+      let userText = "Input received";
       
-      try {
-        // OPTIMIZED transcription with proper timeout for deployment stability
-        userText = await Promise.race([
-          groqService.transcribeAudio(audioBuffer),
-          new Promise<string>((_, reject) => 
-            setTimeout(() => reject(new Error("Transcription timeout")), 3000) // 3s timeout for stability
-          )
-        ]);
-        console.log(`✅ FAST transcription complete: "${userText.substring(0, 50)}..."`);
-      } catch (error) {
-        console.log(`⚠️ Fast transcription failed, using fallback...`);
-        // If ultra-fast fails, get the actual transcription without timeout
+      if (hasText) {
+        // Use provided text directly 
+        userText = userVerse.trim();
+        console.log(`✅ Text input processed: "${userText.substring(0, 50)}..."`);
+      } else if (hasAudio) {
+        // Process audio transcription
+        console.log(`⚡ Starting audio transcription...`);
         try {
-          userText = await groqService.transcribeAudio(audioBuffer);
-          console.log(`✅ Fallback transcription complete: "${userText.substring(0, 50)}..."`);
-        } catch (fallbackError) {
-          console.log(`❌ All transcription failed, using placeholder`);
-          userText = "Voice input received";
+          // OPTIMIZED transcription with proper timeout for deployment stability
+          userText = await Promise.race([
+            groqService.transcribeAudio(audioBuffer),
+            new Promise<string>((_, reject) => 
+              setTimeout(() => reject(new Error("Transcription timeout")), 3000) // 3s timeout for stability
+            )
+          ]);
+          console.log(`✅ FAST transcription complete: "${userText.substring(0, 50)}..."`);
+        } catch (error) {
+          console.log(`⚠️ Fast transcription failed, using fallback...`);
+          // If ultra-fast fails, get the actual transcription without timeout
+          try {
+            userText = await groqService.transcribeAudio(audioBuffer);
+            console.log(`✅ Fallback transcription complete: "${userText.substring(0, 50)}..."`);
+          } catch (fallbackError) {
+            console.log(`❌ All transcription failed, using placeholder`);
+            userText = "Voice input received";
+          }
         }
       }
       

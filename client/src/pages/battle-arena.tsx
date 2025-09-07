@@ -358,10 +358,7 @@ export default function BattleArena() {
             </Badge>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="text-sm text-gray-400">
-              <span>Streak: </span>
-              <span className="text-accent-gold font-semibold">3</span>
-            </div>
+            {/* Streak display removed - no mock data */}
             <div className="text-sm text-gray-400">
               <span>Score: </span>
               <span className="text-accent-blue font-semibold">
