@@ -22,14 +22,7 @@ export class ScoringService {
 
   calculateFlowQuality(text: string): number {
     const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 0);
-    
-    // Minimal input gets minimal flow score
-    if (words.length <= 1) {
-      return 2; // Single words have no flow
-    }
-    if (words.length <= 3) {
-      return 8; // Very short = very poor flow
-    }
+    console.log(`🎵 Analyzing flow quality for ${words.length} words...`);
     
     const lines = text.split('\n').filter(line => line.trim());
     let totalScore = 0;
@@ -51,29 +44,19 @@ export class ScoringService {
   calculateCreativity(text: string): number {
     const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 0);
     
-    // STRICT SCORING - proper battle rap standards
-    
-    // 1. MINIMAL EFFORT GETS MINIMAL POINTS
-    if (words.length <= 1) {
-      console.log(`⚠️ Minimal input (${words.length} word) - very low score applied`);
-      return 5; // Single words get almost nothing
-    }
-    
-    // 2-4 words is still very weak effort
-    if (words.length <= 4) {
-      console.log(`🎤 Short verse (${words.length} words) - low scoring`);
-      return Math.min(25, 8 + words.length * 3); // 11-20 range for short inputs
-    }
+    // COMPREHENSIVE ANALYSIS - analyze everything regardless of length
+    console.log(`🎭 Analyzing ${words.length} words for creativity...`);
     
     const lines = text.split('\n').filter(line => line.trim());
     
-    // More generous content scoring - don't punish short verses heavily
-    let contentBonus = Math.min(15, Math.max(8, words.length * 3)); // Minimum 8 points
-    if (words.length >= 6) contentBonus = 15; // Full bonus for 6+ words (lowered threshold)
+    // Content scoring based on actual substance
+    let contentBonus = Math.min(15, Math.max(0, words.length * 1.5)); // No artificial minimum
+    if (words.length >= 10) contentBonus = 15; // Full bonus for substantial verses
     
-    // 2. LEXICAL DIVERSITY (vocabulary richness) - More generous scoring
+    // 2. LEXICAL DIVERSITY (vocabulary richness) - Based on actual diversity
     const uniqueWords = new Set(words);
-    const lexicalDiversity = Math.min(15, Math.max(5, (uniqueWords.size / words.length) * 30 + 5));
+    const diversityRatio = words.length > 0 ? uniqueWords.size / words.length : 0;
+    const lexicalDiversity = Math.min(15, diversityRatio * 15);
     
     // 3. ADVANCED WORDPLAY DETECTION
     const wordplayScore = this.detectAdvancedWordplay(text);
@@ -293,7 +276,7 @@ export class ScoringService {
   
   private analyzeRhythm(text: string): number {
     const lines = text.split('\n').filter(line => line.trim());
-    if (lines.length < 2) return 2;
+    if (lines.length < 2) return 0; // No rhythm in single lines
     
     let score = 0;
     const syllableCounts = lines.map(line => this.countSyllables(line));
@@ -595,20 +578,8 @@ export class ScoringService {
     const userBalancedScore = this.calculateBalancedScore(userComponents, userWeights);
     const aiBalancedScore = this.calculateBalancedScore(aiComponents, aiWeights);
     
-    // Apply STRICT minimum scoring - no participation trophies
-    const wordCount = userVerse.split(/\s+/).filter(w => w.length > 0).length;
-    let minUserScore = 0; // No artificial minimum
-    
-    // Only give tiny minimums for absolutely minimal effort
-    if (wordCount <= 1) {
-      minUserScore = 3; // Single words = near zero
-    } else if (wordCount <= 3) {
-      minUserScore = 8; // Very short = very low
-    } else if (wordCount <= 6) {
-      minUserScore = 12; // Short = low
-    }
-    
-    const userScore = Math.round(Math.max(minUserScore, userBalancedScore));
+    // Use pure calculated scores - no artificial minimums or maximums
+    const userScore = Math.round(Math.max(0, userBalancedScore));
     const aiScore = Math.round(aiBalancedScore);
 
     return {
