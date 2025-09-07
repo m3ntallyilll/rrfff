@@ -116,9 +116,24 @@ export function useAudioRecorder() {
       setIsRecording(true);
       setRecordingDuration(0);
       
-      // Start duration timer
+      // Start duration timer with 30-second auto-cutoff
       intervalRef.current = setInterval(() => {
-        setRecordingDuration(prev => prev + 1);
+        setRecordingDuration(prev => {
+          const newDuration = prev + 1;
+          // Auto-stop recording after 30 seconds
+          if (newDuration >= 30) {
+            // Show notification about auto-cutoff
+            toast({
+              title: "Recording Auto-Stopped",
+              description: "Recording automatically stopped after 30 seconds",
+              variant: "default",
+            });
+            // Stop recording safely
+            setTimeout(() => stopRecording(), 100);
+            return 30;
+          }
+          return newDuration;
+        });
       }, 1000);
       
       // Start audio visualization

@@ -110,7 +110,15 @@ export function useBattleState(battleId?: string) {
         throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      // Show persistent score notification
+      if (result && typeof result.userScore !== 'undefined' && typeof result.aiScore !== 'undefined') {
+        // Use global toast function to ensure it works
+        if (typeof window !== 'undefined' && (window as any).showPersistentScore) {
+          (window as any).showPersistentScore(result.userScore, result.aiScore);
+        }
+      }
+      
       queryClient.invalidateQueries({ 
         queryKey: ["/api/battles", currentBattleId] 
       });

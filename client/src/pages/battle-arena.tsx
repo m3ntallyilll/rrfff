@@ -47,6 +47,25 @@ export default function BattleArena() {
   const [currentAnalysisText, setCurrentAnalysisText] = useState("");
 
   const { toast } = useToast();
+  
+  // Set up global function for persistent score notifications
+  useEffect(() => {
+    (window as any).showPersistentScore = (userScore: number, aiScore: number) => {
+      const isWinning = userScore > aiScore;
+      const scoreDiff = Math.abs(userScore - aiScore);
+      
+      toast({
+        title: isWinning ? "🎉 Round Score" : "💪 Round Score",
+        description: `You: ${userScore} • AI: ${aiScore} ${isWinning ? '(+' + scoreDiff + ')' : '(-' + scoreDiff + ')'}`,
+        duration: Infinity, // Stay on screen indefinitely
+      });
+    };
+    
+    return () => {
+      delete (window as any).showPersistentScore;
+    };
+  }, [toast]);
+  
   const {
     battleState,
     battle,
