@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { Mic, MicOff, Volume2, VolumeX, Keyboard, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import { WaveformVisualizer } from "./waveform-visualizer";
 import { formatDuration } from "@/lib/audio-utils";
@@ -10,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface RecordingPanelProps {
   onRecordingComplete?: (recording: { blob: Blob; duration: number; url: string }) => void;
+  onTextSubmit?: (text: string) => void;
   onRecordingStart?: () => void;
   profanityFilter: boolean;
   onProfanityFilterChange: (enabled: boolean) => void;
@@ -22,6 +24,7 @@ interface RecordingPanelProps {
 
 export function RecordingPanel({ 
   onRecordingComplete, 
+  onTextSubmit,
   onRecordingStart,
   profanityFilter, 
   onProfanityFilterChange,
@@ -32,6 +35,8 @@ export function RecordingPanel({
   disabled = false 
 }: RecordingPanelProps) {
   const [micSensitivity, setMicSensitivity] = useState<number[]>([75]);
+  const [inputMode, setInputMode] = useState<'voice' | 'text'>('voice');
+  const [textInput, setTextInput] = useState('');
   const { 
     isRecording, 
     audioLevels, 
@@ -57,83 +62,159 @@ export function RecordingPanel({
     return "Press to start recording";
   };
 
+  const handleTextSubmit = () => {
+    if (textInput.trim() && onTextSubmit) {
+      onTextSubmit(textInput.trim());
+      setTextInput('');
+    }
+  };
+
   return (
     <div className="bg-battle-gray rounded-xl p-6 border border-gray-700">
-      <h3 className="font-orbitron font-bold text-lg mb-4 text-accent-gold">
-        <Mic className="inline mr-2" size={20} />
-        Your Turn
-      </h3>
-      
-      {/* Recording Button */}
-      <div className="text-center mb-6">
-        <motion.div
-          whileHover={{ scale: disabled ? 1 : 1.05 }}
-          whileTap={{ scale: disabled ? 1 : 0.95 }}
-        >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-orbitron font-bold text-lg text-accent-gold">
+          {inputMode === 'voice' ? <Mic className="inline mr-2" size={20} /> : <Keyboard className="inline mr-2" size={20} />}
+          Your Turn
+        </h3>
+        
+        {/* Input Mode Toggle */}
+        <div className="flex items-center space-x-2">
           <Button
-            onClick={() => {
-              if (!isRecording && onRecordingStart) {
-                onRecordingStart();
-              }
-              toggleRecording();
-            }}
-            disabled={disabled}
-            className="relative w-24 h-24 bg-gradient-to-br from-accent-red to-red-600 hover:from-red-500 hover:to-red-700 rounded-full transition-all duration-300 focus:ring-4 focus:ring-accent-red focus:ring-opacity-50"
-            data-testid="button-toggle-recording"
+            variant={inputMode === 'voice' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setInputMode('voice')}
+            className={`px-3 py-1 ${
+              inputMode === 'voice'
+                ? 'bg-accent-blue text-white'
+                : 'border-gray-600 text-gray-400 hover:bg-gray-700'
+            }`}
+            data-testid="button-voice-mode"
           >
-            <AnimatePresence mode="wait">
-              {isRecording ? (
-                <motion.div
-                  key="recording"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                >
-                  <MicOff className="text-3xl text-white" size={32} />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="idle"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                >
-                  <Mic className="text-3xl text-white" size={32} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-            
-            {/* Recording Indicator */}
-            {isRecording && (
-              <motion.div 
-                className="absolute -top-1 -right-1 w-6 h-6 bg-accent-gold rounded-full"
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
-                data-testid="indicator-recording-active"
-              />
-            )}
+            <Mic className="w-4 h-4 mr-1" />
+            Voice
           </Button>
-        </motion.div>
-      </div>
-
-      {/* Recording Status */}
-      <div className="text-center mb-4">
-        <div className="text-sm text-gray-400 mb-2" data-testid="text-recording-status">
-          {getRecordingStatus()}
+          <Button
+            variant={inputMode === 'text' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setInputMode('text')}
+            className={`px-3 py-1 ${
+              inputMode === 'text'
+                ? 'bg-accent-gold text-black'
+                : 'border-gray-600 text-gray-400 hover:bg-gray-700'
+            }`}
+            data-testid="button-text-mode"
+          >
+            <Keyboard className="w-4 h-4 mr-1" />
+            Text
+          </Button>
         </div>
-        <div className="text-xs font-code text-accent-blue" data-testid="text-recording-duration">
-          {formatDuration(recordingDuration)}
-        </div>
       </div>
+      
+      {/* Voice Input Mode */}
+      {inputMode === 'voice' && (
+        <>
+          {/* Recording Button */}
+          <div className="text-center mb-6">
+            <motion.div
+              whileHover={{ scale: disabled ? 1 : 1.05 }}
+              whileTap={{ scale: disabled ? 1 : 0.95 }}
+            >
+              <Button
+                onClick={() => {
+                  if (!isRecording && onRecordingStart) {
+                    onRecordingStart();
+                  }
+                  toggleRecording();
+                }}
+                disabled={disabled}
+                className="relative w-24 h-24 bg-gradient-to-br from-accent-red to-red-600 hover:from-red-500 hover:to-red-700 rounded-full transition-all duration-300 focus:ring-4 focus:ring-accent-red focus:ring-opacity-50"
+                data-testid="button-toggle-recording"
+              >
+                <AnimatePresence mode="wait">
+                  {isRecording ? (
+                    <motion.div
+                      key="recording"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                    >
+                      <MicOff className="text-3xl text-white" size={32} />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="idle"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                    >
+                      <Mic className="text-3xl text-white" size={32} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                
+                {/* Recording Indicator */}
+                {isRecording && (
+                  <motion.div 
+                    className="absolute -top-1 -right-1 w-6 h-6 bg-accent-gold rounded-full"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                    data-testid="indicator-recording-active"
+                  />
+                )}
+              </Button>
+            </motion.div>
+          </div>
 
-      {/* Audio Waveform Visualization */}
-      <div className="bg-secondary-dark rounded-lg p-4 mb-4">
-        <WaveformVisualizer 
-          audioLevels={audioLevels} 
-          isActive={isRecording}
-          data-testid="visualizer-waveform"
-        />
-      </div>
+          {/* Recording Status */}
+          <div className="text-center mb-4">
+            <div className="text-sm text-gray-400 mb-2" data-testid="text-recording-status">
+              {getRecordingStatus()}
+            </div>
+            <div className="text-xs font-code text-accent-blue" data-testid="text-recording-duration">
+              {formatDuration(recordingDuration)}
+            </div>
+          </div>
+
+          {/* Audio Waveform Visualization */}
+          <div className="bg-secondary-dark rounded-lg p-4 mb-4">
+            <WaveformVisualizer 
+              audioLevels={audioLevels} 
+              isActive={isRecording}
+              data-testid="visualizer-waveform"
+            />
+          </div>
+        </>
+      )}
+
+      {/* Text Input Mode */}
+      {inputMode === 'text' && (
+        <div className="mb-6">
+          <div className="space-y-4">
+            <Textarea
+              value={textInput}
+              onChange={(e) => setTextInput(e.target.value)}
+              placeholder="Type your rap verse here... Let your creativity flow!"
+              className="min-h-32 bg-secondary-dark border-gray-600 text-white placeholder-gray-400 resize-none"
+              disabled={disabled}
+              data-testid="textarea-rap-input"
+            />
+            <div className="flex justify-between items-center">
+              <div className="text-sm text-gray-400">
+                {textInput.length} characters
+              </div>
+              <Button
+                onClick={handleTextSubmit}
+                disabled={disabled || !textInput.trim()}
+                className="bg-accent-gold hover:bg-yellow-500 text-black font-semibold"
+                data-testid="button-submit-text"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Send Verse
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Voice Controls */}
       <div className="space-y-4">

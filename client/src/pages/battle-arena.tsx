@@ -538,6 +538,12 @@ export default function BattleArena() {
               {/* Recording Panel */}
               <RecordingPanel
                 onRecordingComplete={handleRecordingComplete}
+                onTextSubmit={(text) => {
+                  console.log('📝 User submitted text verse:', text.substring(0, 50) + '...');
+                  // Process text input same as voice
+                  submitRound({ userVerse: text });
+                  triggerCrowdOnSpeech();
+                }}
                 onRecordingStart={() => {
                   console.log('🎤 User started recording - triggering crowd on speech');
                   triggerCrowdOnSpeech();
