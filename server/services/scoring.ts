@@ -21,6 +21,16 @@ export class ScoringService {
   }
 
   calculateFlowQuality(text: string): number {
+    const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+    
+    // Minimal input gets minimal flow score
+    if (words.length <= 1) {
+      return 2; // Single words have no flow
+    }
+    if (words.length <= 3) {
+      return 8; // Very short = very poor flow
+    }
+    
     const lines = text.split('\n').filter(line => line.trim());
     let totalScore = 0;
 
@@ -41,18 +51,18 @@ export class ScoringService {
   calculateCreativity(text: string): number {
     const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 0);
     
-    // COMPREHENSIVE ANALYSIS based on actual rap battle criteria
+    // STRICT SCORING - proper battle rap standards
     
-    // 1. BASIC REQUIREMENTS - more generous for minimal effort
+    // 1. MINIMAL EFFORT GETS MINIMAL POINTS
     if (words.length <= 1) {
-      console.log(`⚠️ Minimal input (${words.length} word) - base score applied`);
-      return 25; // More generous base score
+      console.log(`⚠️ Minimal input (${words.length} word) - very low score applied`);
+      return 5; // Single words get almost nothing
     }
     
-    // Give more credit for very short verses (2-4 words)
+    // 2-4 words is still very weak effort
     if (words.length <= 4) {
-      console.log(`🎤 Short verse (${words.length} words) - adjusted scoring`);
-      return Math.min(40, 20 + words.length * 5); // 25-40 range for short inputs
+      console.log(`🎤 Short verse (${words.length} words) - low scoring`);
+      return Math.min(25, 8 + words.length * 3); // 11-20 range for short inputs
     }
     
     const lines = text.split('\n').filter(line => line.trim());
@@ -585,13 +595,17 @@ export class ScoringService {
     const userBalancedScore = this.calculateBalancedScore(userComponents, userWeights);
     const aiBalancedScore = this.calculateBalancedScore(aiComponents, aiWeights);
     
-    // Apply minimum score boost for short verses
+    // Apply STRICT minimum scoring - no participation trophies
     const wordCount = userVerse.split(/\s+/).filter(w => w.length > 0).length;
-    let minUserScore = 15; // Base minimum
-    if (wordCount <= 4) {
-      minUserScore = Math.max(20, wordCount * 5); // 20-40 for very short
-    } else if (wordCount <= 8) {
-      minUserScore = Math.max(15, wordCount * 3); // 15-24 for short
+    let minUserScore = 0; // No artificial minimum
+    
+    // Only give tiny minimums for absolutely minimal effort
+    if (wordCount <= 1) {
+      minUserScore = 3; // Single words = near zero
+    } else if (wordCount <= 3) {
+      minUserScore = 8; // Very short = very low
+    } else if (wordCount <= 6) {
+      minUserScore = 12; // Short = low
     }
     
     const userScore = Math.round(Math.max(minUserScore, userBalancedScore));
