@@ -22,21 +22,21 @@ const battleArenaImage = "/images/Epic_rap_battle_arena_5a01b4d4.png";
 
 export default function BattleArena() {
   const [difficulty, setDifficulty] = useState<"easy" | "normal" | "hard">("normal");
-  const [profanityFilter, setProfanityFilter] = useState(false); // Default to uncensored for authentic battle rap
-  const [lyricComplexity, setLyricComplexity] = useState(75); // Default to high quality
-  const [styleIntensity, setStyleIntensity] = useState(85); // Intense style for authenticity
+  const [profanityFilter, setProfanityFilter] = useState(false);
+  const [lyricComplexity, setLyricComplexity] = useState(75);
+  const [styleIntensity, setStyleIntensity] = useState(85);
   const [advancedSettings, setAdvancedSettings] = useState({
-    aiAggressiveness: 90, // High aggression for competitive battles
-    responseTime: 2000, // Faster response for better UX
+    aiAggressiveness: 90,
+    responseTime: 2000,
     analysisDepth: "enhanced" as const,
-    voiceSpeed: 1.1, // Slightly faster for energy
+    voiceSpeed: 1.1,
     battleLength: 5
   });
 
   const handleAdvancedSettingsChange = (newSettings: typeof advancedSettings) => {
     setAdvancedSettings(newSettings);
   };
-  const [battleTimer, setBattleTimer] = useState(105); // 1:45
+  const [battleTimer, setBattleTimer] = useState(105);
   const [liveTranscription, setLiveTranscription] = useState("");
   const [aiResponse, setAiResponse] = useState("");
   const [currentAiAudio, setCurrentAiAudio] = useState<string>();
@@ -282,7 +282,7 @@ export default function BattleArena() {
     setLiveTranscription("");
     setAiResponse("");
     setCurrentAiAudio(undefined);
-    setBattleTimer(120);
+    setBattleTimer(105);
     setSelectedCharacter(null);
     setShowCharacterSelector(true);
   };
@@ -317,7 +317,7 @@ export default function BattleArena() {
   };
 
   const getConnectionStatus = () => {
-    return "Connected"; // Could implement real connection monitoring
+    return "Connected";
   };
 
   const handleAnalyzeLyrics = (text: string, source: string) => {
