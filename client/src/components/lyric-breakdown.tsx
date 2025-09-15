@@ -86,6 +86,11 @@ export function LyricBreakdown({ text, isVisible, onClose }: LyricBreakdownProps
   const [loading, setLoading] = useState(false);
   const [highlightedText, setHighlightedText] = useState("");
 
+  // Don't render anything if not visible
+  if (!isVisible) {
+    return null;
+  }
+
   useEffect(() => {
     if (isVisible && text) {
       analyzeText();
