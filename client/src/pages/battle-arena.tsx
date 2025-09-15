@@ -237,9 +237,8 @@ export default function BattleArena() {
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
       
-      // 🎵 CLEAR OLD AUDIO - Prevent old AI audio from playing during new round processing
-      console.log('🧹 Clearing previous AI audio to prevent old lyrics from playing');
-      setCurrentAiAudio(undefined);
+      // 🎵 OLD AUDIO ALREADY CLEARED - Audio was cleared when recording started in handleRecordingStart
+      // No need to clear again here as it interferes with new audio timing
       
       setIsTranscribing(true);
       
@@ -298,7 +297,7 @@ export default function BattleArena() {
       setIsTranscribing(false);
       updateBattleState({ isAIResponding: true });
 
-      const result = await submitRound({ audio: recording.blob, abortSignal: abortController.signal });
+      const result = await submitRound({ audio: recording.blob });
       
       if (result) {
         console.log('🎉 Full battle result received:', {
@@ -685,7 +684,7 @@ export default function BattleArena() {
                   updateBattleState({ isAIResponding: true });
                   
                   try {
-                    const result = await submitRound({ userVerse: text, abortSignal: abortController.signal });
+                    const result = await submitRound({ userVerse: text });
                     
                     if (result) {
                       console.log('🎉 Battle round response received:', {
