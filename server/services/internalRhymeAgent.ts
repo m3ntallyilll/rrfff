@@ -779,9 +779,6 @@ export class InternalRhymeAgent {
     
     return 2; // Standard rhyme
   }
-    
-    return 2; // Single syllable perfect rhyme = strong
-  }
 
   private identifyRhymeTechnique(word1: string, word2: string): InternalRhymeSpan['technique'] {
     const word1Syllables = this.countSyllables(word1);
