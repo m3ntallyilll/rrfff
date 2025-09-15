@@ -43,6 +43,9 @@ export class PhoneticRhymeAnalyzer {
   private nextFamilyLetter = 'A';
   private readonly SLANT_THRESHOLD = 0.7; // Threshold for slant rhyme similarity
 
+  private static analysisDepth = 0;
+  private static readonly MAX_ANALYSIS_DEPTH = 3;
+
   constructor() {
     this.loadCMUDictionary();
     console.log('🎯 PhoneticRhymeAnalyzer initialized with CMU dictionary');
@@ -55,7 +58,7 @@ export class PhoneticRhymeAnalyzer {
     try {
       // Try to load from node_modules first
       const cmuPath = path.join(process.cwd(), 'node_modules', 'cmu-pronouncing-dictionary', 'cmudict.txt');
-      
+
       if (fs.existsSync(cmuPath)) {
         const dictData = fs.readFileSync(cmuPath, 'utf8');
         this.parseCMUDict(dictData);
@@ -72,22 +75,22 @@ export class PhoneticRhymeAnalyzer {
   private parseCMUDict(dictData: string): void {
     const lines = dictData.split('\n');
     let wordCount = 0;
-    
+
     for (const line of lines) {
       if (line.startsWith(';;;') || line.trim() === '') continue;
-      
+
       const parts = line.split('  ');
       if (parts.length >= 2) {
         let word = parts[0].toLowerCase();
-        
+
         // Handle alternative pronunciations like WORD(1)
         const parenIndex = word.indexOf('(');
         if (parenIndex > 0) {
           word = word.substring(0, parenIndex);
         }
-        
+
         const phonemes = parts[1].trim().split(' ');
-        
+
         if (!this.cmuDict.has(word)) {
           this.cmuDict.set(word, []);
         }
@@ -116,13 +119,13 @@ export class PhoneticRhymeAnalyzer {
       ['stack', [['S', 'T', 'AE1', 'K']]],
       ['crack', [['K', 'R', 'AE1', 'K']]],
       ['black', [['B', 'L', 'AE1', 'K']]],
-      
+
       // Rhyme endings
       ['nation', [['N', 'EY1', 'SH', 'AH0', 'N']]],
       ['creation', [['K', 'R', 'IY0', 'EY1', 'SH', 'AH0', 'N']]],
       ['devastation', [['D', 'EH2', 'V', 'AH0', 'S', 'T', 'EY1', 'SH', 'AH0', 'N']]],
       ['domination', [['D', 'AA2', 'M', 'AH0', 'N', 'EY1', 'SH', 'AH0', 'N']]],
-      
+
       // Common endings
       ['time', [['T', 'AY1', 'M']]],
       ['rhyme', [['R', 'AY1', 'M']]],
@@ -142,61 +145,81 @@ export class PhoneticRhymeAnalyzer {
    * Main entry point: Analyze rap lyrics with comprehensive phonetic rhyme scheme
    */
   analyzeRhymeScheme(lyrics: string): RhymeSchemeResult {
-    console.log('🎯 PhoneticRhymeAnalyzer: Starting comprehensive rhyme analysis');
-    
-    // Reset state for new analysis
-    this.families.clear();
-    this.nextFamilyLetter = 'A';
-    
-    const lines = this.preprocessLyrics(lyrics);
-    const lineAnalyses: LineAnalysis[] = [];
-    let totalPerfectRhymes = 0;
-    let totalSlantRhymes = 0;
-
-    // Process each line
-    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-      const line = lines[lineIndex];
-      if (!line.trim()) continue;
-
-      const analysis = this.analyzeLine(line, lineIndex);
-      lineAnalyses.push(analysis);
-      
-      // Count rhyme types by analyzing family patterns
-      analysis.familyCounts.forEach((count, familyLetter) => {
-        const family = this.families.get(familyLetter);
-        if (family && count > 1) {
-          // Determine perfect vs slant based on pattern exactness
-          const rhymePairs = Math.floor(count / 2);
-          
-          // Analyze pattern precision for classification
-          const isExactPattern = this.isExactRhymePattern(family.pattern);
-          
-          if (isExactPattern) {
-            totalPerfectRhymes += rhymePairs;
-          } else {
-            totalSlantRhymes += rhymePairs;
-          }
-        }
-      });
+    // Prevent infinite recursion and memory leaks
+    if (PhoneticRhymeAnalyzer.analysisDepth >= PhoneticRhymeAnalyzer.MAX_ANALYSIS_DEPTH) {
+      console.log('🚫 PhoneticRhymeAnalyzer: Maximum recursion depth reached, returning cached result');
+      return this.createEmptyResult();
     }
 
-    // Calculate overall metrics
-    const totalLines = lineAnalyses.length;
-    const totalInternalRhymes = lineAnalyses.reduce((sum, analysis) => {
-      return sum + Array.from(analysis.familyCounts.values()).reduce((a, b) => a + b, 0);
-    }, 0);
-    
-    const rhymeDensity = totalLines > 0 ? totalInternalRhymes / totalLines : 0;
-    const overallScheme = lineAnalyses.map(analysis => analysis.scheme);
+    PhoneticRhymeAnalyzer.analysisDepth++;
 
-    return {
-      lines: lineAnalyses,
-      families: this.families,
-      overallScheme,
-      rhymeDensity,
-      perfectRhymes: totalPerfectRhymes,
-      slantRhymes: totalSlantRhymes
-    };
+    try {
+      console.log('🎯 PhoneticRhymeAnalyzer: Starting comprehensive rhyme analysis');
+
+      if (!lyrics || lyrics.trim().length === 0) {
+        return this.createEmptyResult();
+      }
+
+      // Reset state for new analysis
+      this.families.clear();
+      this.nextFamilyLetter = 'A';
+
+      const lines = this.preprocessLyrics(lyrics);
+      const lineAnalyses: LineAnalysis[] = [];
+      let totalPerfectRhymes = 0;
+      let totalSlantRhymes = 0;
+
+      // Process each line
+      for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+        const line = lines[lineIndex];
+        if (!line.trim()) continue;
+
+        const analysis = this.analyzeLine(line, lineIndex);
+        lineAnalyses.push(analysis);
+
+        // Count rhyme types by analyzing family patterns
+        analysis.familyCounts.forEach((count, familyLetter) => {
+          const family = this.families.get(familyLetter);
+          if (family && count > 1) {
+            // Determine perfect vs slant based on pattern exactness
+            const rhymePairs = Math.floor(count / 2);
+
+            // Analyze pattern precision for classification
+            const isExactPattern = this.isExactRhymePattern(family.pattern);
+
+            if (isExactPattern) {
+              totalPerfectRhymes += rhymePairs;
+            } else {
+              totalSlantRhymes += rhymePairs;
+            }
+          }
+        });
+      }
+
+      // Calculate overall metrics
+      const totalLines = lineAnalyses.length;
+      const totalInternalRhymes = lineAnalyses.reduce((sum, analysis) => {
+        return sum + Array.from(analysis.familyCounts.values()).reduce((a, b) => a + b, 0);
+      }, 0);
+
+      const rhymeDensity = totalLines > 0 ? totalInternalRhymes / totalLines : 0;
+      const overallScheme = lineAnalyses.map(analysis => analysis.scheme);
+
+      return {
+        lines: lineAnalyses,
+        families: this.families,
+        overallScheme,
+        rhymeDensity,
+        perfectRhymes: totalPerfectRhymes,
+        slantRhymes: totalSlantRhymes
+      };
+    } catch (error) {
+      console.error('🚫 PhoneticRhymeAnalyzer: Analysis error:', error);
+      return this.createEmptyResult();
+    } finally {
+      // Always reset the recursion counter
+      PhoneticRhymeAnalyzer.analysisDepth = Math.max(0, PhoneticRhymeAnalyzer.analysisDepth - 1);
+    }
   }
 
   /**
@@ -262,11 +285,11 @@ export class PhoneticRhymeAnalyzer {
 
     for (const phoneme of phonemes) {
       currentSyllable.push(phoneme);
-      
+
       // Check if this phoneme ends a syllable (has stress marker)
       if (phoneme.match(/[012]$/)) {
         const stress = parseInt(phoneme.slice(-1));
-        
+
         // Extract corresponding text portion (approximate)
         const syllableLength = Math.max(1, Math.floor(word.length / this.countSyllablesInPhonemes(phonemes)));
         const syllableText = word.slice(wordCharIndex, wordCharIndex + syllableLength);
@@ -346,7 +369,7 @@ export class PhoneticRhymeAnalyzer {
       const start = i * syllableLength;
       const end = Math.min(start + syllableLength, word.length);
       const text = word.slice(start, end);
-      
+
       syllables.push({
         phonemes: [text.toUpperCase()], // Approximate
         text,
@@ -442,7 +465,7 @@ export class PhoneticRhymeAnalyzer {
         return phoneme.replace(/[012]$/, ''); // Remove stress marker
       }
     }
-    
+
     // Fallback: first phoneme
     return phonemes[0]?.replace(/[012]$/, '') || '';
   }
@@ -488,10 +511,10 @@ export class PhoneticRhymeAnalyzer {
    */
   private buildSchemeAnnotation(syllableCount: number, familyCounts: Map<string, number>): string {
     let scheme = `${syllableCount}–`;
-    
+
     // Sort families by letter for consistent output
     const sortedFamilies = Array.from(familyCounts.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-    
+
     for (const [letter, count] of sortedFamilies) {
       if (count > 0) {
         scheme += `${letter}${this.toSuperscript(count)}`;
@@ -554,6 +577,20 @@ export class PhoneticRhymeAnalyzer {
     return a.length === b.length && a.every((val, index) => val === b[index]);
   }
 
+  /**
+   * Creates an empty result object for error cases.
+   */
+  private createEmptyResult(): RhymeSchemeResult {
+    return {
+      lines: [],
+      families: new Map(),
+      overallScheme: [],
+      rhymeDensity: 0,
+      perfectRhymes: 0,
+      slantRhymes: 0
+    };
+  }
+
 
   /**
    * Get enhanced rhyme analysis for scoring
@@ -567,10 +604,10 @@ export class PhoneticRhymeAnalyzer {
     complexityScore: number;
   } {
     const analysis = this.analyzeRhymeScheme(lyrics);
-    
+
     const totalRhymes = Array.from(analysis.families.values())
       .reduce((sum, family) => sum + family.occurrences, 0);
-    
+
     const internalRhymes = analysis.lines.reduce((sum, line) => {
       return sum + Array.from(line.familyCounts.values()).reduce((a, b) => a + b, 0);
     }, 0);
