@@ -46,27 +46,6 @@ export default function BattleArena() {
   const [showLyricBreakdown, setShowLyricBreakdown] = useState(false);
   const [currentAnalysisText, setCurrentAnalysisText] = useState("");
 
-  // Get latest round scores for authentic user stats (zero mock data)
-  const getLatestUserScores = () => {
-    if (!rounds || rounds.length === 0) {
-      return { rhymeDensity: 0, flowQuality: 0, creativity: 0 };
-    }
-    
-    // Get the most recent round with user input
-    const latestRound = rounds[rounds.length - 1];
-    if (!latestRound?.scores) {
-      return { rhymeDensity: 0, flowQuality: 0, creativity: 0 };
-    }
-    
-    return {
-      rhymeDensity: Math.round(latestRound.scores.rhymeDensity || 0),
-      flowQuality: Math.round(latestRound.scores.flowQuality || 0), 
-      creativity: Math.round(latestRound.scores.creativity || 0)
-    };
-  };
-  
-  const userScores = getLatestUserScores();
-
   const { toast } = useToast();
   
   // Set up global function for persistent score notifications
@@ -98,6 +77,27 @@ export default function BattleArena() {
     updateBattleState,
     submitRound,
   } = useBattleState();
+
+  // Get latest round scores for authentic user stats (zero mock data)
+  const getLatestUserScores = () => {
+    if (!rounds || rounds.length === 0) {
+      return { rhymeDensity: 0, flowQuality: 0, creativity: 0 };
+    }
+    
+    // Get the most recent round with user input
+    const latestRound = rounds[rounds.length - 1];
+    if (!latestRound?.scores) {
+      return { rhymeDensity: 0, flowQuality: 0, creativity: 0 };
+    }
+    
+    return {
+      rhymeDensity: Math.round(latestRound.scores.rhymeDensity || 0),
+      flowQuality: Math.round(latestRound.scores.flowQuality || 0), 
+      creativity: Math.round(latestRound.scores.creativity || 0)
+    };
+  };
+  
+  const userScores = getLatestUserScores();
 
   // SFX Manager for crowd reactions, bells, and air horns
   const {
