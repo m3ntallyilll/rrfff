@@ -1,4 +1,4 @@
-import { ElevenLabsApi, ElevenLabs } from '@elevenlabs/elevenlabs-js';
+import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 import fs from 'fs';
 import path from 'path';
 
@@ -9,12 +9,12 @@ export interface ElevenLabsTTSOptions {
 }
 
 export class ElevenLabsTTSService {
-  private elevenlabs: ElevenLabs;
+  private elevenlabs: ElevenLabsClient;
   private outputDir: string;
   private voiceCache = new Map<string, any>();
 
   constructor(options: ElevenLabsTTSOptions) {
-    this.elevenlabs = new ElevenLabs({
+    this.elevenlabs = new ElevenLabsClient({
       apiKey: options.apiKey,
     });
     
@@ -194,10 +194,14 @@ export class ElevenLabsTTSService {
 
       console.log(`🎯 ElevenLabs voice settings: stability=${voiceSettings.stability}, similarity=${voiceSettings.similarity_boost}, style=${voiceSettings.style}`);
 
+      // Apply speed multiplier if provided (ElevenLabs doesn't support direct speed control, so we adjust duration estimate)
+      const speedMultiplier = options.speedMultiplier || 1.0;
+      console.log(`🎯 ElevenLabs speed: ${speedMultiplier}x`);
+
       // Generate speech with ElevenLabs API
       const audioResponse = await this.elevenlabs.textToSpeech.convert(voiceId, {
         text: processedText,
-        model_id: "eleven_multilingual_v2", // Latest multilingual model
+        modelId: "eleven_multilingual_v2", // Latest multilingual model
         output_format: "mp3_44100_128", // High quality MP3
         voice_settings: voiceSettings
       });
@@ -226,8 +230,9 @@ export class ElevenLabsTTSService {
       const base64Audio = buffer.toString('base64');
       const audioUrl = `data:audio/mpeg;base64,${base64Audio}`;
 
-      // Estimate duration (rough calculation for MP3)
-      const duration = Math.floor(processedText.length / 15);
+      // Estimate duration (rough calculation for MP3, adjusted for speed multiplier)
+      const baseDuration = Math.floor(processedText.length / 15);
+      const duration = Math.floor(baseDuration / speedMultiplier);
 
       return {
         audioUrl,

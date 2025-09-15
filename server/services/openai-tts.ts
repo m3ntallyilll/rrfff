@@ -57,6 +57,7 @@ export class OpenAITTSService {
       voiceStyle?: 'aggressive' | 'confident' | 'smooth' | 'intense' | 'playful';
       characterName?: string;
       gender?: string;
+      speedMultiplier?: number;
     } = {}
   ): Promise<{ audioUrl: string; duration: number }> {
     console.log(`🎤 OpenAI TTS generating for ${characterId}: "${text.substring(0, 50)}..."`);
@@ -87,7 +88,7 @@ export class OpenAITTSService {
         input: cleanText,
         instructions: instructions, // Steerability feature for authentic rapper delivery
         response_format: 'wav',
-        speed: 1.0
+        speed: options.speedMultiplier || 1.0
       });
 
       const timestamp = Date.now();

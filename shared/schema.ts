@@ -146,8 +146,9 @@ export const users = pgTable("users", {
   totalWins: integer("total_wins").default(0),
   // User-managed API keys for enhanced TTS services
   openaiApiKey: varchar("openai_api_key"), // User's encrypted OpenAI API key
-  groqApiKey: varchar("groq_api_key"), // User's encrypted Groq API key  
-  preferredTtsService: varchar("preferred_tts_service").default("system"), // "openai", "groq", "system"
+  groqApiKey: varchar("groq_api_key"), // User's encrypted Groq API key
+  elevenlabsApiKey: varchar("elevenlabs_api_key"), // User's encrypted ElevenLabs API key
+  preferredTtsService: varchar("preferred_tts_service").default("system"), // "openai", "groq", "elevenlabs", "system"
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
