@@ -150,9 +150,8 @@ export class PhoneticRhymeAnalyzer {
   analyzeRhymeScheme(lyrics: string): RhymeSchemeResult {
     const now = Date.now();
     
-    // EMERGENCY: Completely disable analyzer to prevent infinite loops
-    console.log('🚫 PhoneticRhymeAnalyzer: DISABLED to prevent infinite loops');
-    return this.createEmptyResult();
+    // Advanced phonetic analysis enabled with safety mechanisms
+    console.log('🎯 Enhanced rhyme analysis enabled - full phonetic processing');
     
     // Circuit breaker: prevent multiple simultaneous analyses
     if (PhoneticRhymeAnalyzer.analysisInProgress) {
