@@ -43,7 +43,7 @@ export class GroqTTSService {
 
     // Character-specific voice mapping
     const voiceMap: Record<string, string> = {
-      'razor': 'Cheyenne-PlayAI',  // Female, sharp and cutting
+      'razor': 'Deedee-PlayAI',    // Female, playful and sharp
       'venom': 'Thunder-PlayAI',   // Male, intense and powerful
       'silk': 'Basil-PlayAI',      // Male, smooth and controlled
       'cypher': 'Fritz-PlayAI',    // Robot - Deep, authoritative voice for CYPHER-9000

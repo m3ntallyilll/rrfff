@@ -364,34 +364,42 @@ export class DatabaseStorage implements IStorage {
     if (cached) {
       return cached as any;
     }
-    const user = await this.getUser(userId);
-    if (!user) {
+
+    try {
+      const user = await this.getUser(userId);
+      if (!user) {
+        return { totalBattles: 0, totalWins: 0, winRate: 0, battlesThisMonth: 0 };
+      }
+
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      // Use COUNT query instead of fetching all records to avoid 67MB limit
+      const battlesThisMonthCount = await db
+        .select({ count: count() })
+        .from(battles)
+        .where(
+          and(
+            eq(battles.userId, userId),
+            gte(battles.createdAt, monthStart)
+          )
+        );
+
+      const result = {
+        totalBattles: user.totalBattles || 0,
+        totalWins: user.totalWins || 0,
+        winRate: user.totalBattles ? ((user.totalWins || 0) / user.totalBattles) * 100 : 0,
+        battlesThisMonth: battlesThisMonthCount[0]?.count || 0,
+      };
+
+      // Cache the result for 5 minutes
+      cache.set(cacheKey, result);
+      return result;
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+      // Return fallback stats if query fails
       return { totalBattles: 0, totalWins: 0, winRate: 0, battlesThisMonth: 0 };
     }
-
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    const userBattles = await db
-      .select()
-      .from(battles)
-      .where(
-        and(
-          eq(battles.userId, userId),
-          gte(battles.createdAt, monthStart)
-        )
-      );
-
-    const result = {
-      totalBattles: user.totalBattles || 0,
-      totalWins: user.totalWins || 0,
-      winRate: user.totalBattles ? ((user.totalWins || 0) / user.totalBattles) * 100 : 0,
-      battlesThisMonth: userBattles.length,
-    };
-
-    // Cache the result for 5 minutes
-    cache.set(cacheKey, result);
-    return result;
   }
 
   // Battle round processing methods
