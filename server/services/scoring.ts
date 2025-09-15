@@ -9,81 +9,149 @@ export class ScoringService {
     console.log('🎯 ScoringService initialized with PhoneticRhymeAnalyzer');
   }
 
-  calculateRhymeDensity(text: string): number {
+  calculateRhymeDensity(text: string, isFinalScore: boolean = false, battleId?: string): number {
     // Use the advanced phonetic analyzer for accurate rhyme detection
-    const rhymeAnalysis = this.phoneticAnalyzer.getEnhancedRhymeAnalysis(text);
+    const rhymeAnalysis = this.phoneticAnalyzer.getEnhancedRhymeAnalysis(text, isFinalScore, battleId);
     
-    // The analyzer provides comprehensive metrics
-    const rhymeDensityScore = Math.min(60, rhymeAnalysis.rhymeDensity * 100); // Max 60 points
-    const complexityScore = Math.min(40, rhymeAnalysis.complexityScore); // Max 40 points
+    console.log(`🎵 Advanced rhyme analysis ${isFinalScore ? 'FINAL' : 'preview'}: Perfect=${rhymeAnalysis.perfectRhymes}, Slant=${rhymeAnalysis.slantRhymes}, Multi-syllabic=${rhymeAnalysis.multiSyllabicScore}, Assonance=${rhymeAnalysis.assonanceScore}`);
     
-    return Math.round(rhymeDensityScore + complexityScore);
+    // COMPREHENSIVE SCORING using all advanced metrics
+    const perfectRhymeScore = Math.min(35, rhymeAnalysis.perfectRhymes * 8);
+    const slantRhymeScore = Math.min(15, rhymeAnalysis.slantRhymes * 3);
+    const internalRhymeScore = Math.min(20, rhymeAnalysis.advancedInternalRhymes * 2);
+    const multiSyllabicScore = Math.min(15, rhymeAnalysis.multiSyllabicScore * 0.3);
+    const assonanceScore = Math.min(10, rhymeAnalysis.assonanceScore * 0.1);
+    const consonanceScore = Math.min(5, rhymeAnalysis.consonanceScore * 0.1);
+    
+    const totalScore = Math.round(
+      perfectRhymeScore + slantRhymeScore + internalRhymeScore + 
+      multiSyllabicScore + assonanceScore + consonanceScore
+    );
+    
+    console.log(`🎵 Rhyme density breakdown: Perfect ${perfectRhymeScore}/35, Slant ${slantRhymeScore}/15, Internal ${internalRhymeScore}/20, Multi-syll ${multiSyllabicScore}/15, Assonance ${assonanceScore}/10, Consonance ${consonanceScore}/5`);
+    
+    return Math.min(100, totalScore);
   }
 
-  calculateFlowQuality(text: string): number {
+  calculateFlowQuality(text: string, isFinalScore: boolean = false, battleId?: string): number {
     const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 0);
-    console.log(`🎵 Analyzing flow quality for ${words.length} words...`);
+    console.log(`🎵 Analyzing ${isFinalScore ? 'FINAL' : 'preview'} flow quality for ${words.length} words...`);
     
+    // Get advanced phonetic analysis for authentic flow scoring
+    const rhymeAnalysis = this.phoneticAnalyzer.getEnhancedRhymeAnalysis(text, isFinalScore, battleId);
     const lines = text.split('\n').filter(line => line.trim());
-    let totalScore = 0;
-
-    for (const line of lines) {
-      const syllableCount = this.countSyllables(line);
-      const wordCount = line.split(' ').filter(word => word.trim()).length;
-      
-      // Ideal: 8-16 syllables per line, 4-8 words per line
-      const syllableScore = this.scoreInRange(syllableCount, 8, 16);
-      const wordScore = this.scoreInRange(wordCount, 4, 8);
-      
-      totalScore += (syllableScore + wordScore) / 2;
-    }
-
-    return lines.length > 0 ? totalScore / lines.length : 0;
+    
+    if (lines.length === 0) return 0;
+    
+    // AUTHENTIC FLOW SCORING using advanced metrics
+    
+    // 1. RHYTHM CONSISTENCY (35 points max)
+    const rhythmScore = Math.min(35, rhymeAnalysis.rhythmConsistency * 0.35);
+    
+    // 2. SYLLABLE FLOW PATTERNS (25 points max)
+    let syllableFlowScore = 0;
+    const syllableCounts = lines.map(line => this.countAdvancedSyllables(line, isFinalScore));
+    const avgSyllables = syllableCounts.reduce((a, b) => a + b, 0) / syllableCounts.length;
+    
+    // Penalize inconsistent syllable counts less harshly for skilled rappers
+    const syllableConsistency = 1 - (syllableCounts.reduce((variance, count) => {
+      return variance + Math.abs(count - avgSyllables);
+    }, 0) / (syllableCounts.length * avgSyllables));
+    
+    syllableFlowScore = Math.min(25, syllableConsistency * 25 + (avgSyllables >= 8 && avgSyllables <= 16 ? 10 : 0));
+    
+    // 3. PHONETIC FLOW COMPLEXITY (20 points max)
+    const phoneticFlowScore = Math.min(20, rhymeAnalysis.phoneticComplexity * 0.2);
+    
+    // 4. INTERNAL RHYME FLOW (10 points max)
+    const internalFlowScore = Math.min(10, rhymeAnalysis.advancedInternalRhymes * 0.5);
+    
+    // 5. MULTI-SYLLABIC FLOW (10 points max)
+    const multiSyllableFlowScore = Math.min(10, rhymeAnalysis.multiSyllabicScore * 0.1);
+    
+    const totalScore = Math.round(
+      rhythmScore + syllableFlowScore + phoneticFlowScore + 
+      internalFlowScore + multiSyllableFlowScore
+    );
+    
+    console.log(`🎵 Flow breakdown: Rhythm ${rhythmScore}/35, Syllables ${syllableFlowScore}/25, Phonetic ${phoneticFlowScore}/20, Internal ${internalFlowScore}/10, Multi-syll ${multiSyllableFlowScore}/10`);
+    
+    return Math.min(100, totalScore);
   }
 
-  calculateCreativity(text: string): number {
+  private countAdvancedSyllables(line: string, useAdvanced: boolean): number {
+    if (useAdvanced) {
+      // Use phonetic analyzer for accurate syllable counting
+      const words = this.phoneticAnalyzer.tokenizeExternal(line);
+      return words.reduce((total, word) => {
+        return total + this.getAccurateSyllableCount(word);
+      }, 0);
+    }
+    return this.countSyllables(line);
+  }
+
+  private getAccurateSyllableCount(word: string): number {
+    // This would use the CMU dictionary if available, fallback to heuristic
+    const vowelGroups = word.toLowerCase().match(/[aeiou]+/g);
+    const baseSyllables = vowelGroups ? vowelGroups.length : 1;
+    
+    // Adjust for common patterns
+    if (word.endsWith('e') && baseSyllables > 1) {
+      return baseSyllables - 1;
+    }
+    
+    return Math.max(1, baseSyllables);
+  }
+
+  calculateCreativity(text: string, isFinalScore: boolean = false, battleId?: string): number {
     const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 0);
     
     // COMPREHENSIVE ANALYSIS - analyze everything regardless of length
-    console.log(`🎭 Analyzing ${words.length} words for creativity...`);
+    console.log(`🎭 Analyzing ${words.length} words for creativity ${isFinalScore ? 'FINAL SCORE' : 'preview'}...`);
     
     const lines = text.split('\n').filter(line => line.trim());
     
-    // Content scoring based on actual substance
-    let contentBonus = Math.min(15, Math.max(0, words.length * 1.5)); // No artificial minimum
-    if (words.length >= 10) contentBonus = 15; // Full bonus for substantial verses
+    // Get advanced phonetic analysis for authentic creativity scoring
+    const rhymeAnalysis = this.phoneticAnalyzer.getEnhancedRhymeAnalysis(text, isFinalScore, battleId);
     
-    // 2. LEXICAL DIVERSITY (vocabulary richness) - Based on actual diversity
+    // 1. BATTLE-SPECIFIC VOCABULARY COMPLEXITY (20 points max)
+    const vocabularyComplexity = this.calculateBattleVocabularyComplexity(text, isFinalScore);
+    
+    // 2. LEXICAL DIVERSITY enhanced with phonetic analysis (15 points max)
     const uniqueWords = new Set(words);
     const diversityRatio = words.length > 0 ? uniqueWords.size / words.length : 0;
-    const lexicalDiversity = Math.min(15, diversityRatio * 15);
+    const phoneticallyEnhancedDiversity = isFinalScore ? 
+      Math.min(15, diversityRatio * 15 + rhymeAnalysis.phoneticComplexity * 0.1) :
+      Math.min(15, diversityRatio * 15);
     
-    // 3. ADVANCED WORDPLAY DETECTION
-    const wordplayScore = this.detectAdvancedWordplay(text);
+    // 3. ADVANCED WORDPLAY DETECTION enhanced (20 points max) 
+    const wordplayScore = this.detectAdvancedWordplay(text, rhymeAnalysis, isFinalScore);
     
-    // 4. METAPHORS & SIMILES
+    // 4. METAPHORS & SIMILES (15 points max)
     const figurativeScore = this.detectFigurativeLanguage(text);
     
-    // 5. PUNCHLINES & BATTLE TACTICS
+    // 5. PUNCHLINES & BATTLE TACTICS (50 points max)
     const punchlineScore = this.detectPunchlines(text);
     
-    // 6. HOMONYMS & DOUBLE MEANINGS
-    const homonymScore = this.detectHomonyms(text);
+    // 6. HOMONYMS & DOUBLE MEANINGS enhanced (10 points max)
+    const homonymScore = this.detectHomonyms(text, rhymeAnalysis, isFinalScore);
     
-    // 7. FLOW CONSISTENCY & RHYTHM
-    const rhythmScore = this.analyzeRhythm(text);
+    // 7. RHYTHM & PHONETIC FLOW enhanced (10 points max)
+    const rhythmScore = isFinalScore ? 
+      Math.min(10, rhymeAnalysis.rhythmConsistency * 0.1) :
+      this.analyzeRhythm(text);
     
-    // 8. ORIGINALITY (anti-cliché)
-    const originalityScore = this.calculateOriginality(text);
+    // 8. ORIGINALITY enhanced with phonetic uniqueness (15 points max)
+    const originalityScore = this.calculateOriginality(text, rhymeAnalysis, isFinalScore);
     
     const totalScore = Math.round(
-      contentBonus + lexicalDiversity + wordplayScore + figurativeScore + 
+      vocabularyComplexity + phoneticallyEnhancedDiversity + wordplayScore + figurativeScore + 
       punchlineScore + homonymScore + rhythmScore + originalityScore
     );
     
-    console.log(`🎭 Creativity breakdown: Content ${contentBonus}/15, Vocab ${lexicalDiversity}/15, Wordplay ${wordplayScore}/20, Figurative ${figurativeScore}/15, Punchlines ${punchlineScore}/50, Homonyms ${homonymScore}/10, Rhythm ${rhythmScore}/10, Original ${originalityScore}/15`);
+    console.log(`🎭 Creativity breakdown: Vocab Complexity ${vocabularyComplexity}/20, Diversity ${phoneticallyEnhancedDiversity}/15, Wordplay ${wordplayScore}/20, Figurative ${figurativeScore}/15, Punchlines ${punchlineScore}/50, Homonyms ${homonymScore}/10, Rhythm ${rhythmScore}/10, Originality ${originalityScore}/15`);
     
-    return Math.min(100, totalScore);
+    return Math.min(100, totalScore + (isFinalScore ? 5 : 0)); // Bonus for final score processing
   }
 
   private detectWordplay(text: string): number {
@@ -143,7 +211,63 @@ export class ScoringService {
     return score;
   }
 
-  // NEW ADVANCED DETECTION METHODS
+  /**
+   * Calculate battle-specific vocabulary complexity
+   */
+  private calculateBattleVocabularyComplexity(text: string, isFinalScore: boolean = false): number {
+    const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+    let complexityScore = 0;
+    
+    // 1. ADVANCED BATTLE VOCABULARY (10 points max)
+    const advancedBattleTerms = [
+      'devastation', 'annihilation', 'domination', 'obliteration',
+      'metaphorical', 'lyrical', 'surgical', 'mathematical',
+      'philosophical', 'theoretical', 'psychological', 'methodical',
+      'intellectual', 'spectacular', 'miraculous', 'victorious'
+    ];
+    
+    const advancedTermCount = words.filter(word => 
+      advancedBattleTerms.includes(word) || word.length > 8
+    ).length;
+    
+    complexityScore += Math.min(10, advancedTermCount * 2);
+    
+    // 2. TECHNICAL RAP TERMINOLOGY (5 points max)
+    const technicalTerms = [
+      'syllable', 'phoneme', 'assonance', 'consonance', 'alliteration',
+      'metaphor', 'simile', 'wordplay', 'punchline', 'delivery',
+      'cadence', 'rhythm', 'tempo', 'flow', 'freestyle'
+    ];
+    
+    const technicalCount = words.filter(word => technicalTerms.includes(word)).length;
+    complexityScore += Math.min(5, technicalCount * 1.5);
+    
+    // 3. VOCABULARY SOPHISTICATION (5 points max)
+    const avgWordLength = words.reduce((sum, word) => sum + word.length, 0) / words.length;
+    const sophisticationScore = Math.min(5, (avgWordLength - 4) * 2); // Bonus for longer words
+    complexityScore += Math.max(0, sophisticationScore);
+    
+    return Math.min(20, complexityScore);
+  }
+
+  private detectPhoneticHomonyms(words: string[]): number {
+    // Simplified phonetic homonym detection
+    const phoneticGroups = [
+      ['know', 'no'], ['new', 'knew'], ['two', 'to', 'too'],
+      ['four', 'for', 'fore'], ['here', 'hear'], ['see', 'sea'],
+      ['buy', 'by', 'bye'], ['eye', 'I'], ['one', 'won']
+    ];
+    
+    let homonyms = 0;
+    phoneticGroups.forEach(group => {
+      const foundWords = group.filter(word => words.includes(word));
+      if (foundWords.length >= 2) homonyms++;
+    });
+    
+    return homonyms;
+  }
+
+  // ENHANCED DETECTION METHODS
   
   private detectAdvancedWordplay(text: string): number {
     let score = 0;
@@ -533,18 +657,58 @@ export class ScoringService {
     return rhymeCount / minLength >= 0.6;
   }
   
-  private calculateOriginality(text: string): number {
-    // Check against common rap clichés
+  private calculateOriginality(text: string, rhymeAnalysis?: any, isFinalScore: boolean = false): number {
+    const lower = text.toLowerCase();
+    let originalityScore = 15; // Start with full points
+    
+    // Enhanced clichés and overused phrases in rap
     const cliches = [
-      'mic check', 'drop the beat', 'in the house', 'make some noise', 
-      'put your hands up', 'lets go', 'turn up', 'haters gonna hate'
+      'mic check', 'drop the beat', 'in the house', 'make some noise',
+      'put your hands up', 'lets go', 'turn up', 'haters gonna hate',
+      'money over everything', 'started from the bottom',
+      'real recognize real', 'keep it 100',
+      'grind every day', 'hustle hard',
+      // Battle-specific clichés
+      'step to me', 'bring the heat', 'spit fire',
+      'demolish you', 'end your career', 'call me the best'
     ];
     
-    const lower = text.toLowerCase();
-    const clicheCount = cliches.filter(cliche => lower.includes(cliche)).length;
+    cliches.forEach(cliche => {
+      if (lower.includes(cliche)) {
+        originalityScore -= 3;
+      }
+    });
     
-    // Start with max points, subtract for clichés
-    return Math.max(0, 15 - (clicheCount * 3)); // Increased max from 10 to 15
+    // Enhanced overused rhymes detection
+    const overusedRhymes = [
+      ['money', 'honey'], ['game', 'fame'], ['real', 'deal'],
+      ['flow', 'show'], ['tight', 'right'], ['stack', 'pack'],
+      // Battle-specific overused rhymes
+      ['beat', 'defeat'], ['fire', 'desire'], ['mic', 'sick']
+    ];
+    
+    overusedRhymes.forEach(rhyme => {
+      if (rhyme.every(word => lower.includes(word))) {
+        originalityScore -= 2;
+      }
+    });
+    
+    // Phonetic originality bonus for final scores
+    if (isFinalScore && rhymeAnalysis) {
+      // Bonus for unique phonetic patterns
+      const phoneticOriginality = Math.min(5, rhymeAnalysis.phoneticComplexity * 0.05);
+      originalityScore += phoneticOriginality;
+      
+      // Bonus for advanced slant rhymes (more original than perfect rhymes)
+      const slantRhymeBonus = Math.min(3, rhymeAnalysis.slantRhymes * 0.2);
+      originalityScore += slantRhymeBonus;
+      
+      // Bonus for multi-syllabic complexity
+      const complexityBonus = Math.min(2, rhymeAnalysis.multiSyllabicScore * 0.02);
+      originalityScore += complexityBonus;
+    }
+    
+    return Math.max(0, Math.min(20, originalityScore)); // Increased max for enhanced scoring
   }
 
   private isMultiSyllableRhyme(word1: string, word2: string): boolean {
@@ -554,21 +718,24 @@ export class ScoringService {
     return ending1 === ending2 && word1 !== word2;
   }
 
-  scoreRound(userVerse: string, aiVerse: string): RoundScores {
-    const userRhyme = this.calculateRhymeDensity(userVerse);
-    const userFlow = this.calculateFlowQuality(userVerse);
-    const userCreativity = this.calculateCreativity(userVerse);
+  scoreRound(userVerse: string, aiVerse: string, isFinalScore: boolean = false, battleId?: string): RoundScores {
+    console.log(`🏆 Scoring round ${isFinalScore ? 'FINAL BATTLE SCORES' : 'preview'} with advanced phonetic analysis...`);
     
-    const aiRhyme = this.calculateRhymeDensity(aiVerse);
-    const aiFlow = this.calculateFlowQuality(aiVerse);
-    const aiCreativity = this.calculateCreativity(aiVerse);
+    // CRITICAL: Final battle scores always get advanced analysis with no rate limiting
+    const userRhyme = this.calculateRhymeDensity(userVerse, isFinalScore, battleId);
+    const userFlow = this.calculateFlowQuality(userVerse, isFinalScore, battleId);
+    const userCreativity = this.calculateCreativity(userVerse, isFinalScore, battleId);
+    
+    const aiRhyme = this.calculateRhymeDensity(aiVerse, isFinalScore, battleId);
+    const aiFlow = this.calculateFlowQuality(aiVerse, isFinalScore, battleId);
+    const aiCreativity = this.calculateCreativity(aiVerse, isFinalScore, battleId);
     
     // DYNAMIC BALANCED SCORING: Excel at different techniques at different times
     // Perfect balance across ALL battle rap techniques known to the genre
     
-    // Get detailed component scores for perfect balance
-    const userComponents = this.getDetailedComponents(userVerse);
-    const aiComponents = this.getDetailedComponents(aiVerse);
+    // Get detailed component scores for perfect balance with advanced analysis
+    const userComponents = this.getDetailedComponents(userVerse, isFinalScore, battleId);
+    const aiComponents = this.getDetailedComponents(aiVerse, isFinalScore, battleId);
     
     // Dynamic weighting based on what each rapper excels at this round
     const userWeights = this.calculateDynamicWeights(userComponents);
@@ -581,6 +748,11 @@ export class ScoringService {
     // Use pure calculated scores - no artificial minimums or maximums
     const userScore = Math.round(Math.max(0, userBalancedScore));
     const aiScore = Math.round(aiBalancedScore);
+
+    if (isFinalScore) {
+      console.log(`🏆 FINAL BATTLE SCORES: User (R:${userRhyme}, F:${userFlow}, C:${userCreativity}) = ${userScore} vs AI (R:${aiRhyme}, F:${aiFlow}, C:${aiCreativity}) = ${aiScore}`);
+      console.log(`🎯 Final scoring used advanced phonetic analysis with zero rate limiting`);
+    }
 
     return {
       userScore,
@@ -668,14 +840,18 @@ export class ScoringService {
   // COMPREHENSIVE BALANCED SCORING SYSTEM
   // Excel at different techniques at different times while maintaining perfect balance
   
-  private getDetailedComponents(text: string): any {
-    // SIMPLIFIED - Store text for use in calculateBalancedScore  
+  private getDetailedComponents(text: string, isFinalScore: boolean = false, battleId?: string): any {
+    // ADVANCED COMPONENT ANALYSIS - Pass final score flag for zero rate limiting
+    console.log(`🔍 Getting detailed components ${isFinalScore ? 'FINAL' : 'preview'} for advanced scoring...`);
+    
     return {
       text: text,
-      // Keep the working individual scores
-      rhyme: this.calculateRhymeDensity(text),
-      flow: this.calculateFlowQuality(text),
-      creativity: this.calculateCreativity(text)
+      // CRITICAL: Pass isFinalScore to bypass all rate limiting for advanced analysis
+      rhyme: this.calculateRhymeDensity(text, isFinalScore, battleId),
+      flow: this.calculateFlowQuality(text, isFinalScore, battleId),
+      creativity: this.calculateCreativity(text, isFinalScore, battleId),
+      // Add phonetic analysis for comprehensive component tracking
+      phonetic: isFinalScore ? this.phoneticAnalyzer.getEnhancedRhymeAnalysis(text, isFinalScore, battleId) : null
     };
   }
   
@@ -832,17 +1008,17 @@ export class ScoringService {
     // Enhanced scoring with phonetic analysis
     const phoneticAnalysis = this.phoneticAnalyzer.getEnhancedRhymeAnalysis(userText);
     
-    const components = this.getDetailedComponents(userText);
+    const components = this.getDetailedComponents(userText, true, 'user-analysis'); // Always use advanced for user analysis
     const weights = this.calculateDynamicWeights(components);
     const score = this.calculateBalancedScore(components, weights);
     
-    // Enhance rhyme scoring with phonetic analysis
-    const baseRhyme = this.calculateRhymeDensity(userText);
+    // Enhance rhyme scoring with phonetic analysis (FINAL SCORE - no rate limiting)
+    const baseRhyme = this.calculateRhymeDensity(userText, true, 'user-analysis');
     const phoneticBonus = Math.min(15, phoneticAnalysis.complexityScore * 0.15);
     const enhancedRhyme = Math.min(100, baseRhyme + phoneticBonus);
     
-    // Legacy compatibility - still show main components
-    const flowQuality = this.calculateFlowQuality(userText);
+    // Legacy compatibility - still show main components (FINAL SCORE)
+    const flowQuality = this.calculateFlowQuality(userText, true, 'user-analysis');
     const creativity = this.calculateCreativity(userText);
     
     // Enhanced score combination with phonetic insights

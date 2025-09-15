@@ -23,7 +23,7 @@ import {
   type InsertWebhookEvent,
   SUBSCRIPTION_TIERS,
 } from "@shared/schema";
-import { db } from "./db";
+import { db, withRetry } from "./db";
 import { eq, and, gte, lt, sql, desc, count, max } from "drizzle-orm";
 import NodeCache from 'node-cache';
 
@@ -119,36 +119,42 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values({
-        ...userData,
-        // Ensure defaults for new users
-        subscriptionTier: userData.subscriptionTier || "free",
-        subscriptionStatus: userData.subscriptionStatus || "free",
-        battlesRemaining: userData.battlesRemaining !== undefined ? userData.battlesRemaining : 3,
-        lastBattleReset: userData.lastBattleReset || new Date(),
-        totalBattles: userData.totalBattles || 0,
-        totalWins: userData.totalWins || 0,
-      })
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          // Only update user profile info, preserve subscription data
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          profileImageUrl: userData.profileImageUrl,
-          updatedAt: new Date(),
-          // Set defaults only if fields are null/undefined
-          subscriptionTier: sql`COALESCE(${users.subscriptionTier}, ${userData.subscriptionTier || "free"})`,
-          subscriptionStatus: sql`COALESCE(${users.subscriptionStatus}, ${userData.subscriptionStatus || "free"})`,
-          battlesRemaining: sql`COALESCE(${users.battlesRemaining}, ${userData.battlesRemaining !== undefined ? userData.battlesRemaining : 3})`,
-          lastBattleReset: sql`COALESCE(${users.lastBattleReset}, ${userData.lastBattleReset || new Date()})`,
-        },
-      })
-      .returning();
-    return user;
+    return withRetry(
+      async () => {
+        const [user] = await db
+          .insert(users)
+          .values({
+            ...userData,
+            // Ensure defaults for new users
+            subscriptionTier: userData.subscriptionTier || "free",
+            subscriptionStatus: userData.subscriptionStatus || "free",
+            battlesRemaining: userData.battlesRemaining !== undefined ? userData.battlesRemaining : 3,
+            lastBattleReset: userData.lastBattleReset || new Date(),
+            totalBattles: userData.totalBattles || 0,
+            totalWins: userData.totalWins || 0,
+          })
+          .onConflictDoUpdate({
+            target: users.id,
+            set: {
+              // Only update user profile info, preserve subscription data
+              email: userData.email,
+              firstName: userData.firstName,
+              lastName: userData.lastName,
+              profileImageUrl: userData.profileImageUrl,
+              updatedAt: new Date(),
+              // Set defaults only if fields are null/undefined
+              subscriptionTier: sql`COALESCE(${users.subscriptionTier}, ${userData.subscriptionTier || "free"})`,
+              subscriptionStatus: sql`COALESCE(${users.subscriptionStatus}, ${userData.subscriptionStatus || "free"})`,
+              battlesRemaining: sql`COALESCE(${users.battlesRemaining}, ${userData.battlesRemaining !== undefined ? userData.battlesRemaining : 3})`,
+              lastBattleReset: sql`COALESCE(${users.lastBattleReset}, ${userData.lastBattleReset || new Date()})`,
+            },
+          })
+          .returning();
+        return user;
+      },
+      { maxAttempts: 3 },
+      `upsertUser for ${userData.id}`
+    );
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -210,46 +216,52 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createBattle(battleData: any): Promise<Battle> {
-    // First ensure user has battles available and decrement
-    const user = await this.getUser(battleData.userId);
-    if (!user) {
-      throw new Error("User not found");
-    }
+    return withRetry(
+      async () => {
+        // First ensure user has battles available and decrement
+        const user = await this.getUser(battleData.userId);
+        if (!user) {
+          throw new Error("User not found");
+        }
 
-    // Check and reset daily battles if needed
-    await this.canUserStartBattle(battleData.userId);
+        // Check and reset daily battles if needed
+        await this.canUserStartBattle(battleData.userId);
 
-    // Decrement user's daily battles (except for Pro users)
-    if (user.subscriptionTier !== "pro") {
-      const updatedUser = await this.getUser(battleData.userId); // Get fresh user data after potential reset
-      if ((updatedUser?.battlesRemaining || 0) <= 0) {
-        throw new Error("No battles remaining");
-      }
+        // Decrement user's daily battles (except for Pro users)
+        if (user.subscriptionTier !== "pro") {
+          const updatedUser = await this.getUser(battleData.userId); // Get fresh user data after potential reset
+          if ((updatedUser?.battlesRemaining || 0) <= 0) {
+            throw new Error("No battles remaining");
+          }
 
-      await db
-        .update(users)
-        .set({
-          battlesRemaining: Math.max(0, (updatedUser?.battlesRemaining || 0) - 1),
-          totalBattles: (updatedUser?.totalBattles || 0) + 1,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, battleData.userId));
-    } else {
-      // Pro users - just increment total battles
-      await db
-        .update(users)
-        .set({
-          totalBattles: (user.totalBattles || 0) + 1,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, battleData.userId));
-    }
+          await db
+            .update(users)
+            .set({
+              battlesRemaining: Math.max(0, (updatedUser?.battlesRemaining || 0) - 1),
+              totalBattles: (updatedUser?.totalBattles || 0) + 1,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.id, battleData.userId));
+        } else {
+          // Pro users - just increment total battles
+          await db
+            .update(users)
+            .set({
+              totalBattles: (user.totalBattles || 0) + 1,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.id, battleData.userId));
+        }
 
-    const [battle] = await db
-      .insert(battles)
-      .values(battleData)
-      .returning();
-    return battle;
+        const [battle] = await db
+          .insert(battles)
+          .values(battleData)
+          .returning();
+        return battle;
+      },
+      { maxAttempts: 3 },
+      `createBattle for user ${battleData.userId}`
+    );
   }
 
   async getBattle(id: string): Promise<Battle | undefined> {
@@ -307,30 +319,36 @@ export class DatabaseStorage implements IStorage {
   }
 
   async completeBattle(battleId: string): Promise<void> {
-    const battle = await this.getBattle(battleId);
-    if (!battle) return;
+    return withRetry(
+      async () => {
+        const battle = await this.getBattle(battleId);
+        if (!battle) return;
 
-    await db
-      .update(battles)
-      .set({
-        status: "completed",
-        completedAt: new Date(),
-      })
-      .where(eq(battles.id, battleId));
-
-    // Update user win count if they won
-    if (battle.userScore > battle.aiScore && battle.userId) {
-      const user = await this.getUser(battle.userId);
-      if (user) {
         await db
-          .update(users)
+          .update(battles)
           .set({
-            totalWins: (user.totalWins || 0) + 1,
-            updatedAt: new Date(),
+            status: "completed",
+            completedAt: new Date(),
           })
-          .where(eq(users.id, battle.userId));
-      }
-    }
+          .where(eq(battles.id, battleId));
+
+        // Update user win count if they won
+        if (battle.userScore > battle.aiScore && battle.userId) {
+          const user = await this.getUser(battle.userId);
+          if (user) {
+            await db
+              .update(users)
+              .set({
+                totalWins: (user.totalWins || 0) + 1,
+                updatedAt: new Date(),
+              })
+              .where(eq(users.id, battle.userId));
+          }
+        }
+      },
+      { maxAttempts: 3 },
+      `completeBattle for battle ${battleId}`
+    );
   }
 
   // Analytics
@@ -378,19 +396,25 @@ export class DatabaseStorage implements IStorage {
 
   // Battle round processing methods
   async addBattleRound(battleId: string, round: any): Promise<void> {
-    const battle = await this.getBattle(battleId);
-    if (!battle) return;
+    return withRetry(
+      async () => {
+        const battle = await this.getBattle(battleId);
+        if (!battle) return;
 
-    // Add round to existing rounds array
-    const currentRounds = battle.rounds || [];
-    currentRounds.push(round);
+        // Add round to existing rounds array
+        const currentRounds = battle.rounds || [];
+        currentRounds.push(round);
 
-    await db
-      .update(battles)
-      .set({
-        rounds: currentRounds,
-      })
-      .where(eq(battles.id, battleId));
+        await db
+          .update(battles)
+          .set({
+            rounds: currentRounds,
+          })
+          .where(eq(battles.id, battleId));
+      },
+      { maxAttempts: 3 },
+      `addBattleRound for battle ${battleId}`
+    );
   }
 
   async updateBattleState(battleId: string, updates: any): Promise<void> {
@@ -402,10 +426,16 @@ export class DatabaseStorage implements IStorage {
     if (updates.rounds) allowedUpdates.rounds = updates.rounds;
 
     if (Object.keys(allowedUpdates).length > 0) {
-      await db
-        .update(battles)
-        .set(allowedUpdates)
-        .where(eq(battles.id, battleId));
+      return withRetry(
+        async () => {
+          await db
+            .update(battles)
+            .set(allowedUpdates)
+            .where(eq(battles.id, battleId));
+        },
+        { maxAttempts: 3 },
+        `updateBattleState for battle ${battleId}`
+      );
     }
   }
 
@@ -467,44 +497,50 @@ export class DatabaseStorage implements IStorage {
   }
 
   async advanceTournament(tournamentId: string, matchId: string, winnerId: string): Promise<Tournament> {
-    const tournament = await this.getTournament(tournamentId);
-    if (!tournament) throw new Error('Tournament not found');
+    return withRetry(
+      async () => {
+        const tournament = await this.getTournament(tournamentId);
+        if (!tournament) throw new Error('Tournament not found');
 
-    const updatedBracket = { ...tournament.bracket };
-    let matchFound = false;
+        const updatedBracket = { ...tournament.bracket };
+        let matchFound = false;
 
-    for (let round of updatedBracket.rounds) {
-      for (let match of round.matches) {
-        if (match.id === matchId) {
-          match.isCompleted = true;
-          match.winner = winnerId === match.player1.id ? match.player1 : match.player2;
-          matchFound = true;
-          break;
+        for (let round of updatedBracket.rounds) {
+          for (let match of round.matches) {
+            if (match.id === matchId) {
+              match.isCompleted = true;
+              match.winner = winnerId === match.player1.id ? match.player1 : match.player2;
+              matchFound = true;
+              break;
+            }
+          }
+          if (matchFound) break;
         }
-      }
-      if (matchFound) break;
-    }
 
-    const currentRound = updatedBracket.rounds.find(r => r.roundNumber === tournament.currentRound);
-    const allMatchesComplete = currentRound?.matches.every(m => m.isCompleted) || false;
+        const currentRound = updatedBracket.rounds.find(r => r.roundNumber === tournament.currentRound);
+        const allMatchesComplete = currentRound?.matches.every(m => m.isCompleted) || false;
 
-    let newCurrentRound = tournament.currentRound;
-    let newStatus = tournament.status;
+        let newCurrentRound = tournament.currentRound;
+        let newStatus = tournament.status;
 
-    if (allMatchesComplete) {
-      if (tournament.currentRound < tournament.totalRounds) {
-        newCurrentRound = tournament.currentRound + 1;
-      } else {
-        newStatus = 'completed';
-      }
-    }
+        if (allMatchesComplete) {
+          if (tournament.currentRound < tournament.totalRounds) {
+            newCurrentRound = tournament.currentRound + 1;
+          } else {
+            newStatus = 'completed';
+          }
+        }
 
-    return await this.updateTournament(tournamentId, {
-      bracket: updatedBracket,
-      currentRound: newCurrentRound,
-      status: newStatus,
-      completedAt: newStatus === 'completed' ? new Date() : undefined,
-    });
+        return await this.updateTournament(tournamentId, {
+          bracket: updatedBracket,
+          currentRound: newCurrentRound,
+          status: newStatus,
+          completedAt: newStatus === 'completed' ? new Date() : undefined,
+        });
+      },
+      { maxAttempts: 3 },
+      `advanceTournament for tournament ${tournamentId}`
+    );
   }
 
   generateTournamentBracket(totalRounds: number, opponents: string[]): TournamentBracket {
@@ -650,17 +686,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async recordProcessedWebhookEvent(event: InsertWebhookEvent): Promise<ProcessedWebhookEvent> {
-    try {
-      const [newEvent] = await db
-        .insert(processedWebhookEvents)
-        .values(event)
-        .returning();
-      
-      return newEvent;
-    } catch (error) {
-      console.error('Error recording processed webhook event:', error);
-      throw error;
-    }
+    return withRetry(
+      async () => {
+        const [newEvent] = await db
+          .insert(processedWebhookEvents)
+          .values(event)
+          .returning();
+        
+        return newEvent;
+      },
+      { maxAttempts: 3 },
+      `recordProcessedWebhookEvent for ${event.eventId}`
+    );
   }
 }
 

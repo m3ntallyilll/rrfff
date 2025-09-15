@@ -1213,7 +1213,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // REALISTIC SCORING: Use actual battle analysis instead of random numbers
       console.log(`📊 Analyzing battle performance...`);
-      const scores = scoringService.scoreRound(userText, aiResponseText);
+      // CRITICAL: Final battle scores use advanced phonetic analysis with zero rate limiting
+      const scores = scoringService.scoreRound(userText, aiResponseText, true, battle.id);
+      console.log('🏆 FINAL BATTLE SCORES calculated with advanced phonetic analysis - no rate limiting!');
 
       // GENERATE USER'S BATTLE RAP MAP for display
       const userBattleMap = groqService.generateUserBattleMap(userText);

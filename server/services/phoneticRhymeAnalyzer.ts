@@ -43,11 +43,20 @@ export class PhoneticRhymeAnalyzer {
   private nextFamilyLetter = 'A';
   private readonly SLANT_THRESHOLD = 0.7; // Threshold for slant rhyme similarity
 
+  // Advanced caching system for battle performance
+  private battleCache = new Map<string, RhymeSchemeResult>();
+  private enhancedCache = new Map<string, any>();
+  private cacheExpiry = 5 * 60 * 1000; // 5 minutes
+  
+  // COMPREHENSIVE RHYME FAMILY TRACKING across entire battles
+  private battleRhymeFamilies = new Map<string, Map<string, RhymeFamily>>();
+  private battleProgression = new Map<string, { rounds: number; familyEvolution: string[] }>();
+
   private static analysisDepth = 0;
-  private static readonly MAX_ANALYSIS_DEPTH = 3; // Allow slightly deeper analysis for complex battles
+  private static readonly MAX_ANALYSIS_DEPTH = 10; // Increased for battle complexity
   private static analysisInProgress = false;
   private static lastAnalysisTime = 0;
-  private static readonly MIN_ANALYSIS_INTERVAL = 100; // 100ms minimum between analyses for better battle responsiveness
+  private static readonly MIN_ANALYSIS_INTERVAL = 25; // Reduced for better battle responsiveness
 
   constructor() {
     this.loadCMUDictionary();
@@ -146,38 +155,52 @@ export class PhoneticRhymeAnalyzer {
 
   /**
    * Main entry point: Analyze rap lyrics with comprehensive phonetic rhyme scheme
+   * @param lyrics The lyrics to analyze
+   * @param isFinalScore If true, bypasses all rate limiting for battle scoring
+   * @param battleId Optional battle ID for caching
    */
-  analyzeRhymeScheme(lyrics: string): RhymeSchemeResult {
+  analyzeRhymeScheme(lyrics: string, isFinalScore: boolean = false, battleId?: string): RhymeSchemeResult {
     const now = Date.now();
     
-    // Advanced phonetic analysis enabled with safety mechanisms
-    console.log('🎯 Enhanced rhyme analysis enabled - full phonetic processing');
-    
-    // Circuit breaker: prevent multiple simultaneous analyses (but allow some concurrency for different users)
-    if (PhoneticRhymeAnalyzer.analysisInProgress && (now - PhoneticRhymeAnalyzer.lastAnalysisTime) < 50) {
-      console.log('🚫 PhoneticRhymeAnalyzer: Analysis blocked due to rapid concurrent requests');
-      return this.createEmptyResult();
+    // Check cache first for better performance
+    const cacheKey = `${lyrics.substring(0, 100)}_${battleId || 'default'}`;
+    if (!isFinalScore && this.battleCache.has(cacheKey)) {
+      const cached = this.battleCache.get(cacheKey)!;
+      console.log('📋 Using cached rhyme analysis for faster response');
+      return cached;
     }
     
-    // Rate limiting: prevent excessively frequent analyses while allowing battle-speed requests
-    if (now - PhoneticRhymeAnalyzer.lastAnalysisTime < PhoneticRhymeAnalyzer.MIN_ANALYSIS_INTERVAL) {
-      console.log('🚫 PhoneticRhymeAnalyzer: Rate limited (analysis too frequent), falling back to simple analysis');
-      // Fallback to simple analysis instead of completely skipping
-      return {
-        lines: [],
-        families: new Map(),
-        overallScheme: [],
-        rhymeDensity: 0,
-        perfectRhymes: Math.floor(this.countSimpleRhymes(lyrics.toLowerCase().split(/\s+/).filter(w => w.length > 0)) * 0.7),
-        slantRhymes: Math.floor(this.countSimpleRhymes(lyrics.toLowerCase().split(/\s+/).filter(w => w.length > 0)) * 0.3)
-      };
-    }
+    // Advanced phonetic analysis enabled
+    console.log(`🎯 ${isFinalScore ? 'FINAL SCORE' : 'Enhanced'} rhyme analysis enabled - full phonetic processing`);
     
-    // Depth protection
-    if (PhoneticRhymeAnalyzer.analysisDepth >= PhoneticRhymeAnalyzer.MAX_ANALYSIS_DEPTH) {
-      console.log('🚫 PhoneticRhymeAnalyzer: Maximum recursion depth reached');
-      PhoneticRhymeAnalyzer.analysisDepth = 0;
-      return this.createEmptyResult();
+    // CRITICAL: Final battle scores bypass ALL rate limiting
+    if (!isFinalScore) {
+      // Circuit breaker: prevent multiple simultaneous analyses (but allow some concurrency for different users)
+      if (PhoneticRhymeAnalyzer.analysisInProgress && (now - PhoneticRhymeAnalyzer.lastAnalysisTime) < 25) {
+        console.log('🚫 PhoneticRhymeAnalyzer: Analysis blocked due to rapid concurrent requests');
+        return this.createEmptyResult();
+      }
+      
+      // Rate limiting: prevent excessively frequent analyses while allowing battle-speed requests
+      if (now - PhoneticRhymeAnalyzer.lastAnalysisTime < PhoneticRhymeAnalyzer.MIN_ANALYSIS_INTERVAL) {
+        console.log('🚫 PhoneticRhymeAnalyzer: Rate limited (analysis too frequent), falling back to simple analysis');
+        // Fallback to simple analysis instead of completely skipping
+        return {
+          lines: [],
+          families: new Map(),
+          overallScheme: [],
+          rhymeDensity: 0,
+          perfectRhymes: Math.floor(this.countSimpleRhymes(lyrics.toLowerCase().split(/\s+/).filter(w => w.length > 0)) * 0.7),
+          slantRhymes: Math.floor(this.countSimpleRhymes(lyrics.toLowerCase().split(/\s+/).filter(w => w.length > 0)) * 0.3)
+        };
+      }
+      
+      // Depth protection (relaxed for final scores)
+      if (PhoneticRhymeAnalyzer.analysisDepth >= PhoneticRhymeAnalyzer.MAX_ANALYSIS_DEPTH) {
+        console.log('🚫 PhoneticRhymeAnalyzer: Maximum recursion depth reached');
+        PhoneticRhymeAnalyzer.analysisDepth = 0;
+        return this.createEmptyResult();
+      }
     }
 
     // Input validation
@@ -209,7 +232,7 @@ export class PhoneticRhymeAnalyzer {
       let totalSlantRhymes = 0;
 
       // Limit line processing to prevent memory overflow (increased for longer verses)
-      const maxLines = Math.min(lines.length, 20);
+      const maxLines = isFinalScore ? lines.length : Math.min(lines.length, 20); // No limits for final scores
 
       // Process each line
       for (let lineIndex = 0; lineIndex < maxLines; lineIndex++) {
@@ -247,7 +270,7 @@ export class PhoneticRhymeAnalyzer {
       const rhymeDensity = totalLines > 0 ? totalInternalRhymes / totalLines : 0;
       const overallScheme = lineAnalyses.map(analysis => analysis.scheme);
 
-      return {
+      const result = {
         lines: lineAnalyses,
         families: this.families,
         overallScheme,
@@ -255,6 +278,23 @@ export class PhoneticRhymeAnalyzer {
         perfectRhymes: totalPerfectRhymes,
         slantRhymes: totalSlantRhymes
       };
+
+      // Cache result for future use (if not final score)
+      if (!isFinalScore && battleId) {
+        this.battleCache.set(cacheKey, result);
+        // Clean old cache entries
+        if (this.battleCache.size > 100) {
+          const firstKey = this.battleCache.keys().next().value;
+          this.battleCache.delete(firstKey);
+        }
+      }
+
+      // COMPREHENSIVE BATTLE RHYME FAMILY TRACKING
+      if (battleId) {
+        this.trackBattleRhymeFamilies(battleId, result, isFinalScore);
+      }
+
+      return result;
     } catch (error) {
       console.error('🚫 PhoneticRhymeAnalyzer: Analysis error:', error);
       return this.createEmptyResult();
@@ -648,40 +688,469 @@ export class PhoneticRhymeAnalyzer {
     };
   }
 
+  /**
+   * Track rhyme families across battle rounds for comprehensive analysis
+   * @param battleId The battle ID to track families for
+   * @param result The rhyme scheme analysis result
+   * @param isFinalScore Whether this is for final battle scoring
+   */
+  private trackBattleRhymeFamilies(battleId: string, result: RhymeSchemeResult, isFinalScore: boolean): void {
+    try {
+      // Initialize battle tracking if it doesn't exist
+      if (!this.battleRhymeFamilies.has(battleId)) {
+        this.battleRhymeFamilies.set(battleId, new Map());
+        this.battleProgression.set(battleId, { rounds: 0, familyEvolution: [] });
+      }
+
+      const battleFamilies = this.battleRhymeFamilies.get(battleId)!;
+      const battleProgress = this.battleProgression.get(battleId)!;
+
+      // Merge current families with battle-wide tracking
+      result.families.forEach((family, letter) => {
+        if (battleFamilies.has(letter)) {
+          // Update existing family data
+          const existingFamily = battleFamilies.get(letter)!;
+          existingFamily.occurrences += family.occurrences;
+          existingFamily.lines.push(...family.lines);
+        } else {
+          // Add new family to battle tracking
+          battleFamilies.set(letter, {
+            ...family,
+            lines: [...family.lines] // Clone the array
+          });
+        }
+      });
+
+      // Update battle progression
+      battleProgress.rounds++;
+      
+      // Track family evolution for this round
+      const familySnapshot = Array.from(battleFamilies.keys()).sort().join('');
+      battleProgress.familyEvolution.push(familySnapshot);
+
+      // Log tracking for battle analysis (only for final scores to avoid spam)
+      if (isFinalScore) {
+        console.log(`🎯 Battle ${battleId}: Tracked ${battleFamilies.size} rhyme families across ${battleProgress.rounds} rounds`);
+        console.log(`🎯 Family evolution: ${battleProgress.familyEvolution.join(' → ')}`);
+      }
+
+      // Clean up old battle data to prevent memory leaks (keep last 10 battles)
+      if (this.battleRhymeFamilies.size > 10) {
+        const oldestBattle = this.battleRhymeFamilies.keys().next().value;
+        this.battleRhymeFamilies.delete(oldestBattle);
+        this.battleProgression.delete(oldestBattle);
+      }
+
+    } catch (error) {
+      console.warn(`⚠️ Battle rhyme family tracking failed for battle ${battleId}:`, error);
+      // Don't throw - this is supplementary tracking
+    }
+  }
+
 
   /**
-   * Get enhanced rhyme analysis for scoring - FIXED: Prevent recursion
+   * Get enhanced rhyme analysis for scoring with advanced metrics
+   * @param lyrics The lyrics to analyze
+   * @param isFinalScore Whether this is for final battle scoring (bypasses rate limiting)
+   * @param battleId Optional battle ID for caching
    */
-  getEnhancedRhymeAnalysis(lyrics: string): {
+  getEnhancedRhymeAnalysis(lyrics: string, isFinalScore: boolean = false, battleId?: string): {
     totalRhymes: number;
     internalRhymes: number;
     perfectRhymes: number;
     slantRhymes: number;
     rhymeDensity: number;
     complexityScore: number;
+    assonanceScore: number;
+    consonanceScore: number;
+    multiSyllabicScore: number;
+    rhythmConsistency: number;
+    advancedInternalRhymes: number;
+    phoneticComplexity: number;
   } {
+    // Check enhanced cache first
+    const enhancedCacheKey = `enhanced_${lyrics.substring(0, 50)}_${battleId || 'default'}_${isFinalScore}`;
+    if (!isFinalScore && this.enhancedCache.has(enhancedCacheKey)) {
+      const cached = this.enhancedCache.get(enhancedCacheKey);
+      console.log('📋 Using cached enhanced analysis for faster response');
+      return cached;
+    }
+
     // Enhanced analysis re-enabled for better scoring accuracy
-    console.log('🎯 Enhanced rhyme analysis enabled - full phonetic processing');
+    console.log(`🎯 Enhanced rhyme analysis ${isFinalScore ? 'FINAL SCORE' : 'enabled'} - full phonetic processing`);
     
     try {
       // Use advanced rhyme scheme analysis for enhanced scoring
-      const rhymeScheme = this.analyzeRhymeScheme(lyrics);
+      const rhymeScheme = this.analyzeRhymeScheme(lyrics, isFinalScore, battleId);
       const words = lyrics.toLowerCase().split(/\s+/).filter(w => w.length > 0);
       
-      return {
+      // ADVANCED METRIC CALCULATIONS
+      const assonanceScore = this.calculateAssonance(lyrics);
+      const consonanceScore = this.calculateConsonance(lyrics);
+      const multiSyllabicScore = this.calculateMultiSyllabicComplexity(lyrics);
+      const rhythmConsistency = this.calculateRhythmConsistency(lyrics);
+      const advancedInternalRhymes = this.calculateAdvancedInternalRhymes(rhymeScheme);
+      const phoneticComplexity = this.calculatePhoneticComplexity(lyrics);
+      
+      const result = {
         totalRhymes: rhymeScheme.perfectRhymes + rhymeScheme.slantRhymes,
         internalRhymes: Math.floor((rhymeScheme.perfectRhymes + rhymeScheme.slantRhymes) * 0.6),
         perfectRhymes: rhymeScheme.perfectRhymes,
         slantRhymes: rhymeScheme.slantRhymes,
         rhymeDensity: rhymeScheme.rhymeDensity,
-        complexityScore: Math.min(100, words.length * 2 + rhymeScheme.perfectRhymes * 8 + rhymeScheme.slantRhymes * 5)
+        complexityScore: Math.min(100, words.length * 2 + rhymeScheme.perfectRhymes * 8 + rhymeScheme.slantRhymes * 5),
+        assonanceScore,
+        consonanceScore,
+        multiSyllabicScore,
+        rhythmConsistency,
+        advancedInternalRhymes,
+        phoneticComplexity
       };
+
+      // Cache result (if not final score)
+      if (!isFinalScore) {
+        this.enhancedCache.set(enhancedCacheKey, result);
+        // Clean old cache entries
+        if (this.enhancedCache.size > 50) {
+          const firstKey = this.enhancedCache.keys().next().value;
+          this.enhancedCache.delete(firstKey);
+        }
+      }
+      
+      return result;
     } catch (error) {
       console.warn('Enhanced analysis failed, falling back to simple analysis:', error);
-      return this.getSimpleRhymeAnalysis(lyrics);
+      return this.getAdvancedSimpleRhymeAnalysis(lyrics);
     }
   }
   
+  // ADVANCED PHONETIC ANALYSIS METHODS
+
+  /**
+   * Calculate assonance (vowel sound repetition) score
+   */
+  private calculateAssonance(lyrics: string): number {
+    const words = this.tokenize(lyrics);
+    const vowelPatterns = new Map<string, number>();
+    let totalVowelSounds = 0;
+    
+    for (const word of words) {
+      const pronunciations = this.cmuDict.get(word);
+      if (pronunciations && pronunciations.length > 0) {
+        const phonemes = pronunciations[0];
+        const vowels = phonemes.filter(p => p.match(/[AEIOU]/));
+        
+        for (const vowel of vowels) {
+          const baseVowel = vowel.replace(/[0-9]/g, ''); // Remove stress markers
+          vowelPatterns.set(baseVowel, (vowelPatterns.get(baseVowel) || 0) + 1);
+          totalVowelSounds++;
+        }
+      }
+    }
+    
+    // Calculate assonance score based on repeated vowel patterns
+    let assonanceScore = 0;
+    vowelPatterns.forEach((count) => {
+      if (count >= 2) {
+        assonanceScore += Math.min(10, count * 2); // Max 10 points per vowel pattern
+      }
+    });
+    
+    return Math.min(100, assonanceScore);
+  }
+
+  /**
+   * Calculate consonance (consonant sound repetition) score
+   */
+  private calculateConsonance(lyrics: string): number {
+    const words = this.tokenize(lyrics);
+    const consonantPatterns = new Map<string, number>();
+    let totalConsonantSounds = 0;
+    
+    for (const word of words) {
+      const pronunciations = this.cmuDict.get(word);
+      if (pronunciations && pronunciations.length > 0) {
+        const phonemes = pronunciations[0];
+        const consonants = phonemes.filter(p => !p.match(/[AEIOU]/));
+        
+        for (const consonant of consonants) {
+          consonantPatterns.set(consonant, (consonantPatterns.get(consonant) || 0) + 1);
+          totalConsonantSounds++;
+        }
+      }
+    }
+    
+    // Calculate consonance score based on repeated consonant patterns
+    let consonanceScore = 0;
+    consonantPatterns.forEach((count) => {
+      if (count >= 2) {
+        consonanceScore += Math.min(8, count * 1.5); // Max 8 points per consonant pattern
+      }
+    });
+    
+    return Math.min(100, consonanceScore);
+  }
+
+  /**
+   * Calculate multi-syllabic rhyme complexity
+   */
+  private calculateMultiSyllabicComplexity(lyrics: string): number {
+    const words = this.tokenize(lyrics);
+    let complexityScore = 0;
+    
+    // Analyze word pairs for multi-syllabic rhyming
+    for (let i = 0; i < words.length - 1; i++) {
+      const word1 = words[i];
+      const word2 = words[i + 1];
+      
+      const syllables1 = this.getWordSyllableCount(word1);
+      const syllables2 = this.getWordSyllableCount(word2);
+      
+      // Multi-syllabic rhyme detection
+      if (syllables1 >= 2 && syllables2 >= 2) {
+        const rhymeStrength = this.calculateWordRhymeStrength(word1, word2);
+        if (rhymeStrength > 0.6) {
+          complexityScore += Math.min(15, syllables1 + syllables2) * rhymeStrength;
+        }
+      }
+    }
+    
+    return Math.min(100, complexityScore);
+  }
+
+  /**
+   * Calculate rhythm consistency using stress patterns
+   */
+  private calculateRhythmConsistency(lyrics: string): number {
+    const lines = lyrics.split('\n').filter(line => line.trim());
+    if (lines.length < 2) return 0;
+    
+    const stressPatterns: number[][] = [];
+    
+    for (const line of lines) {
+      const words = this.tokenize(line);
+      const lineStresses: number[] = [];
+      
+      for (const word of words) {
+        const stresses = this.getWordStressPattern(word);
+        lineStresses.push(...stresses);
+      }
+      
+      stressPatterns.push(lineStresses);
+    }
+    
+    // Calculate rhythm consistency
+    let consistencyScore = 0;
+    const avgLength = stressPatterns.reduce((sum, pattern) => sum + pattern.length, 0) / stressPatterns.length;
+    
+    for (let i = 0; i < stressPatterns.length - 1; i++) {
+      const pattern1 = stressPatterns[i];
+      const pattern2 = stressPatterns[i + 1];
+      
+      // Compare stress patterns
+      const similarity = this.compareStressPatterns(pattern1, pattern2);
+      consistencyScore += similarity * 10; // Max 10 points per line pair
+    }
+    
+    // Bonus for consistent line lengths
+    const lengthConsistency = 1 - (stressPatterns.reduce((variance, pattern) => {
+      return variance + Math.abs(pattern.length - avgLength);
+    }, 0) / (stressPatterns.length * avgLength));
+    
+    consistencyScore += lengthConsistency * 20;
+    
+    return Math.min(100, consistencyScore);
+  }
+
+  /**
+   * Calculate advanced internal rhymes with positioning analysis
+   */
+  private calculateAdvancedInternalRhymes(rhymeScheme: RhymeSchemeResult): number {
+    let internalRhymeScore = 0;
+    
+    // Analyze internal rhyme positioning and frequency
+    rhymeScheme.lines.forEach(line => {
+      const syllables = line.syllables;
+      const internalFamilies = new Set<string>();
+      
+      // Check for internal rhymes within the line
+      syllables.forEach((syllable, index) => {
+        syllable.families.forEach(family => {
+          if (internalFamilies.has(family)) {
+            // Found internal rhyme - score based on position and complexity
+            const positionBonus = this.calculateRhymePositionBonus(index, syllables.length);
+            const complexityBonus = syllable.rhymePattern.length * 2;
+            internalRhymeScore += 5 + positionBonus + complexityBonus;
+          }
+          internalFamilies.add(family);
+        });
+      });
+    });
+    
+    return Math.min(100, internalRhymeScore);
+  }
+
+  /**
+   * Calculate overall phonetic complexity score
+   */
+  private calculatePhoneticComplexity(lyrics: string): number {
+    const words = this.tokenize(lyrics);
+    let complexityScore = 0;
+    
+    for (const word of words) {
+      const pronunciations = this.cmuDict.get(word);
+      if (pronunciations && pronunciations.length > 0) {
+        const phonemes = pronunciations[0];
+        
+        // Score based on phoneme diversity and rarity
+        const uniquePhonemes = new Set(phonemes.map(p => p.replace(/[0-9]/g, '')));
+        complexityScore += uniquePhonemes.size; // Unique phoneme count
+        
+        // Bonus for complex phoneme clusters
+        const consonantClusters = this.countConsonantClusters(phonemes);
+        complexityScore += consonantClusters * 3;
+        
+        // Bonus for stress variation
+        const stressVariation = this.calculateStressVariation(phonemes);
+        complexityScore += stressVariation * 2;
+      }
+    }
+    
+    return Math.min(100, complexityScore / Math.max(1, words.length / 2));
+  }
+
+  // HELPER METHODS FOR ADVANCED ANALYSIS
+
+  private getWordSyllableCount(word: string): number {
+    const pronunciations = this.cmuDict.get(word);
+    if (pronunciations && pronunciations.length > 0) {
+      return pronunciations[0].filter(p => p.match(/[0-9]$/)).length;
+    }
+    // Fallback heuristic
+    return Math.max(1, (word.match(/[aeiouAEIOU]/g) || []).length);
+  }
+
+  private calculateWordRhymeStrength(word1: string, word2: string): number {
+    const pron1 = this.cmuDict.get(word1);
+    const pron2 = this.cmuDict.get(word2);
+    
+    if (!pron1 || !pron2) return 0;
+    
+    const phonemes1 = pron1[0];
+    const phonemes2 = pron2[0];
+    
+    // Extract rhyming portions (from last stressed vowel to end)
+    const rhyme1 = this.extractRhymePattern(phonemes1);
+    const rhyme2 = this.extractRhymePattern(phonemes2);
+    
+    return this.phonemeMatch(rhyme1, rhyme2) ? 1.0 : 0.0;
+  }
+
+  private getWordStressPattern(word: string): number[] {
+    const pronunciations = this.cmuDict.get(word);
+    if (pronunciations && pronunciations.length > 0) {
+      const phonemes = pronunciations[0];
+      return phonemes
+        .filter(p => p.match(/[0-9]$/))
+        .map(p => parseInt(p.slice(-1)));
+    }
+    return [1]; // Default stress
+  }
+
+  private compareStressPatterns(pattern1: number[], pattern2: number[]): number {
+    const minLength = Math.min(pattern1.length, pattern2.length);
+    if (minLength === 0) return 0;
+    
+    let matches = 0;
+    for (let i = 0; i < minLength; i++) {
+      if (pattern1[i] === pattern2[i]) {
+        matches++;
+      }
+    }
+    
+    return matches / minLength;
+  }
+
+  private calculateRhymePositionBonus(index: number, totalSyllables: number): number {
+    const position = index / totalSyllables;
+    // Bonus for mid-line rhymes (more impressive than end rhymes)
+    if (position >= 0.3 && position <= 0.7) {
+      return 5;
+    }
+    return 2;
+  }
+
+  private countConsonantClusters(phonemes: string[]): number {
+    let clusters = 0;
+    let consecutiveConsonants = 0;
+    
+    for (const phoneme of phonemes) {
+      if (!phoneme.match(/[AEIOU]/)) {
+        consecutiveConsonants++;
+      } else {
+        if (consecutiveConsonants >= 2) {
+          clusters++;
+        }
+        consecutiveConsonants = 0;
+      }
+    }
+    
+    if (consecutiveConsonants >= 2) clusters++;
+    return clusters;
+  }
+
+  private calculateStressVariation(phonemes: string[]): number {
+    const stressValues = phonemes
+      .filter(p => p.match(/[0-9]$/))
+      .map(p => parseInt(p.slice(-1)));
+    
+    const uniqueStresses = new Set(stressValues);
+    return uniqueStresses.size;
+  }
+
+  private getAdvancedSimpleRhymeAnalysis(lyrics: string): {
+    totalRhymes: number;
+    internalRhymes: number;
+    perfectRhymes: number;
+    slantRhymes: number;
+    rhymeDensity: number;
+    complexityScore: number;
+    assonanceScore: number;
+    consonanceScore: number;
+    multiSyllabicScore: number;
+    rhythmConsistency: number;
+    advancedInternalRhymes: number;
+    phoneticComplexity: number;
+  } {
+    if (!lyrics || lyrics.trim().length === 0) {
+      return {
+        totalRhymes: 0, internalRhymes: 0, perfectRhymes: 0, slantRhymes: 0,
+        rhymeDensity: 0, complexityScore: 0, assonanceScore: 0, consonanceScore: 0,
+        multiSyllabicScore: 0, rhythmConsistency: 0, advancedInternalRhymes: 0,
+        phoneticComplexity: 0
+      };
+    }
+
+    const words = lyrics.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+    const simpleRhymeCount = this.countSimpleRhymes(words);
+    const estimatedComplexity = Math.min(100, words.length * 2 + simpleRhymeCount * 5);
+
+    return {
+      totalRhymes: simpleRhymeCount,
+      internalRhymes: Math.floor(simpleRhymeCount * 0.6),
+      perfectRhymes: Math.floor(simpleRhymeCount * 0.7),
+      slantRhymes: Math.floor(simpleRhymeCount * 0.3),
+      rhymeDensity: words.length > 0 ? simpleRhymeCount / words.length : 0,
+      complexityScore: estimatedComplexity,
+      assonanceScore: Math.min(50, words.length * 2), // Estimated
+      consonanceScore: Math.min(40, words.length * 1.5), // Estimated  
+      multiSyllabicScore: Math.min(30, simpleRhymeCount * 3), // Estimated
+      rhythmConsistency: Math.min(60, words.length), // Estimated
+      advancedInternalRhymes: Math.floor(simpleRhymeCount * 0.4), // Estimated
+      phoneticComplexity: Math.min(70, words.length * 1.8) // Estimated
+    };
+  }
+
   private getSimpleRhymeAnalysis(lyrics: string): {
     totalRhymes: number;
     internalRhymes: number;
@@ -690,7 +1159,6 @@ export class PhoneticRhymeAnalyzer {
     rhymeDensity: number;
     complexityScore: number;
   } {
-
     if (!lyrics || lyrics.trim().length === 0) {
       return {
         totalRhymes: 0,
