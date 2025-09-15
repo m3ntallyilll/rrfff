@@ -884,14 +884,6 @@ export default function BattleArena() {
         </div>
       </div>
 
-      {/* Lyric Analysis Modal */}
-      {showLyricBreakdown && currentAnalysisText && (
-        <LyricBreakdown
-          text={currentAnalysisText}
-          onClose={handleCloseLyricBreakdown}
-          isVisible={true}
-        />
-      )}
     </>
   );
 }
