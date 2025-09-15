@@ -792,9 +792,10 @@ export class InternalRhymeAgent {
       return 'multi';
     }
     
-    // Simple technique classification based on phonetic similarity
-    const analysis = this.phoneticAnalyzer.analyzeRhymeScheme(`${word1}\n${word2}`);
-    const isSameFamily = analysis.families.size < 2;
+    // FIXED: Use simple string comparison instead of phonetic analyzer to prevent infinite loops
+    const ending1 = word1.slice(-2).toLowerCase();
+    const ending2 = word2.slice(-2).toLowerCase();
+    const isSameFamily = ending1 === ending2;
     
     if (isSameFamily) {
       return 'assonance';

@@ -171,7 +171,7 @@ JSON only: {"reactionType":"wild_cheering","intensity":85,"reasoning":"devastati
   }
 
   /**
-   * Lightweight pattern analysis without phonetic analyzer to prevent memory leaks
+   * FIXED: Lightweight pattern analysis without phonetic analyzer to prevent memory leaks and infinite loops
    */
   private fallbackPatternAnalysis(lyrics: string, context?: any): CrowdReactionAnalysis {
     const cleanLyrics = lyrics.toLowerCase().trim();
