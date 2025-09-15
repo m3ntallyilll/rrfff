@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { SponsoredBanner } from "@/components/sponsored-banner";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { InstallPrompt } from "@/components/install-prompt";
+import { AudioAutoplayGate } from "@/components/AudioAutoplayGate";
 import Landing from "@/pages/Landing";
 import Home from "@/pages/Home";
 import Subscribe from "@/pages/Subscribe";
@@ -73,6 +74,12 @@ function App() {
             <Toaster />
             <SponsoredBanner interval={25000} enabled={true} />
             <InstallPrompt />
+            <AudioAutoplayGate 
+              showDetailedInstructions={true}
+              onAudioUnlocked={() => {
+                console.log('🎵 Global audio unlocked - all auto-play features enabled');
+              }}
+            />
             <ErrorBoundary>
               <Router />
             </ErrorBoundary>

@@ -783,6 +783,7 @@ export default function BattleArena() {
               {/* Audio Playback Controls */}
               <AudioControls
                 audioUrl={currentAiAudio}
+                autoPlay={true}
                 onPlaybackChange={(isPlaying) => 
                   updateBattleState({ isPlayingAudio: isPlaying })
                 }

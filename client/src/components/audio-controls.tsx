@@ -5,15 +5,18 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDuration } from "@/lib/audio-utils";
 import { motion } from "framer-motion";
+import { attemptAutoplay } from "@/lib/audioAutoplay";
 
 interface AudioControlsProps {
   audioUrl?: string;
+  autoPlay?: boolean;
   onPlaybackChange?: (isPlaying: boolean) => void;
   className?: string;
 }
 
 export function AudioControls({ 
-  audioUrl, 
+  audioUrl,
+  autoPlay = false,
   onPlaybackChange,
   className = ""
 }: AudioControlsProps) {
@@ -56,6 +59,11 @@ export function AudioControls({
       // Optimize audio loading for performance
       audio.preload = 'metadata'; // Load faster
       audio.crossOrigin = 'anonymous'; // Handle CORS
+      
+      // Essential mobile attributes for reliable playback
+      audio.setAttribute('playsinline', 'true');
+      audio.setAttribute('webkit-playsinline', 'true');
+      
       audio.src = audioUrl;
       audioRef.current = audio;
       
@@ -64,6 +72,28 @@ export function AudioControls({
         setDuration(audio.duration || 0);
         setAudioLoaded(true);
         console.log('Audio loaded, duration:', audio.duration);
+        
+        // Attempt auto-play when audio is ready
+        if (autoPlay) {
+          console.log('🎵 AudioControls: Attempting auto-play with shared manager');
+          attemptAutoplay(audio, {
+            volume: isMuted ? 0 : volume[0] / 100,
+            retryAttempts: 2,
+            fallbackToMuted: true,
+            onFallback: () => {
+              console.log('🔄 AudioControls: Auto-play failed, manual control available');
+              // Audio controls remain available for manual interaction
+            }
+          }).then(success => {
+            if (success) {
+              console.log('✅ AudioControls: Auto-play successful');
+              setIsPlaying(true);
+              onPlaybackChange?.(true);
+            }
+          }).catch(error => {
+            console.error('🚨 AudioControls: Auto-play error:', error);
+          });
+        }
       };
       const handleEnded = () => {
         setIsPlaying(false);
@@ -107,7 +137,7 @@ export function AudioControls({
         audioRef.current = null;
       }
     }
-  }, [audioUrl]);
+  }, [audioUrl, autoPlay, volume, isMuted, onPlaybackChange]);
 
   // Handle volume changes separately
   useEffect(() => {

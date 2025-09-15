@@ -1,6 +1,7 @@
 // Advanced Lip Sync Component - Provides data only, no visual rendering
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
+import { getSharedAudioContext, attemptAutoplay } from "@/lib/audioAutoplay";
 
 interface AdvancedLipSyncProps {
   audioUrl?: string;
@@ -102,20 +103,33 @@ export function AdvancedLipSync({
       return;
     }
     
-    // Initialize audio and auto-play when needed
+    // Initialize audio using shared audio manager when needed
     if (!audioRef.current && audioUrl && isPlaying) {
-      console.log('🎵 Initializing new audio element for auto-play');
+      console.log('🎵 AdvancedLipSync: Initializing audio with shared manager');
       audioRef.current = new Audio(audioUrl);
       audioRef.current.crossOrigin = 'anonymous';
-      audioRef.current.volume = 1.0;
+      audioRef.current.volume = disableAudioPlayback ? 0 : 1.0;
       
-      // Auto-play as soon as audio is ready
-      audioRef.current.addEventListener('loadeddata', () => {
-        console.log('🔥 Audio ready - auto-playing immediately');
-        audioRef.current?.play().catch(error => {
-          console.error('🔊 Auto-play failed:', error);
+      // Essential mobile attributes
+      audioRef.current.setAttribute('playsinline', 'true');
+      audioRef.current.setAttribute('webkit-playsinline', 'true');
+      
+      // Use shared audio manager for auto-play
+      if (!disableAudioPlayback) {
+        audioRef.current.addEventListener('loadeddata', () => {
+          console.log('🔥 AdvancedLipSync: Audio ready - using shared manager for auto-play');
+          attemptAutoplay(audioRef.current!, {
+            volume: 1.0,
+            fallbackToMuted: true,
+            retryAttempts: 2,
+            onFallback: () => {
+              console.log('🔄 AdvancedLipSync: Auto-play failed, continuing with lip sync simulation');
+            }
+          }).catch(error => {
+            console.error('🔊 AdvancedLipSync: Auto-play error:', error);
+          });
         });
-      });
+      }
       
       audioRef.current.load();
     }
@@ -160,14 +174,42 @@ export function AdvancedLipSync({
           return;
         }
 
-        // Original audio analysis code (only used if disableAudioPlayback is false)
-        if (!audioRef.current) {
-          audioRef.current = new Audio(audioUrl);
-          audioRef.current.volume = 1.0; // Full volume for auto-play
-          audioRef.current.preload = 'auto';
+        // Use shared AudioContext for analysis (avoids multiple contexts)
+        audioContextRef.current = getSharedAudioContext();
+        
+        if (!audioContextRef.current) {
+          console.warn('🎵 AdvancedLipSync: Shared AudioContext not available, falling back to simulation');
+          // Fall back to simulation mode
+          const simulateLipSync = () => {
+            if (isPlaying) {
+              const time = Date.now() / 100;
+              const intensity = (Math.sin(time * 0.5) + 1) * 50;
+              const phonemeIndex = Math.floor(time / 5) % Object.keys(VISEME_MOUTH_SHAPES).length;
+              const phonemeKeys = Object.keys(VISEME_MOUTH_SHAPES);
+              const currentPhoneme = phonemeKeys[phonemeIndex];
+              
+              setCurrentViseme(currentPhoneme);
+              setMouthShape(VISEME_MOUTH_SHAPES[currentPhoneme]);
+              setAudioIntensity(intensity);
+              
+              const lipSync = generateLipSyncData(currentPhoneme, intensity);
+              setLipSyncData(lipSync);
+              onLipSyncData?.(lipSync);
+              
+              animationFrameRef.current = requestAnimationFrame(simulateLipSync);
+            }
+          };
+          simulateLipSync();
+          return;
         }
         
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (!audioRef.current) {
+          audioRef.current = new Audio(audioUrl);
+          audioRef.current.volume = disableAudioPlayback ? 0 : 1.0;
+          audioRef.current.preload = 'auto';
+          audioRef.current.setAttribute('playsinline', 'true');
+          audioRef.current.setAttribute('webkit-playsinline', 'true');
+        }
         
         const source = audioContextRef.current.createMediaElementSource(audioRef.current);
         analyserRef.current = audioContextRef.current.createAnalyser();
@@ -202,12 +244,25 @@ export function AdvancedLipSync({
         };
         
         if (!disableAudioPlayback && audioRef.current) {
-          // AUTO-PLAY as soon as audio is ready
-          console.log(`🔥 Auto-playing TTS audio immediately`);
-          audioRef.current.play().catch((error) => {
-            console.error('🔊 Auto-play failed:', error);
+          // Use shared manager for reliable auto-play
+          console.log('🔥 AdvancedLipSync: Using shared manager for TTS auto-play');
+          attemptAutoplay(audioRef.current, {
+            volume: 1.0,
+            fallbackToMuted: true,
+            retryAttempts: 2,
+            onFallback: () => {
+              console.log('🔄 AdvancedLipSync: TTS auto-play failed, continuing with analysis');
+            }
+          }).then(success => {
+            if (success) {
+              processAudio();
+            }
+          }).catch(error => {
+            console.error('🔊 AdvancedLipSync: TTS auto-play error:', error);
+            processAudio(); // Continue with analysis even if autoplay fails
           });
-          processAudio();
+        } else {
+          processAudio(); // Start analysis even without audio playback
         }
         
       } catch (error) {
@@ -223,12 +278,10 @@ export function AdvancedLipSync({
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().catch(() => {
-          // Ignore errors when closing AudioContext
-        });
-        audioContextRef.current = null;
-      }
+      // Don't close shared AudioContext - it's managed globally
+      audioContextRef.current = null;
+      analyserRef.current = null;
+      
       if (audioRef.current) {
         const existingAudio = document.querySelector('audio') as HTMLAudioElement;
         if (!existingAudio || audioRef.current !== existingAudio) {
