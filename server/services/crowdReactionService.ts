@@ -112,7 +112,7 @@ JSON ONLY: {"reactionType":"wild_cheering","intensity":85,"reasoning":"Found tri
       
       // RETRY WITH SIMPLER, MORE RELIABLE PROMPT
       try {
-        const retryPrompt = `As a battle rap crowd expert familiar with legendary personas like Ghost H.H. Holmes, The Destroyer Thor, Thunderstrike Frank Lucas, The Silent Jack the Ripper, The Impaler Richard Ramirez, Bloodletter Saddam Hussein, The Reaper Bugsy Siegel, Iron Al Capone, and Shadow Pablo Escobar, analyze this lyric:
+        const retryPrompt = `As a battle rap crowd expert, analyze this lyric:
 
 "${lyrics}"
 

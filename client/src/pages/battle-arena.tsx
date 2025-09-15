@@ -15,7 +15,7 @@ import { RecordingPanel } from "@/components/recording-panel";
 import { BattleAvatar } from "@/components/battle-avatar";
 import { BattleTextDisplay } from "@/components/battle-text-display";
 import { AudioControls } from "@/components/audio-controls";
-// import { LyricBreakdown } from "@/components/lyric-breakdown"; // Temporarily disabled
+import { LyricBreakdown } from "@/components/lyric-breakdown";
 import { formatDuration } from "@/lib/audio-utils";
 import { motion, AnimatePresence } from "framer-motion";
 const battleArenaImage = "/images/Epic_rap_battle_arena_5a01b4d4.png";
@@ -321,6 +321,7 @@ export default function BattleArena() {
   };
 
   const handleAnalyzeLyrics = (text: string, source: string) => {
+    console.log(`🎯 Analyzing lyrics from ${source}: ${text.substring(0, 50)}...`);
     setCurrentAnalysisText(text);
     setShowLyricBreakdown(true);
   };
@@ -884,7 +885,14 @@ export default function BattleArena() {
       </div>
 
       {/* Lyric Breakdown Modal - Temporarily disabled */}
-      {false && <div>LyricBreakdown disabled</div>}
+      {/* Lyric Analysis Modal */}
+      {showLyricBreakdown && currentAnalysisText && (
+        <LyricBreakdown
+          text={currentAnalysisText}
+          onClose={handleCloseLyricBreakdown}
+          isVisible={showLyricBreakdown}
+        />
+      )}
     </>
   );
 }

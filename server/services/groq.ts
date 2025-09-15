@@ -442,7 +442,7 @@ STEP 2 - CREATE DEVASTATING COUNTER-ATTACK:
 🚫 ANTI-REPETITION PROTOCOL - MANDATORY:
 - BANNED: "thunderclap", "lightning", "storm", "thunder" (overused trash)
 - REQUIRED: Fresh metaphors from diverse categories:
-  • Criminal: mobster, hitman, Capone, cartel, Scarface
+  • Criminal: mobster, streetwise, cartel, underground
   • Military: atom bomb, sniper, missile, war machine, tank
   • Predators: Hannibal Lecter, Freddy Krueger, demon, vampire, savage beast, Jason Voorhees
   • Disaster: hurricane, earthquake, tornado, wildfire
@@ -713,7 +713,7 @@ Write exactly 8 lines with mandatory rhyme density matching reaction level:`;
 🚫 BANNED REPETITIVE METAPHORS: "thunderclap", "lightning strike", "storm", "thunder", "lightning" - NEVER USE THESE OVERUSED CONCEPTS!
 
 ✅ DIVERSE METAPHOR REQUIREMENTS:
-- Criminal/Gangster: mobster, hitman, Capone, Scarface, cartel, mafia boss
+- Criminal/Gangster: mobster, streetwise, cartel, underground, boss
 - Military/Weapons: atom bomb, sniper, missile, tank, napalm, war machine  
 - Predators/Monsters: Jason Voorhees, Freddy Krueger, Michael Myers, Hannibal Lecter, Chucky, Pennywise, demon, vampire, savage beast, Grim Reaper, Pinhead, Leatherface
 - Natural Disasters: hurricane, earthquake, tornado, wildfire, blizzard, tidal wave
