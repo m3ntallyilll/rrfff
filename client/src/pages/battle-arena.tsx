@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Mic, Trophy, Clock, Flame, Wifi, History, Share, Dumbbell, User, BarChart3 } from "lucide-react";
 import { CharacterSelector } from "@/components/character-selector";
@@ -17,6 +17,7 @@ import { BattleTextDisplay } from "@/components/battle-text-display";
 import { AudioControls } from "@/components/audio-controls";
 import { SimpleAnalyzer } from "@/components/simple-analyzer";
 import { formatDuration } from "@/lib/audio-utils";
+import { preventMobileOverscroll, applyMobileScrollClasses } from "@/lib/mobile-scroll-prevention";
 import { motion, AnimatePresence } from "framer-motion";
 const battleArenaImage = "/images/Epic_rap_battle_arena_5a01b4d4.png";
 
@@ -32,6 +33,10 @@ export default function BattleArena() {
     voiceSpeed: 1.0,
     battleLength: 5
   });
+
+  // Mobile scroll prevention refs
+  const mainRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   const handleAdvancedSettingsChange = (newSettings: typeof advancedSettings) => {
     setAdvancedSettings(newSettings);
@@ -141,6 +146,37 @@ export default function BattleArena() {
       return () => clearInterval(timer);
     }
   }, [battleState?.timeRemaining, updateBattleState]);
+
+  // Initialize mobile scroll prevention
+  useEffect(() => {
+    const cleanupFunctions: (() => void)[] = [];
+
+    // Apply mobile scroll prevention to main container
+    if (mainRef.current) {
+      applyMobileScrollClasses(mainRef.current, 'prevent-overscroll');
+      cleanupFunctions.push(preventMobileOverscroll(mainRef.current, {
+        preventPullToRefresh: true,
+        preventVerticalOverscroll: true,
+        preventHorizontalOverscroll: true,
+        allowVerticalScroll: true,
+        allowHorizontalScroll: false,
+      }));
+    }
+
+    // Apply mobile scroll prevention to header
+    if (headerRef.current) {
+      applyMobileScrollClasses(headerRef.current, 'prevent-pull-to-refresh');
+    }
+
+    // Global document-level prevention
+    document.body.classList.add('prevent-overscroll');
+    document.documentElement.classList.add('prevent-overscroll');
+
+    return () => {
+      // Cleanup all mobile scroll prevention
+      cleanupFunctions.forEach(cleanup => cleanup());
+    };
+  }, []);
 
   // Initialize new battle on component mount
   useEffect(() => {
@@ -354,7 +390,7 @@ export default function BattleArena() {
   return (
     <>
       {/* Header */}
-      <header className="bg-secondary-dark border-b border-battle-gray px-4 py-3">
+      <header ref={headerRef} className="bg-secondary-dark border-b border-battle-gray px-4 py-3 prevent-pull-to-refresh">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Mic className="text-accent-gold text-2xl" />
@@ -395,7 +431,7 @@ export default function BattleArena() {
         </div>
       </header>
 
-      <main className="min-h-screen relative">
+      <main ref={mainRef} className="min-h-screen relative prevent-overscroll mobile-scroll-safe">
         {/* Battle Arena Background */}
         <div 
           className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-50 z-0 pointer-events-none"

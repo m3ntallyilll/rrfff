@@ -102,6 +102,14 @@
     position: relative;
     min-height: 100vh;
     color: white !important;
+    /* Mobile scroll fixes - prevent pull-to-refresh and overscroll */
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
+    touch-action: pan-x pan-y;
+    -webkit-overflow-scrolling: touch;
+    /* Prevent iOS bounce/elastic scrolling */
+    -webkit-overscroll-behavior: none;
   }
   
   /* Force override any component backgrounds */
@@ -125,6 +133,11 @@
   
   html {
     background: var(--void-black) !important;
+    /* Mobile scroll fixes - prevent pull-to-refresh */
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    touch-action: pan-x pan-y;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Theme Song Volume Slider Custom Styling */
@@ -414,6 +427,36 @@
     box-shadow: 0 0 20px var(--cyber-red);
     text-shadow: 0 0 15px var(--cyber-red);
     transform: translateY(-2px);
+  }
+  
+  /* Mobile scroll prevention utilities */
+  .prevent-overscroll {
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
+    touch-action: pan-x pan-y;
+    -webkit-overflow-scrolling: touch;
+    -webkit-overscroll-behavior: none;
+  }
+  
+  .prevent-pull-to-refresh {
+    overscroll-behavior-y: none;
+    touch-action: pan-x pan-y;
+    -webkit-overscroll-behavior: none;
+  }
+  
+  /* Prevent iOS bouncing on specific containers */
+  .no-bounce {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+    position: relative;
+  }
+  
+  /* Mobile-safe scrollable areas */
+  .mobile-scroll-safe {
+    overscroll-behavior: none;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
   }
   /* Battle Arena Enhancements */
   .bg-gradient-radial {
