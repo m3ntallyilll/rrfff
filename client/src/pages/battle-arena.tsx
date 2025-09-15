@@ -29,7 +29,7 @@ export default function BattleArena() {
     aiAggressiveness: 90,
     responseTime: 2000,
     analysisDepth: "enhanced" as const,
-    voiceSpeed: 1.1,
+    voiceSpeed: 1.0,
     battleLength: 5
   });
 

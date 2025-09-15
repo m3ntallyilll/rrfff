@@ -186,21 +186,21 @@ export class GroqTTSService {
   }
   
   private calculateDynamicSpeed(characterId: string, voiceStyle?: string, speedMultiplier: number = 1.0): number {
-    // Base speeds for different characters
+    // Base speeds for different characters - normalized to reasonable speeds
     const characterSpeeds: Record<string, number> = {
-      'cypher': 1.4,     // FAST robotic delivery - rapid-fire termination protocol
-      'venom': 0.9,      // Menacing, deliberate 
-      'razor': 1.1,      // Quick, sharp delivery
+      'cypher': 1.0,     // Normal robotic delivery
+      'venom': 0.95,     // Slightly slower, menacing
+      'razor': 1.0,      // Normal sharp delivery
       'silk': 1.0        // Smooth, natural pace
     };
     
-    // Style modifiers
+    // Style modifiers - normalized to reasonable speeds
     const styleModifiers: Record<string, number> = {
-      'aggressive': 1.2,  // Faster for aggressive style
+      'aggressive': 1.05, // Slightly faster for aggressive style
       'confident': 1.0,   // Normal speed
       'smooth': 0.95,     // Slightly slower for smooth
-      'intense': 1.15,    // Faster for intensity
-      'playful': 1.1      // Upbeat tempo
+      'intense': 1.05,    // Slightly faster for intensity
+      'playful': 1.0      // Normal tempo
     };
     
     const baseSpeed = characterSpeeds[characterId] || 1.0;
