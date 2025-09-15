@@ -252,35 +252,21 @@ export default function BattleArena() {
           updateBattleState({ isAIResponding: false });
         }
         
-        console.log('🎵 Setting current AI audio URL:', result.audioUrl?.substring(0, 100) + '...');
+        console.log('🎵 AI audio received, waiting for text to finish displaying...');
         console.log('🎵 Audio URL length:', result.audioUrl?.length || 0);
         console.log('🎵 Audio available:', !!result.audioUrl);
-        setCurrentAiAudio(result.audioUrl);
         
-        // 🔊 Audio is working via component system now
+        // Wait for AI text to finish typing before starting audio
+        const textLength = result.aiResponse?.length || 0;
+        const typingDelay = Math.min(textLength * 50, 3000); // 50ms per character, max 3 seconds
         
-        // FORCE AUTO-PLAY TTS - All AI responses must play automatically
-        if (result.audioUrl && result.audioUrl.length > 100) {
-          console.log('🔥 FORCING AUTOPLAY - AI must speak now!');
-          console.log('🔥 Audio URL ready for FORCED playback:', result.audioUrl.substring(0, 100) + '...');
-          
-          // Immediately trigger FORCED audio playback state
-          updateBattleState({ isPlayingAudio: true });
-          
-          // Enhanced audio playback trigger with multiple attempts
-          setTimeout(() => {
-            console.log('🔥 Enhanced autoplay trigger - attempt 1');
-            updateBattleState({ isPlayingAudio: true });
-            
-            // Additional trigger after ensuring audio component is ready
-            setTimeout(() => {
-              console.log('🔥 Enhanced autoplay trigger - attempt 2');
-              updateBattleState({ isPlayingAudio: true });
-            }, 200);
-          }, 50);
-        } else {
-          console.log('⚠️ No valid audio URL received:', result.audioUrl?.substring(0, 50));
-        }
+        console.log('🎵 Waiting', typingDelay, 'ms for text to finish displaying...');
+        setTimeout(() => {
+          console.log('🎵 Text display complete - now setting audio URL for playback');
+          setCurrentAiAudio(result.audioUrl);
+        }, typingDelay);
+        
+        // Audio playback is now handled by SimpleAudioPlayer with proper timing
         
         toast({
           title: "Round Complete!",
@@ -770,7 +756,7 @@ export default function BattleArena() {
               {/* Audio Playback Controls */}
               <AudioControls
                 audioUrl={currentAiAudio}
-                autoPlay={true}
+                autoPlay={false}
                 onPlaybackChange={(isPlaying) => 
                   updateBattleState({ isPlayingAudio: isPlaying })
                 }
