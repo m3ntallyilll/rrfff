@@ -535,11 +535,94 @@ export default function BattleArena() {
               {/* Recording Panel */}
               <RecordingPanel
                 onRecordingComplete={handleRecordingComplete}
-                onTextSubmit={(text) => {
+                onTextSubmit={async (text) => {
                   console.log('📝 User submitted text verse:', text.substring(0, 50) + '...');
-                  // Process text input same as voice
-                  submitRound({ userVerse: text });
                   triggerCrowdOnSpeech();
+                  
+                  // Start AI responding state
+                  updateBattleState({ isAIResponding: true });
+                  
+                  try {
+                    const result = await submitRound({ userVerse: text });
+                    
+                    if (result) {
+                      console.log('🎉 Battle round response received:', {
+                        hasUserText: !!result.userText,
+                        hasAiResponse: !!result.aiResponse,
+                        hasAudioUrl: !!result.audioUrl,
+                        userScore: result.userScore,
+                        aiScore: result.aiScore,
+                        keys: Object.keys(result)
+                      });
+                      
+                      // Update transcription
+                      if (result.userText) {
+                        setLiveTranscription(result.userText);
+                      }
+                      
+                      if (result.aiResponse) {
+                        console.log('🤖 Setting AI response:', result.aiResponse.substring(0, 100) + '...');
+                        console.log('🤖 AI response length:', result.aiResponse.length);
+                        console.log('🤖 Current aiResponse state before setting:', aiResponse?.substring(0, 50) + '...');
+                        
+                        // Clear AI responding state FIRST
+                        updateBattleState({ isAIResponding: false });
+                        
+                        // Then set the AI response
+                        setAiResponse(result.aiResponse);
+                        
+                        console.log('🤖 AI response state should be updated now');
+                        
+                        // Trigger crowd reactions for high-scoring AI responses
+                        if (result.aiResponse && result.aiResponse.length > 20 && (result.aiScore || 0) > 70) {
+                          console.log('🤖 Triggering AI crowd reaction for high-scoring response:', result.aiResponse.substring(0, 50) + '...');
+                          playIntelligentCrowdReaction(result.aiResponse, {
+                            battlePhase: (battleState?.currentRound || 1) === (battleState?.maxRounds || 3) ? 'closing' : 'middle',
+                            userPerformanceScore: result.aiScore || 0
+                          });
+                        }
+                      }
+                      
+                      console.log('🎵 Setting current AI audio URL:', result.audioUrl?.substring(0, 100) + '...');
+                      console.log('🎵 Audio URL length:', result.audioUrl?.length || 0);
+                      console.log('🎵 Audio available:', !!result.audioUrl);
+                      setCurrentAiAudio(result.audioUrl);
+                      
+                      // FORCE AUTO-PLAY TTS - All AI responses must play automatically
+                      if (result.audioUrl && result.audioUrl.length > 100) {
+                        console.log('🔥 FORCING AUTOPLAY - AI must speak now!');
+                        console.log('🔥 Audio URL ready for FORCED playback:', result.audioUrl.substring(0, 100) + '...');
+                        
+                        // Immediately trigger FORCED audio playback state
+                        updateBattleState({ isPlayingAudio: true });
+                        
+                        // Enhanced audio playback trigger with multiple attempts
+                        setTimeout(() => {
+                          console.log('🔥 Enhanced autoplay trigger - attempt 1');
+                          updateBattleState({ isPlayingAudio: true });
+                          
+                          // Additional trigger after ensuring audio component is ready
+                          setTimeout(() => {
+                            console.log('🔥 Enhanced autoplay trigger - attempt 2');
+                            updateBattleState({ isPlayingAudio: true });
+                          }, 200);
+                        }, 50);
+                      }
+                      
+                      toast({
+                        title: "Round Complete!",
+                        description: `Score: You ${result.userScore || 0} - AI ${result.aiScore || 0}`,
+                      });
+                    }
+                  } catch (error) {
+                    toast({
+                      title: "Battle Error",
+                      description: error instanceof Error ? error.message : "Failed to process battle round",
+                      variant: "destructive",
+                    });
+                  } finally {
+                    updateBattleState({ isAIResponding: false });
+                  }
                 }}
                 onRecordingStart={() => {
                   console.log('🎤 User started recording - triggering crowd on speech');
