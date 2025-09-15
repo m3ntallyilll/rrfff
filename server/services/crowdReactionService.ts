@@ -171,8 +171,7 @@ JSON only: {"reactionType":"wild_cheering","intensity":85,"reasoning":"devastati
   }
 
   /**
-   * REMOVED: This fallback function is no longer used
-   * ALL reactions are now 100% AI-powered via Groq analysis
+   * Lightweight pattern analysis without phonetic analyzer to prevent memory leaks
    */
   private fallbackPatternAnalysis(lyrics: string, context?: any): CrowdReactionAnalysis {
     const cleanLyrics = lyrics.toLowerCase().trim();
@@ -381,16 +380,7 @@ JSON only: {"reactionType":"wild_cheering","intensity":85,"reasoning":"devastati
     let totalSyllables = 0;
     
     for (const word of words) {
-      const cleanWord = word.toLowerCase().replace(/[^\w]/g, '');
-      if (cleanWord.length === 0) continue;
-      
-      // Basic syllable counting
-      const vowelMatches = cleanWord.match(/[aeiouy]+/g);
-      const vowelCount = vowelMatches ? vowelMatches.length : 1;
-      
-      // Adjust for silent e
-      const silentE = cleanWord.endsWith('e') && vowelCount > 1 ? 1 : 0;
-      totalSyllables += Math.max(1, vowelCount - silentE);
+      totalSyllables += this.countSyllablesSimple(word);
     }
     
     return totalSyllables;
@@ -417,6 +407,14 @@ JSON only: {"reactionType":"wild_cheering","intensity":85,"reasoning":"devastati
     const varietyScore = avgWordLength >= 4 && avgWordLength <= 6 ? 15 : 0;
     
     return Math.min(100, ratioScore + wordCountScore + varietyScore);
+  }
+
+  /**
+   * Simple syllable counting without phonetic analyzer
+   */
+  private countSyllablesSimple(word: string): number {
+    const vowelGroups = word.toLowerCase().match(/[aeiouy]+/g);
+    return vowelGroups ? vowelGroups.length : 1;
   }
 
   /**

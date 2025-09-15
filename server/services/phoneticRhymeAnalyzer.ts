@@ -44,7 +44,10 @@ export class PhoneticRhymeAnalyzer {
   private readonly SLANT_THRESHOLD = 0.7; // Threshold for slant rhyme similarity
 
   private static analysisDepth = 0;
-  private static readonly MAX_ANALYSIS_DEPTH = 3;
+  private static readonly MAX_ANALYSIS_DEPTH = 2;
+  private static analysisInProgress = false;
+  private static lastAnalysisTime = 0;
+  private static readonly MIN_ANALYSIS_INTERVAL = 1000; // 1 second minimum between analyses
 
   constructor() {
     this.loadCMUDictionary();
@@ -145,21 +148,38 @@ export class PhoneticRhymeAnalyzer {
    * Main entry point: Analyze rap lyrics with comprehensive phonetic rhyme scheme
    */
   analyzeRhymeScheme(lyrics: string): RhymeSchemeResult {
-    // FIXED: Prevent infinite recursion and memory leaks with better depth tracking
+    const now = Date.now();
+    
+    // Circuit breaker: prevent multiple simultaneous analyses
+    if (PhoneticRhymeAnalyzer.analysisInProgress) {
+      console.log('🚫 PhoneticRhymeAnalyzer: Analysis already in progress, skipping');
+      return this.createEmptyResult();
+    }
+    
+    // Rate limiting: prevent frequent analyses
+    if (now - PhoneticRhymeAnalyzer.lastAnalysisTime < PhoneticRhymeAnalyzer.MIN_ANALYSIS_INTERVAL) {
+      console.log('🚫 PhoneticRhymeAnalyzer: Rate limited, skipping analysis');
+      return this.createEmptyResult();
+    }
+    
+    // Depth protection
     if (PhoneticRhymeAnalyzer.analysisDepth >= PhoneticRhymeAnalyzer.MAX_ANALYSIS_DEPTH) {
-      console.log('🚫 PhoneticRhymeAnalyzer: Maximum recursion depth reached, returning empty result');
-      PhoneticRhymeAnalyzer.analysisDepth = 0; // Reset counter
+      console.log('🚫 PhoneticRhymeAnalyzer: Maximum recursion depth reached');
+      PhoneticRhymeAnalyzer.analysisDepth = 0;
       return this.createEmptyResult();
     }
 
-    // FIXED: Prevent re-analysis of same content
+    // Input validation
     if (!lyrics || lyrics.trim().length === 0) {
       return this.createEmptyResult();
     }
 
-    // FIXED: Limit analysis to prevent memory issues
-    const truncatedLyrics = lyrics.length > 1000 ? lyrics.substring(0, 1000) : lyrics;
+    // Limit input size to prevent memory issues
+    const truncatedLyrics = lyrics.length > 500 ? lyrics.substring(0, 500) : lyrics;
 
+    // Set flags
+    PhoneticRhymeAnalyzer.analysisInProgress = true;
+    PhoneticRhymeAnalyzer.lastAnalysisTime = now;
     PhoneticRhymeAnalyzer.analysisDepth++;
 
     try {
@@ -228,13 +248,17 @@ export class PhoneticRhymeAnalyzer {
       console.error('🚫 PhoneticRhymeAnalyzer: Analysis error:', error);
       return this.createEmptyResult();
     } finally {
-      // FIXED: Always reset the recursion counter properly
+      // Always reset flags to prevent deadlock
+      PhoneticRhymeAnalyzer.analysisInProgress = false;
       PhoneticRhymeAnalyzer.analysisDepth = Math.max(0, PhoneticRhymeAnalyzer.analysisDepth - 1);
       
-      // FIXED: Reset to 0 when back to root level
+      // Clear cached data when back to root level
       if (PhoneticRhymeAnalyzer.analysisDepth === 0) {
-        // Clear any cached data to prevent memory leaks
         this.families.clear();
+        // Force garbage collection hint
+        if (global.gc) {
+          global.gc();
+        }
       }
     }
   }
@@ -620,20 +644,20 @@ export class PhoneticRhymeAnalyzer {
     rhymeDensity: number;
     complexityScore: number;
   } {
-    // FIXED: Prevent infinite recursion by limiting analysis depth
-    if (PhoneticRhymeAnalyzer.analysisDepth >= 2) {
-      console.log('🚫 Enhanced analysis skipped - recursion prevented');
-      return {
-        totalRhymes: 0,
-        internalRhymes: 0,
-        perfectRhymes: 0,
-        slantRhymes: 0,
-        rhymeDensity: 0,
-        complexityScore: 0
-      };
-    }
+    // DISABLED: Always use simple analysis to prevent memory leaks
+    console.log('🚫 Enhanced analysis disabled - using simple counting only');
+    return this.getSimpleRhymeAnalysis(lyrics);
+  }
+  
+  private getSimpleRhymeAnalysis(lyrics: string): {
+    totalRhymes: number;
+    internalRhymes: number;
+    perfectRhymes: number;
+    slantRhymes: number;
+    rhymeDensity: number;
+    complexityScore: number;
+  } {
 
-    // FIXED: Quick analysis for scoring without full recursion
     if (!lyrics || lyrics.trim().length === 0) {
       return {
         totalRhymes: 0,
@@ -645,7 +669,6 @@ export class PhoneticRhymeAnalyzer {
       };
     }
 
-    // FIXED: Use simplified analysis instead of full recursive analysis
     const words = lyrics.toLowerCase().split(/\s+/).filter(w => w.length > 0);
     const simpleRhymeCount = this.countSimpleRhymes(words);
     const estimatedComplexity = Math.min(100, words.length * 2 + simpleRhymeCount * 5);

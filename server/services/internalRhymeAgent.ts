@@ -752,32 +752,33 @@ export class InternalRhymeAgent {
   }
 
   private wordsRhyme(word1: string, word2: string): boolean {
-    // Delegate to phonetic analyzer's enhanced rhyme detection
-    const analysis = this.phoneticAnalyzer.analyzeRhymeScheme(`${word1}\n${word2}`);
-    return analysis.families.size < 2; // Same family means they rhyme
+    // Simple rhyme detection to prevent memory leaks
+    if (word1.length < 2 || word2.length < 2) return false;
+    const ending1 = word1.slice(-2).toLowerCase();
+    const ending2 = word2.slice(-2).toLowerCase();
+    return ending1 === ending2;
   }
 
   private extractRhymeKey(word: string): string {
-    const analysis = this.phoneticAnalyzer.analyzeRhymeScheme(word);
-    const firstLine = analysis.lines[0];
-    return firstLine ? firstLine.endRhymeFamily : word.slice(-2);
+    // Simple rhyme key extraction to prevent memory leaks
+    return word.length >= 2 ? word.slice(-2).toLowerCase() : word.toLowerCase();
   }
 
   private calculateRhymeStrength(word1: string, word2: string): 1 | 2 | 3 {
-    const analysis = this.phoneticAnalyzer.analyzeRhymeScheme(`${word1}\n${word2}`);
-    const isSameFamily = analysis.families.size < 2;
-    
-    if (!isSameFamily) {
+    // Simple strength calculation to prevent memory leaks
+    if (!this.wordsRhyme(word1, word2)) {
       return 1; // Subtle/slant
     }
     
-    // Check syllable count for strength
     const word1Syllables = this.countSyllables(word1);
     const word2Syllables = this.countSyllables(word2);
     
     if (word1Syllables > 1 && word2Syllables > 1) {
       return 3; // Multi-syllable rhyme = devastating
     }
+    
+    return 2; // Standard rhyme
+  }
     
     return 2; // Single syllable perfect rhyme = strong
   }
