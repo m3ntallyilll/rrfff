@@ -408,7 +408,7 @@ export default function BattleArena() {
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.9, opacity: 0 }}
-                  className="bg-battle-gray rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto border border-gray-700"
+                  className="bg-battle-gray/80 backdrop-blur rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto border border-gray-700"
                 >
                   <div className="mb-6">
                     <h2 className="text-2xl font-orbitron font-bold text-center text-white mb-2">
@@ -439,7 +439,7 @@ export default function BattleArena() {
             )}
           </AnimatePresence>
           {/* Battle Status Bar */}
-          <Card className="mb-6 bg-battle-gray border-gray-700">
+          <Card className="mb-6 bg-battle-gray/30 backdrop-blur-sm border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-4">
@@ -453,7 +453,7 @@ export default function BattleArena() {
                 </div>
                 <div className="flex items-center space-x-4">
                   {/* Battle Timer */}
-                  <div className="flex items-center space-x-2 bg-secondary-dark px-4 py-2 rounded-lg">
+                  <div className="flex items-center space-x-2 bg-secondary-dark/40 backdrop-blur-sm px-4 py-2 rounded-lg">
                     <Clock className="text-accent-blue" size={16} />
                     <span className="font-orbitron font-bold text-lg" data-testid="text-battle-timer">
                       {formatDuration(battleTimer)}
@@ -461,10 +461,10 @@ export default function BattleArena() {
                   </div>
                   {/* Difficulty */}
                   <Select value={difficulty} onValueChange={handleDifficultyChange}>
-                    <SelectTrigger className="w-32 bg-secondary-dark border-gray-600" data-testid="select-difficulty">
+                    <SelectTrigger className="w-32 bg-secondary-dark/40 backdrop-blur-sm border-gray-600" data-testid="select-difficulty">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-secondary-dark border-gray-600">
+                    <SelectContent className="bg-secondary-dark/90 backdrop-blur border-gray-600">
                       <SelectItem value="easy">Easy</SelectItem>
                       <SelectItem value="normal">Normal</SelectItem>
                       <SelectItem value="hard">Hard</SelectItem>
@@ -476,7 +476,7 @@ export default function BattleArena() {
               {/* Enhanced Battle Score Display */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <div className="text-center bg-secondary-dark/50 rounded-lg px-6 py-4 border border-accent-blue/30">
+                  <div className="text-center bg-secondary-dark/30 backdrop-blur-sm rounded-lg px-6 py-4 border border-accent-blue/30">
                     <div className="text-accent-blue font-semibold text-sm">YOU</div>
                     <div className="text-3xl font-orbitron font-bold text-white" data-testid="text-user-score">
                       {battleState?.userScore || 0}
@@ -501,7 +501,7 @@ export default function BattleArena() {
                     </div>
                   </div>
                   
-                  <div className="text-center bg-secondary-dark/50 rounded-lg px-6 py-4 border border-accent-red/30">
+                  <div className="text-center bg-secondary-dark/30 backdrop-blur-sm rounded-lg px-6 py-4 border border-accent-red/30">
                     <div className="text-accent-red font-semibold text-sm">AI BOT</div>
                     <div className="text-3xl font-orbitron font-bold text-white" data-testid="text-ai-score">
                       {battleState?.aiScore || 0}
@@ -639,7 +639,7 @@ export default function BattleArena() {
               />
 
               {/* User Score Panel */}
-              <Card className="bg-battle-gray border-gray-700">
+              <Card className="bg-battle-gray/30 backdrop-blur-sm border-gray-700">
                 <CardContent className="p-6">
                   <h3 className="font-orbitron font-bold text-lg mb-4 text-accent-blue">
                     <Trophy className="inline mr-2" size={20} />
@@ -756,7 +756,7 @@ export default function BattleArena() {
               />
 
               {/* Battle History */}
-              <Card className="bg-battle-gray border-gray-700">
+              <Card className="bg-battle-gray/30 backdrop-blur-sm border-gray-700">
                 <CardContent className="p-6">
                   <h3 className="font-orbitron font-bold text-lg mb-4 text-accent-gold">
                     <History className="inline mr-2" size={20} />
@@ -772,7 +772,7 @@ export default function BattleArena() {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -20 }}
                           transition={{ delay: index * 0.1 }}
-                          className="bg-secondary-dark rounded-lg p-3 border border-gray-600"
+                          className="bg-secondary-dark/40 backdrop-blur-sm rounded-lg p-3 border border-gray-600"
                           data-testid={`card-battle-history-${index}`}
                         >
                           <div className="flex justify-between items-center">
@@ -811,7 +811,7 @@ export default function BattleArena() {
               </Card>
 
               {/* Quick Actions */}
-              <Card className="bg-battle-gray border-gray-700">
+              <Card className="bg-battle-gray/30 backdrop-blur-sm border-gray-700">
                 <CardContent className="p-6">
                   <h3 className="font-orbitron font-bold text-lg mb-4 text-accent-gold">Quick Actions</h3>
                   
@@ -852,7 +852,7 @@ export default function BattleArena() {
       </main>
 
       {/* Bottom Audio Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-secondary-dark border-t border-gray-700 px-4 py-3">
+      <div className="fixed bottom-0 left-0 right-0 bg-secondary-dark/40 backdrop-blur-sm border-t border-gray-700 px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Button
