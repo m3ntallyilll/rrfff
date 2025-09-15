@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Mic, Trophy, Clock, Flame, Wifi, History, Share, Dumbbell, User, BarChart3 } from "lucide-react";
 import { CharacterSelector } from "@/components/character-selector";
@@ -50,6 +50,34 @@ export default function BattleArena() {
   const [showCharacterSelector, setShowCharacterSelector] = useState(false);
   const [showLyricBreakdown, setShowLyricBreakdown] = useState(false);
   const [currentAnalysisText, setCurrentAnalysisText] = useState("");
+
+  // Audio race condition prevention
+  const [currentRequestId, setCurrentRequestId] = useState<string | null>(null);
+  const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Generate unique request ID
+  const generateRequestId = useCallback(() => {
+    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }, []);
+
+  // Clear typing timer utility
+  const clearTypingTimer = useCallback(() => {
+    if (typingTimerRef.current) {
+      console.log('🧹 Clearing typing delay timer');
+      clearTimeout(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+  }, []);
+
+  // Cancel active request utility
+  const cancelActiveRequest = useCallback(() => {
+    if (abortControllerRef.current) {
+      console.log('🚫 Aborting active network request');
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
 
   const { toast } = useToast();
   
@@ -185,8 +213,34 @@ export default function BattleArena() {
     }
   }, [currentBattleId, showCharacterSelector, selectedCharacter]);
 
+  // Cleanup on component unmount - prevent memory leaks and race conditions
+  useEffect(() => {
+    return () => {
+      console.log('🧹 Component unmounting - cleaning up timers and requests');
+      clearTypingTimer();
+      cancelActiveRequest();
+    };
+  }, [clearTypingTimer, cancelActiveRequest]);
+
   const handleRecordingComplete = async (recording: { blob: Blob; duration: number; url: string }) => {
     try {
+      // 🎯 RACE CONDITION PREVENTION - Generate unique request ID and setup AbortController
+      const requestId = generateRequestId();
+      setCurrentRequestId(requestId);
+      console.log('🎯 Starting new round with request ID:', requestId);
+      
+      // Cancel any previous requests and clear timers
+      clearTypingTimer();
+      cancelActiveRequest();
+      
+      // Setup new AbortController for this request
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+      
+      // 🎵 CLEAR OLD AUDIO - Prevent old AI audio from playing during new round processing
+      console.log('🧹 Clearing previous AI audio to prevent old lyrics from playing');
+      setCurrentAiAudio(undefined);
+      
       setIsTranscribing(true);
       
       // 🤫 NO AUTO-CROWD REACTIONS - Only intelligent analysis will trigger reactions
@@ -202,6 +256,7 @@ export default function BattleArena() {
           const transcriptionResponse = await fetch(`/api/battles/${currentBattleId}/transcribe`, {
             method: 'POST',
             body: formData,
+            signal: abortController.signal,
           });
           
           if (transcriptionResponse.ok) {
@@ -243,7 +298,7 @@ export default function BattleArena() {
       setIsTranscribing(false);
       updateBattleState({ isAIResponding: true });
 
-      const result = await submitRound({ audio: recording.blob });
+      const result = await submitRound({ audio: recording.blob, abortSignal: abortController.signal });
       
       if (result) {
         console.log('🎉 Full battle result received:', {
@@ -292,14 +347,25 @@ export default function BattleArena() {
         console.log('🎵 Audio URL length:', result.audioUrl?.length || 0);
         console.log('🎵 Audio available:', !!result.audioUrl);
         
-        // Wait for AI text to finish typing before starting audio
+        // Wait for AI text to finish typing before starting audio - with race condition protection
         const textLength = result.aiResponse?.length || 0;
         const typingDelay = Math.min(textLength * 50, 3000); // 50ms per character, max 3 seconds
         
         console.log('🎵 Waiting', typingDelay, 'ms for text to finish displaying...');
-        setTimeout(() => {
-          console.log('🎵 Text display complete - now setting audio URL for playback');
-          setCurrentAiAudio(result.audioUrl);
+        
+        // Clear any existing timer before setting new one
+        clearTypingTimer();
+        
+        // Set new timer with request ID verification
+        typingTimerRef.current = setTimeout(() => {
+          // ✅ RACE CONDITION PROTECTION - Only set audio if this is still the current request
+          if (currentRequestId === requestId) {
+            console.log('🎵 Text display complete - setting audio for request:', requestId);
+            setCurrentAiAudio(result.audioUrl);
+          } else {
+            console.log('🚫 Ignoring stale audio for old request:', requestId, '(current:', currentRequestId, ')');
+          }
+          typingTimerRef.current = null;
         }, typingDelay);
         
         // Audio playback is now handled by SimpleAudioPlayer with proper timing
@@ -319,6 +385,24 @@ export default function BattleArena() {
       setIsTranscribing(false);
       updateBattleState({ isAIResponding: false });
     }
+  };
+
+  const handleRecordingStart = () => {
+    // 🎵 PREVENT RACE CONDITIONS - Clear all pending timers and requests
+    console.log('🧹 User started recording - preventing race conditions');
+    clearTypingTimer();
+    cancelActiveRequest();
+    setCurrentRequestId(null);
+    
+    // 🎵 CLEAR OLD AUDIO - Immediately clear previous AI audio when user starts new round
+    console.log('🧹 User started recording - clearing previous AI audio');
+    setCurrentAiAudio(undefined);
+    setAiResponse("");  // Also clear previous AI text
+    setLiveTranscription("");  // Clear previous transcription
+    
+    // 🎤 TRIGGER CROWD REACTIONS - Original crowd reaction functionality
+    console.log('🎤 User started recording - triggering crowd on speech');
+    triggerCrowdOnSpeech();
   };
 
   const handleNewBattle = () => {
@@ -579,15 +663,29 @@ export default function BattleArena() {
               {/* Recording Panel */}
               <RecordingPanel
                 onRecordingComplete={handleRecordingComplete}
+                onRecordingStart={handleRecordingStart}
                 onTextSubmit={async (text) => {
                   console.log('📝 User submitted text verse:', text.substring(0, 50) + '...');
                   triggerCrowdOnSpeech();
+                  
+                  // 🎯 RACE CONDITION PREVENTION - Generate unique request ID and setup AbortController
+                  const requestId = generateRequestId();
+                  setCurrentRequestId(requestId);
+                  console.log('🎯 Starting text submission with request ID:', requestId);
+                  
+                  // Cancel any previous requests and clear timers
+                  clearTypingTimer();
+                  cancelActiveRequest();
+                  
+                  // Setup new AbortController for this request
+                  const abortController = new AbortController();
+                  abortControllerRef.current = abortController;
                   
                   // Start AI responding state
                   updateBattleState({ isAIResponding: true });
                   
                   try {
-                    const result = await submitRound({ userVerse: text });
+                    const result = await submitRound({ userVerse: text, abortSignal: abortController.signal });
                     
                     if (result) {
                       console.log('🎉 Battle round response received:', {
@@ -627,7 +725,28 @@ export default function BattleArena() {
                         }
                       }
                       
-                      console.log('🎵 Setting current AI audio URL:', result.audioUrl?.substring(0, 100) + '...');
+                      // Wait for AI text to finish typing before starting audio - with race condition protection
+                      const textLength = result.aiResponse?.length || 0;
+                      const typingDelay = Math.min(textLength * 50, 3000); // 50ms per character, max 3 seconds
+                      
+                      console.log('🎵 Waiting', typingDelay, 'ms for text to finish displaying...');
+                      
+                      // Clear any existing timer before setting new one
+                      clearTypingTimer();
+                      
+                      // Set new timer with request ID verification
+                      typingTimerRef.current = setTimeout(() => {
+                        // ✅ RACE CONDITION PROTECTION - Only set audio if this is still the current request
+                        if (currentRequestId === requestId) {
+                          console.log('🎵 Text display complete - setting audio for request:', requestId);
+                          setCurrentAiAudio(result.audioUrl);
+                        } else {
+                          console.log('🚫 Ignoring stale audio for old request:', requestId, '(current:', currentRequestId, ')');
+                        }
+                        typingTimerRef.current = null;
+                      }, typingDelay);
+                      
+                      console.log('🎵 Audio will be set after typing delay for request:', requestId);
                       console.log('🎵 Audio URL length:', result.audioUrl?.length || 0);
                       console.log('🎵 Audio available:', !!result.audioUrl);
                       setCurrentAiAudio(result.audioUrl);
@@ -667,10 +786,6 @@ export default function BattleArena() {
                   } finally {
                     updateBattleState({ isAIResponding: false });
                   }
-                }}
-                onRecordingStart={() => {
-                  console.log('🎤 User started recording - triggering crowd on speech');
-                  triggerCrowdOnSpeech();
                 }}
                 profanityFilter={profanityFilter}
                 onProfanityFilterChange={setProfanityFilter}
