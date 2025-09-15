@@ -44,10 +44,10 @@ export class PhoneticRhymeAnalyzer {
   private readonly SLANT_THRESHOLD = 0.7; // Threshold for slant rhyme similarity
 
   private static analysisDepth = 0;
-  private static readonly MAX_ANALYSIS_DEPTH = 2;
+  private static readonly MAX_ANALYSIS_DEPTH = 3; // Allow slightly deeper analysis for complex battles
   private static analysisInProgress = false;
   private static lastAnalysisTime = 0;
-  private static readonly MIN_ANALYSIS_INTERVAL = 1000; // 1 second minimum between analyses
+  private static readonly MIN_ANALYSIS_INTERVAL = 100; // 100ms minimum between analyses for better battle responsiveness
 
   constructor() {
     this.loadCMUDictionary();
@@ -153,16 +153,24 @@ export class PhoneticRhymeAnalyzer {
     // Advanced phonetic analysis enabled with safety mechanisms
     console.log('🎯 Enhanced rhyme analysis enabled - full phonetic processing');
     
-    // Circuit breaker: prevent multiple simultaneous analyses
-    if (PhoneticRhymeAnalyzer.analysisInProgress) {
-      console.log('🚫 PhoneticRhymeAnalyzer: Analysis already in progress, skipping');
+    // Circuit breaker: prevent multiple simultaneous analyses (but allow some concurrency for different users)
+    if (PhoneticRhymeAnalyzer.analysisInProgress && (now - PhoneticRhymeAnalyzer.lastAnalysisTime) < 50) {
+      console.log('🚫 PhoneticRhymeAnalyzer: Analysis blocked due to rapid concurrent requests');
       return this.createEmptyResult();
     }
     
-    // Rate limiting: prevent frequent analyses
+    // Rate limiting: prevent excessively frequent analyses while allowing battle-speed requests
     if (now - PhoneticRhymeAnalyzer.lastAnalysisTime < PhoneticRhymeAnalyzer.MIN_ANALYSIS_INTERVAL) {
-      console.log('🚫 PhoneticRhymeAnalyzer: Rate limited, skipping analysis');
-      return this.createEmptyResult();
+      console.log('🚫 PhoneticRhymeAnalyzer: Rate limited (analysis too frequent), falling back to simple analysis');
+      // Fallback to simple analysis instead of completely skipping
+      return {
+        lines: [],
+        families: new Map(),
+        overallScheme: [],
+        rhymeDensity: 0,
+        perfectRhymes: Math.floor(this.countSimpleRhymes(lyrics.toLowerCase().split(/\s+/).filter(w => w.length > 0)) * 0.7),
+        slantRhymes: Math.floor(this.countSimpleRhymes(lyrics.toLowerCase().split(/\s+/).filter(w => w.length > 0)) * 0.3)
+      };
     }
     
     // Depth protection
@@ -177,8 +185,8 @@ export class PhoneticRhymeAnalyzer {
       return this.createEmptyResult();
     }
 
-    // Limit input size to prevent memory issues
-    const truncatedLyrics = lyrics.length > 500 ? lyrics.substring(0, 500) : lyrics;
+    // Limit input size to prevent memory issues (increased for battle verses)
+    const truncatedLyrics = lyrics.length > 1000 ? lyrics.substring(0, 1000) : lyrics;
 
     // Set flags
     PhoneticRhymeAnalyzer.analysisInProgress = true;
@@ -186,9 +194,9 @@ export class PhoneticRhymeAnalyzer {
     PhoneticRhymeAnalyzer.analysisDepth++;
 
     try {
-      // FIXED: Only log once per analysis session
+      // Log analysis start with timing info for battle performance monitoring
       if (PhoneticRhymeAnalyzer.analysisDepth === 1) {
-        console.log('🎯 PhoneticRhymeAnalyzer: Starting comprehensive rhyme analysis');
+        console.log(`🎯 PhoneticRhymeAnalyzer: Starting analysis (depth: ${PhoneticRhymeAnalyzer.analysisDepth}, interval: ${now - PhoneticRhymeAnalyzer.lastAnalysisTime}ms)`);
       }
 
       // Reset state for new analysis
@@ -200,8 +208,8 @@ export class PhoneticRhymeAnalyzer {
       let totalPerfectRhymes = 0;
       let totalSlantRhymes = 0;
 
-      // FIXED: Limit line processing to prevent memory overflow
-      const maxLines = Math.min(lines.length, 10);
+      // Limit line processing to prevent memory overflow (increased for longer verses)
+      const maxLines = Math.min(lines.length, 20);
 
       // Process each line
       for (let lineIndex = 0; lineIndex < maxLines; lineIndex++) {
@@ -258,9 +266,14 @@ export class PhoneticRhymeAnalyzer {
       // Clear cached data when back to root level
       if (PhoneticRhymeAnalyzer.analysisDepth === 0) {
         this.families.clear();
-        // Force garbage collection hint
-        if (typeof global !== 'undefined' && 'gc' in global && typeof (global as any).gc === 'function') {
-          (global as any).gc();
+        // Optional garbage collection hint (less aggressive)
+        if (PhoneticRhymeAnalyzer.analysisDepth === 0 && typeof global !== 'undefined' && 'gc' in global && typeof (global as any).gc === 'function') {
+          // Only suggest GC if we're truly done with all analyses
+          setTimeout(() => {
+            if (PhoneticRhymeAnalyzer.analysisDepth === 0) {
+              (global as any).gc();
+            }
+          }, 1000);
         }
       }
     }
