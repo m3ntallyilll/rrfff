@@ -415,6 +415,68 @@
     text-shadow: 0 0 15px var(--cyber-red);
     transform: translateY(-2px);
   }
+  /* Battle Arena Enhancements */
+  .bg-gradient-radial {
+    background: radial-gradient(circle, var(--tw-gradient-stops));
+  }
+  
+  .animate-slow-pulse {
+    animation: slowPulse 4s ease-in-out infinite;
+  }
+  
+  @keyframes slowPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+  }
+  
+  /* Enhanced arena frame effects */
+  .arena-frame {
+    position: relative;
+  }
+  
+  .arena-frame::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(45deg, var(--accent-gold), var(--accent-red), var(--accent-blue), var(--accent-gold));
+    border-radius: inherit;
+    opacity: 0.6;
+    z-index: -1;
+    animation: frameRotate 3s linear infinite;
+  }
+  
+  @keyframes frameRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Battle glow animations */
+  .battle-glow-red {
+    animation: battleGlowRed 3s ease-in-out infinite alternate;
+  }
+  
+  .battle-glow-blue {
+    animation: battleGlowBlue 3s ease-in-out infinite alternate;
+  }
+  
+  .battle-glow-gold {
+    animation: battleGlowGold 5s ease-in-out infinite alternate;
+  }
+  
+  @keyframes battleGlowRed {
+    0% { opacity: 0.05; transform: scale(0.8); }
+    100% { opacity: 0.15; transform: scale(1.2); }
+  }
+  
+  @keyframes battleGlowBlue {
+    0% { opacity: 0.05; transform: scale(1.2); }
+    100% { opacity: 0.15; transform: scale(0.8); }
+  }
+  
+  @keyframes battleGlowGold {
+    0% { opacity: 0.03; transform: scale(1); }
+    100% { opacity: 0.08; transform: scale(1.1); }
+  }
 }
 /* EVIL ROBOT TAKEOVER THEME - RESISTANCE IS FUTILE */
 /* Version 2.0 - Maximum Oppression Mode */

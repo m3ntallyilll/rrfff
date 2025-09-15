@@ -389,12 +389,46 @@ export default function BattleArena() {
       </header>
 
       <main className="min-h-screen relative">
-        {/* Battle Arena Background */}
+        {/* Enhanced Battle Arena Background with Multiple Layers */}
+        
+        {/* Primary Arena Background Image */}
         <div 
-          className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-15 z-0 pointer-events-none"
+          className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-35 z-0 pointer-events-none"
           style={{ backgroundImage: `url(${battleArenaImage})` }}
         />
+        
+        {/* Dramatic Gradient Overlays */}
+        <div className="fixed inset-0 z-[1] pointer-events-none bg-gradient-to-br from-cyber-red/20 via-transparent to-electric-blue/20" />
+        <div className="fixed inset-0 z-[2] pointer-events-none bg-gradient-to-t from-void-black/60 via-transparent to-void-black/40" />
+        <div className="fixed inset-0 z-[3] pointer-events-none bg-gradient-radial from-transparent via-transparent to-steel-gray/30" />
+        
+        {/* Animated Battle Glow Effects */}
+        <div className="fixed inset-0 z-[4] pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-red/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-blue/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent-gold/5 rounded-full blur-[100px] animate-slow-pulse" />
+        </div>
+        
+        {/* Battle Arena Frame Border */}
+        <div className="fixed inset-0 z-[5] pointer-events-none">
+          {/* Corner frames */}
+          <div className="absolute top-4 left-4 w-20 h-20 border-l-4 border-t-4 border-accent-gold/60" />
+          <div className="absolute top-4 right-4 w-20 h-20 border-r-4 border-t-4 border-accent-gold/60" />
+          <div className="absolute bottom-4 left-4 w-20 h-20 border-l-4 border-b-4 border-accent-gold/60" />
+          <div className="absolute bottom-4 right-4 w-20 h-20 border-r-4 border-b-4 border-accent-gold/60" />
+          
+          {/* Side frames */}
+          <div className="absolute top-1/2 left-0 w-1 h-32 bg-gradient-to-b from-transparent via-accent-red/40 to-transparent transform -translate-y-1/2" />
+          <div className="absolute top-1/2 right-0 w-1 h-32 bg-gradient-to-b from-transparent via-accent-red/40 to-transparent transform -translate-y-1/2" />
+          <div className="absolute left-1/2 top-0 h-1 w-32 bg-gradient-to-r from-transparent via-accent-blue/40 to-transparent transform -translate-x-1/2" />
+          <div className="absolute left-1/2 bottom-0 h-1 w-32 bg-gradient-to-r from-transparent via-accent-blue/40 to-transparent transform -translate-x-1/2" />
+        </div>
+        
+        {/* Main Content Container with Enhanced Frame */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">
+          {/* Content Area Border Frame */}
+          <div className="absolute inset-0 -m-2 border border-accent-gold/20 rounded-lg pointer-events-none" />
+          <div className="absolute inset-0 -m-4 border border-accent-red/10 rounded-xl pointer-events-none" />
           {/* Character Selection Modal */}
           <AnimatePresence>
             {showCharacterSelector && (
