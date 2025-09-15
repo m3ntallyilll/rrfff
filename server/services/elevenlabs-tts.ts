@@ -82,11 +82,26 @@ export class ElevenLabsTTSService {
     let selectedVoice = voices.find(voice => {
       const voiceName = voice.name?.toLowerCase() || '';
       const voiceDescription = voice.description?.toLowerCase() || '';
-      const voiceLabels = voice.labels?.join(' ').toLowerCase() || '';
+      
+      // Safely handle voice.labels (can be array, object, or undefined)
+      let voiceLabels = '';
+      let genderLabels: string[] = [];
+      
+      try {
+        if (Array.isArray(voice.labels)) {
+          voiceLabels = voice.labels.join(' ').toLowerCase();
+          genderLabels = voice.labels.map((l: string) => l.toLowerCase());
+        } else if (voice.labels && typeof voice.labels === 'object') {
+          voiceLabels = Object.values(voice.labels).join(' ').toLowerCase();
+          genderLabels = Object.values(voice.labels).map((l: string) => l.toLowerCase());
+        }
+      } catch (error) {
+        console.warn(`⚠️ ElevenLabs voice labels parsing error for ${voice.name}:`, error);
+      }
+      
       const searchText = `${voiceName} ${voiceDescription} ${voiceLabels}`;
       
       // Check if voice matches gender preference
-      const genderLabels = voice.labels?.map((l: string) => l.toLowerCase()) || [];
       const matchesGender = genderLabels.includes(charPrefs.preferredGender) || 
                            genderLabels.includes(`${charPrefs.preferredGender}_voice`);
       
@@ -101,7 +116,18 @@ export class ElevenLabsTTSService {
     // If no perfect match, find any voice matching gender
     if (!selectedVoice) {
       selectedVoice = voices.find(voice => {
-        const genderLabels = voice.labels?.map((l: string) => l.toLowerCase()) || [];
+        let genderLabels: string[] = [];
+        
+        try {
+          if (Array.isArray(voice.labels)) {
+            genderLabels = voice.labels.map((l: string) => l.toLowerCase());
+          } else if (voice.labels && typeof voice.labels === 'object') {
+            genderLabels = Object.values(voice.labels).map((l: string) => l.toLowerCase());
+          }
+        } catch (error) {
+          console.warn(`⚠️ ElevenLabs gender fallback labels error for ${voice.name}:`, error);
+        }
+        
         return genderLabels.includes(charPrefs.preferredGender) || 
                genderLabels.includes(`${charPrefs.preferredGender}_voice`);
       });
