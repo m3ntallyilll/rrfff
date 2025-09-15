@@ -15,7 +15,7 @@ import { RecordingPanel } from "@/components/recording-panel";
 import { BattleAvatar } from "@/components/battle-avatar";
 import { BattleTextDisplay } from "@/components/battle-text-display";
 import { AudioControls } from "@/components/audio-controls";
-import { LyricBreakdown } from "@/components/lyric-breakdown";
+import { SimpleAnalyzer } from "@/components/simple-analyzer";
 import { formatDuration } from "@/lib/audio-utils";
 import { motion, AnimatePresence } from "framer-motion";
 const battleArenaImage = "/images/Epic_rap_battle_arena_5a01b4d4.png";
@@ -917,6 +917,15 @@ export default function BattleArena() {
           </div>
         </div>
       </div>
+
+      {/* Lyric Analysis Modal */}
+      {showLyricBreakdown && currentAnalysisText && (
+        <SimpleAnalyzer
+          text={currentAnalysisText}
+          onClose={handleCloseLyricBreakdown}
+          isVisible={true}
+        />
+      )}
 
     </>
   );
