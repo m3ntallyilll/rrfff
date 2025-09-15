@@ -14,15 +14,18 @@ import { Eye, EyeOff, Key, CheckCircle, AlertCircle, Zap, Settings2, TestTube } 
 interface APIKeyStatus {
   hasValidOpenAI: boolean;
   hasValidGroq: boolean;
+  hasValidElevenLabs: boolean;
   preferredTtsService: string;
 }
 
 export function APIKeyManager() {
   const [openaiKey, setOpenaiKey] = useState('');
   const [groqKey, setGroqKey] = useState('');
+  const [elevenlabsKey, setElevenlabsKey] = useState('');
   const [preferredService, setPreferredService] = useState('system');
   const [showOpenaiKey, setShowOpenaiKey] = useState(false);
   const [showGroqKey, setShowGroqKey] = useState(false);
+  const [showElevenlabsKey, setShowElevenlabsKey] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -37,6 +40,7 @@ export function APIKeyManager() {
     mutationFn: async (data: { 
       openaiApiKey?: string; 
       groqApiKey?: string; 
+      elevenlabsApiKey?: string;
       preferredTtsService?: string;
     }) => {
       const response = await apiRequest('PUT', '/api/user/api-keys', data);
@@ -51,6 +55,7 @@ export function APIKeyManager() {
       // Clear input fields
       setOpenaiKey('');
       setGroqKey('');
+      setElevenlabsKey('');
     },
     onError: (error: any) => {
       toast({
@@ -63,7 +68,7 @@ export function APIKeyManager() {
 
   // Test API key mutation
   const testKeyMutation = useMutation({
-    mutationFn: async (service: 'openai' | 'groq') => {
+    mutationFn: async (service: 'openai' | 'groq' | 'elevenlabs') => {
       const response = await apiRequest('POST', '/api/user/test-api-key', { service });
       return response.json();
     },
@@ -94,6 +99,10 @@ export function APIKeyManager() {
       updates.groqApiKey = groqKey.trim();
     }
     
+    if (elevenlabsKey.trim()) {
+      updates.elevenlabsApiKey = elevenlabsKey.trim();
+    }
+    
     if (preferredService !== keyStatus?.preferredTtsService) {
       updates.preferredTtsService = preferredService;
     }
@@ -108,7 +117,7 @@ export function APIKeyManager() {
     }
   };
 
-  const handleTestKey = (service: 'openai' | 'groq') => {
+  const handleTestKey = (service: 'openai' | 'groq' | 'elevenlabs') => {
     testKeyMutation.mutate(service);
   };
 
@@ -143,7 +152,7 @@ export function APIKeyManager() {
       
       <CardContent className="space-y-6">
         {/* Current Status */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-400">OpenAI:</span>
             {keyStatus?.hasValidOpenAI ? (
@@ -175,6 +184,21 @@ export function APIKeyManager() {
           </div>
           
           <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-400">ElevenLabs:</span>
+            {keyStatus?.hasValidElevenLabs ? (
+              <Badge className="bg-green-600 text-white">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Active
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="border-gray-600 text-gray-400">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                Not Set
+              </Badge>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2">
             <span className="text-sm text-gray-400">Preferred:</span>
             <Badge className="bg-purple-600 text-white">
               <Settings2 className="w-3 h-3 mr-1" />
@@ -185,12 +209,15 @@ export function APIKeyManager() {
 
         {/* API Key Input Tabs */}
         <Tabs defaultValue="openai" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-gray-700">
+          <TabsList className="grid w-full grid-cols-3 bg-gray-700">
             <TabsTrigger value="openai" className="data-[state=active]:bg-blue-600">
               OpenAI gpt-4o-mini-tts
             </TabsTrigger>
             <TabsTrigger value="groq" className="data-[state=active]:bg-green-600">
               Groq PlayAI TTS
+            </TabsTrigger>
+            <TabsTrigger value="elevenlabs" className="data-[state=active]:bg-orange-600">
+              ElevenLabs Premium
             </TabsTrigger>
           </TabsList>
           
@@ -303,6 +330,61 @@ export function APIKeyManager() {
               </p>
             </div>
           </TabsContent>
+          
+          {/* ElevenLabs API Key */}
+          <TabsContent value="elevenlabs" className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="elevenlabs-key" className="text-white">
+                ElevenLabs API Key
+              </Label>
+              <div className="relative">
+                <Input
+                  id="elevenlabs-key"
+                  type={showElevenlabsKey ? "text" : "password"}
+                  value={elevenlabsKey}
+                  onChange={(e) => setElevenlabsKey(e.target.value)}
+                  placeholder="sk_..."
+                  className="bg-gray-700 border-gray-600 text-white pr-20"
+                  data-testid="input-elevenlabs-key"
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowElevenlabsKey(!showElevenlabsKey)}
+                    className="h-6 w-6 p-0"
+                  >
+                    {showElevenlabsKey ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                  </Button>
+                  {keyStatus?.hasValidElevenLabs && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleTestKey('elevenlabs')}
+                      disabled={testKeyMutation.isPending}
+                      className="h-6 w-6 p-0"
+                      data-testid="button-test-elevenlabs"
+                    >
+                      <TestTube className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <p className="text-xs text-gray-400">
+                Get your API key from{' '}
+                <a
+                  href="https://elevenlabs.io/subscription"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-orange-400 hover:underline"
+                >
+                  ElevenLabs Dashboard
+                </a>
+              </p>
+            </div>
+          </TabsContent>
         </Tabs>
 
         {/* TTS Service Preference */}
@@ -323,6 +405,9 @@ export function APIKeyManager() {
               </SelectItem>
               <SelectItem value="groq" className="text-white">
                 Groq (PlayAI - 10x faster)
+              </SelectItem>
+              <SelectItem value="elevenlabs" className="text-white">
+                ElevenLabs (Premium voices with character mapping)
               </SelectItem>
             </SelectContent>
           </Select>

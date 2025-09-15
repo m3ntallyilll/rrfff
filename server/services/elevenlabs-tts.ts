@@ -90,10 +90,10 @@ export class ElevenLabsTTSService {
       try {
         if (Array.isArray(voice.labels)) {
           voiceLabels = voice.labels.join(' ').toLowerCase();
-          genderLabels = voice.labels.map((l: string) => l.toLowerCase());
+          genderLabels = voice.labels.map((l: unknown) => String(l).toLowerCase());
         } else if (voice.labels && typeof voice.labels === 'object') {
           voiceLabels = Object.values(voice.labels).join(' ').toLowerCase();
-          genderLabels = Object.values(voice.labels).map((l: string) => l.toLowerCase());
+          genderLabels = Object.values(voice.labels).map((l: unknown) => String(l).toLowerCase());
         }
       } catch (error) {
         console.warn(`⚠️ ElevenLabs voice labels parsing error for ${voice.name}:`, error);
@@ -120,9 +120,9 @@ export class ElevenLabsTTSService {
         
         try {
           if (Array.isArray(voice.labels)) {
-            genderLabels = voice.labels.map((l: string) => l.toLowerCase());
+            genderLabels = voice.labels.map((l: unknown) => String(l).toLowerCase());
           } else if (voice.labels && typeof voice.labels === 'object') {
-            genderLabels = Object.values(voice.labels).map((l: string) => l.toLowerCase());
+            genderLabels = Object.values(voice.labels).map((l: unknown) => String(l).toLowerCase());
           }
         } catch (error) {
           console.warn(`⚠️ ElevenLabs gender fallback labels error for ${voice.name}:`, error);
@@ -228,7 +228,7 @@ export class ElevenLabsTTSService {
       const audioResponse = await this.elevenlabs.textToSpeech.convert(voiceId, {
         text: processedText,
         modelId: "eleven_multilingual_v2", // Latest multilingual model
-        output_format: "mp3_44100_128", // High quality MP3
+        outputFormat: "mp3_44100_128", // High quality MP3
         voice_settings: voiceSettings
       });
 

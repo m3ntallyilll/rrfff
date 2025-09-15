@@ -595,6 +595,7 @@ export class DatabaseStorage implements IStorage {
     keys: { 
       openaiApiKey?: string; 
       groqApiKey?: string; 
+      elevenlabsApiKey?: string;
       preferredTtsService?: string 
     }
   ): Promise<User> {
@@ -608,6 +609,11 @@ export class DatabaseStorage implements IStorage {
     if (keys.groqApiKey !== undefined) {
       // In production, you'd encrypt the API key here  
       updateData.groqApiKey = keys.groqApiKey;
+    }
+
+    if (keys.elevenlabsApiKey !== undefined) {
+      // In production, you'd encrypt the API key here  
+      updateData.elevenlabsApiKey = keys.elevenlabsApiKey;
     }
 
     if (keys.preferredTtsService !== undefined) {
@@ -626,6 +632,7 @@ export class DatabaseStorage implements IStorage {
   async getUserAPIKeysStatus(userId: string): Promise<{
     hasValidOpenAI: boolean;
     hasValidGroq: boolean;
+    hasValidElevenLabs: boolean;
     preferredTtsService: string;
   }> {
     const user = await this.getUser(userId);
@@ -633,6 +640,7 @@ export class DatabaseStorage implements IStorage {
       return {
         hasValidOpenAI: false,
         hasValidGroq: false,
+        hasValidElevenLabs: false,
         preferredTtsService: 'system'
       };
     }
@@ -640,6 +648,7 @@ export class DatabaseStorage implements IStorage {
     return {
       hasValidOpenAI: !!(user.openaiApiKey && user.openaiApiKey.length > 0),
       hasValidGroq: !!(user.groqApiKey && user.groqApiKey.length > 0),
+      hasValidElevenLabs: !!(user.elevenlabsApiKey && user.elevenlabsApiKey.length > 0),
       preferredTtsService: user.preferredTtsService || 'system'
     };
   }
