@@ -46,6 +46,27 @@ export default function BattleArena() {
   const [showLyricBreakdown, setShowLyricBreakdown] = useState(false);
   const [currentAnalysisText, setCurrentAnalysisText] = useState("");
 
+  // Get latest round scores for authentic user stats (zero mock data)
+  const getLatestUserScores = () => {
+    if (!rounds || rounds.length === 0) {
+      return { rhymeDensity: 0, flowQuality: 0, creativity: 0 };
+    }
+    
+    // Get the most recent round with user input
+    const latestRound = rounds[rounds.length - 1];
+    if (!latestRound?.scores) {
+      return { rhymeDensity: 0, flowQuality: 0, creativity: 0 };
+    }
+    
+    return {
+      rhymeDensity: Math.round(latestRound.scores.rhymeDensity || 0),
+      flowQuality: Math.round(latestRound.scores.flowQuality || 0), 
+      creativity: Math.round(latestRound.scores.creativity || 0)
+    };
+  };
+  
+  const userScores = getLatestUserScores();
+
   const { toast } = useToast();
   
   // Set up global function for persistent score notifications
@@ -650,24 +671,24 @@ export default function BattleArena() {
                     <div className="flex justify-between">
                       <span className="text-gray-400">Rhyme Density</span>
                       <div className="flex items-center space-x-2">
-                        <Progress value={75} className="w-16 h-2" />
-                        <span className="text-sm font-semibold" data-testid="text-rhyme-density">75%</span>
+                        <Progress value={userScores.rhymeDensity} className="w-16 h-2" />
+                        <span className="text-sm font-semibold" data-testid="text-rhyme-density">{userScores.rhymeDensity}%</span>
                       </div>
                     </div>
                     
                     <div className="flex justify-between">
                       <span className="text-gray-400">Flow Quality</span>
                       <div className="flex items-center space-x-2">
-                        <Progress value={80} className="w-16 h-2" />
-                        <span className="text-sm font-semibold" data-testid="text-flow-quality">80%</span>
+                        <Progress value={userScores.flowQuality} className="w-16 h-2" />
+                        <span className="text-sm font-semibold" data-testid="text-flow-quality">{userScores.flowQuality}%</span>
                       </div>
                     </div>
                     
                     <div className="flex justify-between">
                       <span className="text-gray-400">Creativity</span>
                       <div className="flex items-center space-x-2">
-                        <Progress value={60} className="w-16 h-2" />
-                        <span className="text-sm font-semibold" data-testid="text-creativity">60%</span>
+                        <Progress value={userScores.creativity} className="w-16 h-2" />
+                        <span className="text-sm font-semibold" data-testid="text-creativity">{userScores.creativity}%</span>
                       </div>
                     </div>
 
