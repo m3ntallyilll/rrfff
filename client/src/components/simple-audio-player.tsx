@@ -29,7 +29,9 @@ export function SimpleAudioPlayer({
       console.log('🎵 SimpleAudioPlayer: New audio URL received');
       console.log('🎵 Audio URL length:', audioUrl.length);
       console.log('🎵 Audio URL format:', audioUrl.substring(0, 50) + '...');
+      console.log('🎵 Audio URL FULL:', audioUrl);
       console.log('🎵 Auto-play enabled:', autoPlay);
+      console.log('🎵 AUDIO DEBUG: Props received - audioUrl:', audioUrl, 'autoPlay:', autoPlay, 'volume:', volume);
       
       // Clean up previous audio
       if (audioRef.current) {
@@ -63,11 +65,19 @@ export function SimpleAudioPlayer({
 
       audio.addEventListener('error', (error) => {
         console.error('🔊 Audio error:', error);
+        console.error('🔊 Audio error details - src:', audio.src, 'readyState:', audio.readyState, 'networkState:', audio.networkState);
+        console.error('🔊 Audio error event:', error.target?.error);
         if (showFallbackButton) {
           setShowPlayButton(true);
           setAutoplayAttempted(true);
         }
       });
+      
+      // Additional debugging events
+      audio.addEventListener('loadstart', () => console.log('🎵 Audio loadstart'));
+      audio.addEventListener('loadeddata', () => console.log('🎵 Audio loadeddata'));
+      audio.addEventListener('canplay', () => console.log('🎵 Audio canplay'));
+      audio.addEventListener('canplaythrough', () => console.log('🎵 Audio canplaythrough'));
 
       // Use shared audio manager for comprehensive auto-play
       if (autoPlay) {

@@ -213,6 +213,13 @@ export default function BattleArena() {
     }
   }, [currentBattleId, showCharacterSelector, selectedCharacter]);
 
+  // Track currentAiAudio state changes for debugging
+  useEffect(() => {
+    console.log('🎵 AUDIO DEBUG: currentAiAudio state changed to:', currentAiAudio);
+    console.log('🎵 AUDIO DEBUG: currentAiAudio length:', currentAiAudio?.length || 0);
+    console.log('🎵 AUDIO DEBUG: currentAiAudio is valid URL:', currentAiAudio && currentAiAudio.startsWith('/') && currentAiAudio.length > 10);
+  }, [currentAiAudio]);
+
   // Cleanup on component unmount - prevent memory leaks and race conditions
   useEffect(() => {
     return () => {
@@ -360,7 +367,12 @@ export default function BattleArena() {
           // ✅ RACE CONDITION PROTECTION - Only set audio if this is still the current request
           if (currentRequestId === requestId) {
             console.log('🎵 Text display complete - setting audio for request:', requestId);
+            console.log('🎵 AUDIO DEBUG: result.audioUrl:', result.audioUrl);
+            console.log('🎵 AUDIO DEBUG: audioUrl length:', result.audioUrl?.length || 0);
+            console.log('🎵 AUDIO DEBUG: audioUrl type:', typeof result.audioUrl);
+            console.log('🎵 AUDIO DEBUG: audioUrl valid:', result.audioUrl && result.audioUrl.length > 10);
             setCurrentAiAudio(result.audioUrl);
+            console.log('🎵 AUDIO DEBUG: currentAiAudio state should now be set to:', result.audioUrl?.substring(0, 100));
           } else {
             console.log('🚫 Ignoring stale audio for old request:', requestId, '(current:', currentRequestId, ')');
           }
@@ -738,7 +750,12 @@ export default function BattleArena() {
                         // ✅ RACE CONDITION PROTECTION - Only set audio if this is still the current request
                         if (currentRequestId === requestId) {
                           console.log('🎵 Text display complete - setting audio for request:', requestId);
+                          console.log('🎵 AUDIO DEBUG (delayed): result.audioUrl:', result.audioUrl);
+                          console.log('🎵 AUDIO DEBUG (delayed): audioUrl length:', result.audioUrl?.length || 0);
+                          console.log('🎵 AUDIO DEBUG (delayed): audioUrl type:', typeof result.audioUrl);
+                          console.log('🎵 AUDIO DEBUG (delayed): audioUrl valid:', result.audioUrl && result.audioUrl.length > 10);
                           setCurrentAiAudio(result.audioUrl);
+                          console.log('🎵 AUDIO DEBUG (delayed): currentAiAudio state should now be set to:', result.audioUrl?.substring(0, 100));
                         } else {
                           console.log('🚫 Ignoring stale audio for old request:', requestId, '(current:', currentRequestId, ')');
                         }
@@ -748,7 +765,11 @@ export default function BattleArena() {
                       console.log('🎵 Audio will be set after typing delay for request:', requestId);
                       console.log('🎵 Audio URL length:', result.audioUrl?.length || 0);
                       console.log('🎵 Audio available:', !!result.audioUrl);
+                      console.log('🎵 AUDIO DEBUG (immediate): result.audioUrl:', result.audioUrl);
+                      console.log('🎵 AUDIO DEBUG (immediate): audioUrl type:', typeof result.audioUrl);
+                      console.log('🎵 AUDIO DEBUG (immediate): audioUrl valid:', result.audioUrl && result.audioUrl.length > 10);
                       setCurrentAiAudio(result.audioUrl);
+                      console.log('🎵 AUDIO DEBUG (immediate): currentAiAudio state should now be set to:', result.audioUrl?.substring(0, 100));
                       
                       // FORCE AUTO-PLAY TTS - All AI responses must play automatically
                       if (result.audioUrl && result.audioUrl.length > 100) {
@@ -850,6 +871,12 @@ export default function BattleArena() {
                 audioUrl={currentAiAudio}
                 character={selectedCharacter || undefined}
               />
+              {/* DEBUG: Current Audio URL */}
+              <div className="text-xs text-gray-500 p-2 bg-gray-800 rounded">
+                <div>🎵 DEBUG - currentAiAudio: {currentAiAudio || 'null'}</div>
+                <div>🎵 DEBUG - audioUrl length: {currentAiAudio?.length || 0}</div>
+                <div>🎵 DEBUG - audioUrl valid: {currentAiAudio && currentAiAudio.length > 10 ? 'YES' : 'NO'}</div>
+              </div>
 
               {/* Battle Text Display */}
               <BattleTextDisplay

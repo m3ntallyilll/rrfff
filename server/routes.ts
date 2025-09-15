@@ -1629,18 +1629,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const filename = req.params.filename;
       const filePath = path.join(process.cwd(), 'temp_audio', filename);
 
-      // Security: Validate filename to prevent path traversal
-      if (!filename.startsWith('bark_') || !filename.endsWith('.wav')) {
+      // Security: Validate filename to prevent path traversal - Updated to allow all TTS audio files
+      const allowedPrefixes = ['bark_', 'groq_tts_', 'elevenlabs_tts_', 'openai_tts_', 'typecast_tts_'];
+      const allowedExtensions = ['.wav', '.mp3'];
+      
+      const hasValidPrefix = allowedPrefixes.some(prefix => filename.startsWith(prefix));
+      const hasValidExtension = allowedExtensions.some(ext => filename.endsWith(ext));
+      
+      if (!hasValidPrefix || !hasValidExtension) {
+        console.log('🚫 Audio file blocked - filename:', filename, 'hasValidPrefix:', hasValidPrefix, 'hasValidExtension:', hasValidExtension);
         return res.status(404).json({ message: 'File not found' });
       }
+      
+      console.log('✅ Audio file allowed - filename:', filename);
 
       if (!fs.existsSync(filePath)) {
         return res.status(404).json({ message: 'Audio file not found' });
       }
 
-      res.setHeader('Content-Type', 'audio/wav');
+      // Set appropriate content type based on file extension
+      const contentType = filename.endsWith('.mp3') ? 'audio/mpeg' : 'audio/wav';
+      res.setHeader('Content-Type', contentType);
       res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      
+      // Add CORS headers for cross-origin audio access
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
+      console.log('🎵 Serving audio file:', filename, 'type:', contentType);
       const fileStream = fs.createReadStream(filePath);
       fileStream.pipe(res);
 
