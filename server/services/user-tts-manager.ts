@@ -51,7 +51,7 @@ export class UserTTSManager {
         throw new Error('User not found');
       }
 
-      const preferredService = user.preferredTtsService || 'system';
+      const preferredService = user.preferredTtsService || 'elevenlabs';
       console.log(`🎯 User ${userId} prefers: ${preferredService} TTS`);
 
       // FORCE CYPHER-9000 to use Groq for robotic voice

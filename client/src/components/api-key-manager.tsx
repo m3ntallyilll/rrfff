@@ -22,7 +22,7 @@ export function APIKeyManager() {
   const [openaiKey, setOpenaiKey] = useState('');
   const [groqKey, setGroqKey] = useState('');
   const [elevenlabsKey, setElevenlabsKey] = useState('');
-  const [preferredService, setPreferredService] = useState('system');
+  const [preferredService, setPreferredService] = useState('elevenlabs');
   const [showOpenaiKey, setShowOpenaiKey] = useState(false);
   const [showGroqKey, setShowGroqKey] = useState(false);
   const [showElevenlabsKey, setShowElevenlabsKey] = useState(false);
@@ -123,7 +123,7 @@ export function APIKeyManager() {
 
   React.useEffect(() => {
     if (keyStatus) {
-      setPreferredService(keyStatus.preferredTtsService || 'system');
+      setPreferredService(keyStatus.preferredTtsService || 'elevenlabs');
     }
   }, [keyStatus]);
 
@@ -202,7 +202,7 @@ export function APIKeyManager() {
             <span className="text-sm text-gray-400">Preferred:</span>
             <Badge className="bg-purple-600 text-white">
               <Settings2 className="w-3 h-3 mr-1" />
-              {keyStatus?.preferredTtsService || 'system'}
+              {keyStatus?.preferredTtsService || 'elevenlabs'}
             </Badge>
           </div>
         </div>

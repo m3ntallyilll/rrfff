@@ -641,7 +641,7 @@ export class DatabaseStorage implements IStorage {
         hasValidOpenAI: false,
         hasValidGroq: false,
         hasValidElevenLabs: false,
-        preferredTtsService: 'system'
+        preferredTtsService: 'elevenlabs'
       };
     }
 
@@ -649,7 +649,7 @@ export class DatabaseStorage implements IStorage {
       hasValidOpenAI: !!(user.openaiApiKey && user.openaiApiKey.length > 0),
       hasValidGroq: !!(user.groqApiKey && user.groqApiKey.length > 0),
       hasValidElevenLabs: !!(user.elevenlabsApiKey && user.elevenlabsApiKey.length > 0),
-      preferredTtsService: user.preferredTtsService || 'system'
+      preferredTtsService: user.preferredTtsService || 'elevenlabs'
     };
   }
 
