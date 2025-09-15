@@ -1,5 +1,6 @@
 import { createOpenAITTS, OpenAITTSService } from './openai-tts';
 import { createGroqTTS, GroqTTSService } from './groq-tts';
+import { createElevenLabsTTS, ElevenLabsTTSService } from './elevenlabs-tts';
 import { storage } from '../storage';
 
 export interface TTSGenerationOptions {
@@ -13,6 +14,7 @@ export interface TTSGenerationOptions {
 export class UserTTSManager {
   private openaiInstances = new Map<string, OpenAITTSService>();
   private groqInstances = new Map<string, GroqTTSService>();
+  private elevenlabsInstances = new Map<string, ElevenLabsTTSService>();
 
   private getOpenAIInstance(apiKey: string): OpenAITTSService {
     if (!this.openaiInstances.has(apiKey)) {
@@ -26,6 +28,13 @@ export class UserTTSManager {
       this.groqInstances.set(apiKey, createGroqTTS(apiKey));
     }
     return this.groqInstances.get(apiKey)!;
+  }
+
+  private getElevenLabsInstance(apiKey: string): ElevenLabsTTSService {
+    if (!this.elevenlabsInstances.has(apiKey)) {
+      this.elevenlabsInstances.set(apiKey, createElevenLabsTTS(apiKey));
+    }
+    return this.elevenlabsInstances.get(apiKey)!;
   }
 
   async generateTTS(
@@ -103,6 +112,28 @@ export class UserTTSManager {
         }
       }
 
+      // ElevenLabs premium TTS option
+      if (preferredService === 'elevenlabs') {
+        try {
+          // Try user's ElevenLabs API key first, then fallback to system key
+          const apiKey = user.elevenlabsApiKey || process.env.ELEVENLABS_API_KEY;
+          if (apiKey) {
+            console.log(`🚀 Using ${user.elevenlabsApiKey ? "user's" : "system"} ElevenLabs TTS service (premium)`);
+            const elevenlabsInstance = this.getElevenLabsInstance(apiKey);
+            return await elevenlabsInstance.generateTTS(text, options.characterId, {
+              voiceStyle: options.voiceStyle,
+              characterName: options.characterName,
+              gender: options.gender,
+              speedMultiplier: options.speedMultiplier
+            });
+          } else {
+            console.log(`⚠️ No ElevenLabs API key available (user or system)`);
+          }
+        } catch (error: any) {
+          console.log(`❌ ElevenLabs TTS failed: ${error.message}, falling back`);
+        }
+      }
+
       // Fallback to system TTS services
       console.log(`🔄 Falling back to system TTS services`);
       return await this.useSystemTTS(text, options);
@@ -122,9 +153,25 @@ export class UserTTSManager {
     text: string, 
     options: TTSGenerationOptions
   ): Promise<{ audioUrl: string; duration: number }> {
-    console.log(`🔄 Using system TTS services (Groq/OpenAI only)`);
+    console.log(`🔄 Using system TTS services (ElevenLabs/Groq/OpenAI priority)`);
     
-    // Try system Groq first (best option for all characters)
+    // Try system ElevenLabs first (premium quality if available)
+    if (process.env.ELEVENLABS_API_KEY) {
+      try {
+        console.log(`🚀 Using system ElevenLabs TTS (premium)...`);
+        const elevenlabsInstance = this.getElevenLabsInstance(process.env.ELEVENLABS_API_KEY);
+        return await elevenlabsInstance.generateTTS(text, options.characterId, {
+          voiceStyle: options.voiceStyle,
+          characterName: options.characterName,
+          gender: options.gender,
+          speedMultiplier: options.speedMultiplier
+        });
+      } catch (error: any) {
+        console.log(`❌ System ElevenLabs TTS failed: ${error.message}`);
+      }
+    }
+    
+    // Try system Groq second (good quality and fast)
     if (process.env.GROQ_API_KEY) {
       try {
         console.log(`🚀 Using system Groq TTS...`);
@@ -140,7 +187,7 @@ export class UserTTSManager {
       }
     }
     
-    // Try system OpenAI as fallback
+    // Try system OpenAI as final fallback
     if (process.env.OPENAI_API_KEY) {
       try {
         console.log(`🚀 Using system OpenAI TTS as fallback...`);
@@ -157,7 +204,7 @@ export class UserTTSManager {
     }
     
     // All services failed - return empty audio (battle continues without sound)
-    console.log(`🚫 No working TTS services available (Groq/OpenAI only) - continuing with silent mode`);
+    console.log(`🚫 No working TTS services available - continuing with silent mode`);
     return {
       audioUrl: "", // Empty audio - frontend handles gracefully
       duration: Math.floor(text.length / 15)
@@ -165,7 +212,7 @@ export class UserTTSManager {
   }
 
   // Test a user's API key
-  async testUserAPIKey(userId: string, service: 'openai' | 'groq'): Promise<boolean> {
+  async testUserAPIKey(userId: string, service: 'openai' | 'groq' | 'elevenlabs'): Promise<boolean> {
     const user = await storage.getUser(userId);
     if (!user) return false;
 
@@ -178,6 +225,11 @@ export class UserTTSManager {
 
       if (service === 'groq' && user.groqApiKey) {
         const instance = this.getGroqInstance(user.groqApiKey);
+        return await instance.testConnection();
+      }
+
+      if (service === 'elevenlabs' && user.elevenlabsApiKey) {
+        const instance = this.getElevenLabsInstance(user.elevenlabsApiKey);
         return await instance.testConnection();
       }
 
@@ -194,7 +246,8 @@ export class UserTTSManager {
     // For now, we'll clear all instances when any key changes
     this.openaiInstances.clear();
     this.groqInstances.clear();
-    console.log(`🧹 Cleared TTS instances cache`);
+    this.elevenlabsInstances.clear();
+    console.log(`🧹 Cleared all TTS instances cache (OpenAI, Groq, ElevenLabs)`);
   }
 }
 
