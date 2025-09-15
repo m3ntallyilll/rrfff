@@ -53,3 +53,11 @@ task = "shell.exec"
 args = "NODE_OPTIONS=\"--max-old-space-size=4096\" npm run dev"
 
 [agent]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 36301
+externalPort = 3000

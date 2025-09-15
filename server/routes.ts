@@ -32,6 +32,19 @@ if (!process.env.STRIPE_SECRET_KEY) {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Service Worker endpoint for PWA functionality
+  app.get('/sw.js', (req, res) => {
+    const swPath = path.join(process.cwd(), 'public', 'sw.js');
+    
+    if (fs.existsSync(swPath)) {
+      res.set('Content-Type', 'application/javascript');
+      res.set('Cache-Control', 'no-cache');
+      res.sendFile(swPath);
+    } else {
+      res.status(404).send('Service Worker not found');
+    }
+  });
+
   // Sitemap.xml endpoint for SEO
   app.get('/sitemap.xml', (req, res) => {
     const sitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');

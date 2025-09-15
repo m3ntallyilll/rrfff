@@ -260,8 +260,8 @@ export class PhoneticRhymeAnalyzer {
       if (PhoneticRhymeAnalyzer.analysisDepth === 0) {
         this.families.clear();
         // Force garbage collection hint
-        if (global.gc) {
-          global.gc();
+        if (typeof global !== 'undefined' && 'gc' in global && typeof (global as any).gc === 'function') {
+          (global as any).gc();
         }
       }
     }
@@ -648,9 +648,26 @@ export class PhoneticRhymeAnalyzer {
     rhymeDensity: number;
     complexityScore: number;
   } {
-    // DISABLED: Always use simple analysis to prevent memory leaks
-    console.log('🚫 Enhanced analysis disabled - using simple counting only');
-    return this.getSimpleRhymeAnalysis(lyrics);
+    // Enhanced analysis re-enabled for better scoring accuracy
+    console.log('🎯 Enhanced rhyme analysis enabled - full phonetic processing');
+    
+    try {
+      // Use advanced rhyme scheme analysis for enhanced scoring
+      const rhymeScheme = this.analyzeRhymeScheme(lyrics);
+      const words = lyrics.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+      
+      return {
+        totalRhymes: rhymeScheme.perfectRhymes + rhymeScheme.slantRhymes,
+        internalRhymes: Math.floor((rhymeScheme.perfectRhymes + rhymeScheme.slantRhymes) * 0.6),
+        perfectRhymes: rhymeScheme.perfectRhymes,
+        slantRhymes: rhymeScheme.slantRhymes,
+        rhymeDensity: rhymeScheme.rhymeDensity,
+        complexityScore: Math.min(100, words.length * 2 + rhymeScheme.perfectRhymes * 8 + rhymeScheme.slantRhymes * 5)
+      };
+    } catch (error) {
+      console.warn('Enhanced analysis failed, falling back to simple analysis:', error);
+      return this.getSimpleRhymeAnalysis(lyrics);
+    }
   }
   
   private getSimpleRhymeAnalysis(lyrics: string): {
@@ -701,7 +718,7 @@ export class PhoneticRhymeAnalyzer {
     }
     
     let rhymeCount = 0;
-    for (const count of endings.values()) {
+    for (const count of Array.from(endings.values())) {
       if (count > 1) {
         rhymeCount += count;
       }
