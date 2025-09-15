@@ -1237,6 +1237,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: Date.now()
       };
 
+      // CRITICAL FIX: Update main battle record with scores
+      await storage.updateBattleScore(battleId, scores.userScore, scores.aiScore);
+      console.log(`🏆 Updated battle scores: User ${scores.userScore}/100, AI ${scores.aiScore}/100`);
+
       // Quick storage update
       await storage.addBattleRound(battleId, round);
 
