@@ -51,7 +51,7 @@ export class UserTTSManager {
         throw new Error('User not found');
       }
 
-      const preferredService = user.preferredTtsService || 'elevenlabs';
+      const preferredService = user.preferredTtsService || 'groq';
       console.log(`🎯 User ${userId} prefers: ${preferredService} TTS`);
 
       // FORCE CYPHER-9000 to use Groq for robotic voice
@@ -153,9 +153,25 @@ export class UserTTSManager {
     text: string, 
     options: TTSGenerationOptions
   ): Promise<{ audioUrl: string; duration: number }> {
-    console.log(`🔄 Using system TTS services (ElevenLabs/Groq/OpenAI priority)`);
+    console.log(`🔄 Using system TTS services (Groq/ElevenLabs/OpenAI priority)`);
     
-    // Try system ElevenLabs first (premium quality if available)
+    // Try system Groq first (fast, auto-playback optimized)
+    if (process.env.GROQ_API_KEY) {
+      try {
+        console.log(`🚀 Using system Groq TTS (auto-playback optimized)...`);
+        const groqInstance = this.getGroqInstance(process.env.GROQ_API_KEY);
+        return await groqInstance.generateTTS(text, options.characterId, {
+          voiceStyle: options.voiceStyle,
+          characterName: options.characterName,
+          gender: options.gender,
+          speedMultiplier: options.speedMultiplier
+        });
+      } catch (error: any) {
+        console.log(`❌ System Groq TTS failed: ${error.message}`);
+      }
+    }
+    
+    // Try system ElevenLabs second (premium quality)
     if (process.env.ELEVENLABS_API_KEY) {
       try {
         console.log(`🚀 Using system ElevenLabs TTS (premium)...`);
@@ -168,22 +184,6 @@ export class UserTTSManager {
         });
       } catch (error: any) {
         console.log(`❌ System ElevenLabs TTS failed: ${error.message}`);
-      }
-    }
-    
-    // Try system Groq second (good quality and fast)
-    if (process.env.GROQ_API_KEY) {
-      try {
-        console.log(`🚀 Using system Groq TTS...`);
-        const groqInstance = this.getGroqInstance(process.env.GROQ_API_KEY);
-        return await groqInstance.generateTTS(text, options.characterId, {
-          voiceStyle: options.voiceStyle,
-          characterName: options.characterName,
-          gender: options.gender,
-          speedMultiplier: options.speedMultiplier
-        });
-      } catch (error: any) {
-        console.log(`❌ System Groq TTS failed: ${error.message}`);
       }
     }
     

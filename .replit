@@ -53,6 +53,7 @@ task = "shell.exec"
 args = "NODE_OPTIONS=\"--max-old-space-size=4096\" npm run dev"
 
 [agent]
+integrations = ["javascript_log_in_with_replit:1.0.0", "javascript_stripe:1.0.0"]
 
 [[ports]]
 localPort = 5000
